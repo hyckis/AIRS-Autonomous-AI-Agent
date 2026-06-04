@@ -1,6 +1,6 @@
 ### 6/1 progress: define question criteria & build prototype system
 ### 6/2 progress: prepare system architecture, plans, schedule, tools
-### 6/3 progress: clear prototype code & push to github
+### 6/3 progress: clear prototype code & push to github, finalize tech and milestone details, research existing Autonomous agents and their code (hermes agent, other small personal agents), schedule SIAI lab setup
 
 ## Autonomous AI Research agent Summary
 Monotony in ideas, trend slop (not good business advice)
