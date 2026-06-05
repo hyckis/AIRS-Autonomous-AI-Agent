@@ -1,22 +1,15 @@
 #### 6/1 progress: define question criteria & build prototype system
 #### 6/2 progress: prepare system architecture, plans, schedule, tools
 #### 6/3 progress: clear prototype code & push to github, finalize tech and milestone details, research existing Autonomous agents and their code (hermes agent, other small personal agents), schedule SIAI lab setup
-#### 6/4 progress: SIAI lab setup, research existing agents (gemma agent)
+#### 6/4 progress: SIAI lab setup, research existing agents (gemma agent), reach out to Mahanth
 #### 6/5 progress: 
 
 ## Autonomous AI Research agent Summary
-Monotony in ideas, trend slop (not good business advice)
-Not fully autonomous, interacts with researcher to reduce (more like a conversation)
-Actively engage 
-Safeguard human jobs, maintain creativity
-
-## PITCH IDEAS
-Show traditional LLMs and what they output for research inquiries
-Mockup our agent’s potential response/ conversation
-
+# The problem: Monotony in ideas, trend slop (not good business advice)
+# Agent vision: Not fully autonomous, interacts with researcher (more like a conversation)
 
 ## GOAL
- reduce homogenization of ideas, maintaining overall diversity of ideas, avoid loss of cognitive diversity
+reduce homogenization of ideas, maintain overall diversity of ideas, avoid loss of cognitive diversity, safeguard human jobs
 
 ## System Architecture
 User Input Research Topic
