@@ -5,8 +5,8 @@
 #### 6/5 progress: 
 
 ## Autonomous AI Research agent Summary
-# The problem: Monotony in ideas, trend slop (not good business advice)
-# Agent vision: Not fully autonomous, interacts with researcher (more like a conversation)
+The problem: Monotony in ideas, trend slop (not good business advice)  
+Agent vision: Not fully autonomous, interacts with researcher (more like a conversation)
 
 ## GOAL
 reduce homogenization of ideas, maintain overall diversity of ideas, avoid loss of cognitive diversity, safeguard human jobs
