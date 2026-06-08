@@ -6,6 +6,20 @@
 - Limitations
 - Relevance to Our Project
 
+Local LLMs
+1. Ollama
+- Main Purpose
+- Strengths
+- Limitations
+- Relevance to Our Project
+
+2. Jarvis
+- Main Purpose
+- Strengths
+- Limitations
+- Relevance to Our Project
+
+Open source LLMs
 1. Hermes
 - Main Purpose
 - Strengths

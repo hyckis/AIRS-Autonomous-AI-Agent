@@ -26,7 +26,7 @@ def evaluate_cognitive_diversity(topic, response_text):
       "summary": ""
     }}
     """
-    result = call_llm(prompt, temperature=0.2)
+    result = call_llm(prompt, "local_ollama", temperature=0.2)
 
     try:
         return json.loads(result)

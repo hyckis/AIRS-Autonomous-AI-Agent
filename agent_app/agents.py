@@ -34,7 +34,7 @@ def detect_homogeneity(topic, baseline_response):
 
     Return a concise critique with bullet points.
     """
-    return call_llm(prompt, temperature=0.5)
+    return call_llm(prompt, "local_ollama", temperature=0.5)
 
 
 def diversity_expander_agent(topic, baseline_response, critique):
