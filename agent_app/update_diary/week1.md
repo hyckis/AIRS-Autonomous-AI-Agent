@@ -17,3 +17,8 @@
 - reach out to Mahanth
 
 ## 6/5 progress
+- research ollama/ other local llm providers  
+- plan for redesigning backend pipeline to strengthen the research aspect
+
+## 6/7 progress
+- multi-device testing
