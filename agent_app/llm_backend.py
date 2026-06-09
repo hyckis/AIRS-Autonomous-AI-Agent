@@ -87,5 +87,5 @@ def call_llm(prompt,
         ],
         temperature=temperature
     )
-
+    print(f"Provider={provider} Model={model}")
     return response.choices[0].message.content

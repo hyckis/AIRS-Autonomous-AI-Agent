@@ -1,5 +1,23 @@
 import json
 from llm_backend import call_llm
+import re
+
+
+def extract_json(text):
+    match = re.search(
+        r"\{.*\}",
+        text,
+        re.DOTALL
+    )
+
+    if match:
+        return json.loads(
+            match.group()
+        )
+
+    raise ValueError(
+        "No JSON found"
+    )
 
 def evaluate_cognitive_diversity(topic, response_text):
     prompt = f"""
@@ -29,7 +47,7 @@ def evaluate_cognitive_diversity(topic, response_text):
     result = call_llm(prompt, temperature=0.2)
 
     try:
-        return json.loads(result)
+        return extract_json(result)
     except json.JSONDecodeError:
         return {
             "novelty": 0,

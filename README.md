@@ -34,8 +34,8 @@ Evaluation in Traditional LLM & Diversity Agent
 Score table & Bar chart & Summary
 
 ## TO RUN ON LAB COMPUTER
-git pull
-cd /agent_app
+git pull  
+cd /agent_app  
 python3 -m venv venv  
 source venv/bin/activate  
 pip install -r requirements.txt  
