@@ -33,6 +33,9 @@ Human-in-the-Loop Question
 Evaluation in Traditional LLM & Diversity Agent
 Score table & Bar chart & Summary
 
+## Evaluation metrics  
+Research outputs are evaluated across four dimensions: Novelty (originality), Diversity (conceptual variety), Usefulness (practical and scholarly value), and Assumption Challenge (ability to question dominant assumptions). Each research direction is individually scored on a 1–5 rubric by an LLM evaluator, and metric scores are computed as the average across all generated directions. This enables systematic comparison between traditional LLM-generated research ideas and cognitively diverse alternatives.  
+
 ## TO RUN ON LAB COMPUTER
 git pull  
 cd /agent_app  
