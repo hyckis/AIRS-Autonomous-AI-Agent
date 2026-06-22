@@ -3,6 +3,25 @@ import re
 from llm_backend import call_llm
 
 def extract_json(text):
+    text = text.strip()
+
+    # case 1: ```json
+    text = re.sub(r"^```json\s", "", text)
+    text = re.sub(r"^```\s*", "", text)
+    text = re.sub(r"\s*```$", "", text)
+
+    # case 2: direct parsing
+    try: return json.loads(text)
+    except json.JSONDecodeError: pass
+
+    # case 3: extract first json obj inside the txt
+    match = re.search(r"\{[\s\S]*\}", text)
+    if match:
+        try:
+            return json.loads(match.group(0))
+        except json.JSONDecodeError: "No json obj found"
+
+def extract_json_old(text):
     match = re.search(
         r"\{.*\}",
         text,
@@ -72,11 +91,11 @@ def evaluate_cognitive_diversity(topic, response_text):
     try:
         return extract_json(result)
         #return json.loads(result)
-    except json.JSONDecodeError:
+    except (json.JSONDecodeError, ValueError) as e:
         return {
             "novelty": 0,
             "diversity": 0,
             "usefulness": 0,
             "assumption_challenge": 0,
-            "summary": "Evaluation parsing failed."
+            "summary": f"Evaluation parsing failed: {e}. Raw output: {result[:500]}"
         }
