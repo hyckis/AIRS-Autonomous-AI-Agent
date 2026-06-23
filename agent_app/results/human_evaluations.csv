@@ -1,0 +1,3 @@
+timestamp,topic,output_type,novelty,diversity,usefulness,assumption_challenge,comment
+2026-06-23T14:02:29.481182,AI agents in education,traditional_llm,4,5,4,3,very creative
+2026-06-23T14:02:29.486193,AI agents in education,diversity_preserving_agent,4,5,4,3,very creative
