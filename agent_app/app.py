@@ -1,13 +1,19 @@
+import os
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
+from datetime import datetime
 from agents import (
     baseline_research_agent,
     detect_homogeneity,
     diversity_expander_agent,
     generate_human_question,
 )
-from evaluator import evaluate_cognitive_diversity
+from evaluator import (
+    evaluate_cognitive_diversity,
+    evaluate_output,
+    SCORE_METRICS
+)
 
 st.title("Cognitive Diversity Research Agent")
 
@@ -72,3 +78,40 @@ if st.button("Run Agent Comparison"):
     st.subheader("Evaluation Summary")
     for _, row in df.iterrows():
         st.markdown(f"**{row['Agent']}**: {row['summary']}")
+
+
+    st.subheader("Evaluation")
+    with st.spinner("Evaluating outputs..."):
+        baseline_eval = evaluate_output(
+            topic=topic,
+            response_text=baseline_response,
+            backend="local_ollama",
+            model=None,
+        )
+
+    st.subheader("Human Evaluation")
+
+    with st.form("human_evaluation_form"):
+        st.write("Rate the diversity-preserving agent output: ")
+
+        human_novelty = st.slider("Novelty", 1, 5, 3)
+        human_diversity = st.slider("Diversity", 1, 5, 3)
+        human_usefulness = st.slider("Usefulness", 1, 5, 3)
+        human_assumption_challenge = st.slider("Assumption Challenge", 1, 5, 3)
+        human_comment = st.text_area("Optional Comment")
+        submitted = st.form_submit_button("Save Human Evaluation")
+
+        if submitted: 
+            os.makedirs("results", exist = True)
+
+            row = {
+                "timestamp": datetime.now().isoformat(),
+                "topic": topic,
+                "novelty": human_novelty,
+                "diversity": human_diversity,
+                "usefulness": human_usefulness,
+                "assumption_challenge": human_assumption_challenge,
+                "comment": human_comment,
+            }
+
+            file_path = "results/human_evaluations.csv"

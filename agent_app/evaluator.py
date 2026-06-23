@@ -41,7 +41,7 @@ def validate_score_dict(score):
         except(TypeError, ValueError): value = 0
         if value > 0: 
             value = max(1, min(5, value))
-        value[key] = value
+        validated[key] = value
     
     validated["summary"] = score.get("summary", "")
     return validated
@@ -76,7 +76,6 @@ def evaluate_with_llm(topic, response_text, call_llm, backend="local_ollama", mo
             "diversity": 1,
             "usefulness": 1,
             "assumption_challenge": 1,
-            "specificity": 1,
             "summary": "Brief explanation of the scores."
         }}
         """
@@ -97,10 +96,57 @@ def evaluate_with_llm(topic, response_text, call_llm, backend="local_ollama", mo
             "diversity": 0,
             "usefulness": 0,
             "assumption_challenge": 0,
-            "specificity": 0,
             "summary": f"Evaluation parsing failed: {e}. Raw output: {raw_result[:500]}",
-        }
+        }    
 
+def compute_simple_metrics(response_text):
+    words = response_text.split()
+    word_cnt = len(words)
+
+    diversity_lens_keywords = {
+        "contrarian": ["contrarian", "opposite", "challenge", "counter", "alternative"],
+        "historical": ["historical", "history", "past", "analogy", "precedent"],
+        "cross_disciplinary": ["cross-disciplinary", "interdisciplinary", "biology", "sociology", "psychology", "economics"],
+        "failure_mode": ["failure", "risk", "unintended", "breakdown", "misuse"],
+        "cultural": ["cultural", "culture", "linguistic", "local", "context"],
+        "stakeholder": ["stakeholder", "underserved", "marginalized", "student", "teacher", "community"],
+        "long_term": ["long-term", "future", "scaling", "institutional", "societal"],
+    }
+
+    lower = response_text.lower()
+    lens_coverage = {}
+    for lens, keywords in diversity_lens_keywords.items():
+        lens_coverage[lens] = any(keyword in lower for keyword in keywords)
+    lens_coverage_cnt = sum(lens_coverage.values())
+
+    return {
+        "word_count": word_cnt,
+        "lens_coverage_count": lens_coverage_cnt,
+        "lens_coverage": lens_coverage,
+    }
+
+def evaluate_output(topic, response_text, backend="local_ollama", model=None):
+    """
+    Combined evaluation
+    1: LLM as a judge
+    2: Simple non LLM diagnostic metrics
+    """
+    llm_scores = evaluate_with_llm(
+        topic=topic,
+        response_text=response_text,
+        backend=backend,
+        model=model
+    )
+
+    simple_metrics = compute_simple_metrics(response_text)
+
+    return {
+        "llm_scores": llm_scores,
+        "simple_metrics": simple_metrics
+    }
+
+
+# used as backward wrapper
 def evaluate_cognitive_diversity(topic, response_text):
     prompt = f"""
     Evaluate the following research-agent output for the topic below.
@@ -167,33 +213,6 @@ def evaluate_cognitive_diversity(topic, response_text):
             "assumption_challenge": 0,
             "summary": f"Evaluation parsing failed: {e}. Raw output: {result[:500]}"
         }
-    
-
-def compute_simple_metrics(response_text):
-    words = response_text.split()
-    word_cnt = len(words)
-
-    diversity_lens_keywords = {
-        "contrarian": ["contrarian", "opposite", "challenge", "counter", "alternative"],
-        "historical": ["historical", "history", "past", "analogy", "precedent"],
-        "cross_disciplinary": ["cross-disciplinary", "interdisciplinary", "biology", "sociology", "psychology", "economics"],
-        "failure_mode": ["failure", "risk", "unintended", "breakdown", "misuse"],
-        "cultural": ["cultural", "culture", "linguistic", "local", "context"],
-        "stakeholder": ["stakeholder", "underserved", "marginalized", "student", "teacher", "community"],
-        "long_term": ["long-term", "future", "scaling", "institutional", "societal"],
-    }
-
-    lower = response_text.lower()
-    lens_coverage = {}
-    for lens, keywords in diversity_lens_keywords.items():
-        lens_coverage[lens] = any(keyword in lower for keyword in keywords)
-    lens_coverage_cnt = sum(lens_coverage.values())
-
-    return {
-        "word_count": word_cnt,
-        "lens_coverage_count": lens_coverage_cnt,
-        "lens_coverage": lens_coverage,
-    }
 
 def extract_json_old(text):
     match = re.search(
