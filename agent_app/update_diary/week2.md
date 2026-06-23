@@ -11,10 +11,12 @@
 
 ## 6/10 progress
 - add document: future_goal, project_overview
+- research apis for multi-source retrieval
 
 ## 6/11 progress
 - update readme document
 - add document: divergence_mechanism, milestones
+- attempted to utilize SemanticScholar API
 
 ## 6/12 progress
 - split llm backend source code: llm_backend_ollama, llm_backend_openai, llm_backend_jarvis

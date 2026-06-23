@@ -69,11 +69,11 @@ if __name__ == "__main__":
         test_retrieve_literature(topic, use_llm_queries=False)
 
     try:
-        test_llm_query_generation(TOPICS[0])
+        test_llm_query_generation(TOPICS[1])
     except Exception as error:
         print(f"\nLLM query generation failed: {error}")
 
     try:
-        test_retrieve_literature(TOPICS[0], use_llm_queries=True)
+        test_retrieve_literature(TOPICS[1], use_llm_queries=True)
     except Exception as error:
         print(f"\nretrieve_literature (LLM) failed: {error}")
