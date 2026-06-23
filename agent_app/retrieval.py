@@ -147,16 +147,31 @@ def parse_query_list(raw_text):
 
 
 def normalize_queries(queries, min_year=DEFAULT_MIN_YEAR):
-    """Ensure each query includes a recency filter."""
+    """Ensure each query includes a valid arXiv recency filter."""
     recency = _recency_clause(min_year)
+    end_date = date.today().strftime("%Y%m%d")
     normalized = []
 
     for query in queries:
         query = query.strip()
         if not query:
             continue
+
+        # arXiv rejects open-ended ranges like "TO *" — use a concrete end date.
+        query = re.sub(r"TO\s+\*", f"TO {end_date}", query, flags=re.IGNORECASE)
+        # Normalize dashed dates: 2020-01-01 -> 20200101
+        query = re.sub(
+            r"(\d{4})-(\d{2})-(\d{2})",
+            lambda match: f"{match.group(1)}{match.group(2)}{match.group(3)}",
+            query,
+        )
+
         if "submittedDate:" not in query:
             query = f"({query}) AND {recency}"
+
+        if len(query) > 1000:
+            continue
+
         normalized.append(query)
 
     return normalized
@@ -202,14 +217,12 @@ def retrieve_with_query(query, limit=DEFAULT_PAPERS_PER_QUERY):
 
     papers = []
     try:
-        results = client.results(search)
+        for result in client.results(search):
+            paper = _paper_from_result(result)
+            paper["query"] = query
+            papers.append(paper)
     except arxiv.HTTPError:
-        return papers
-
-    for result in results:
-        paper = _paper_from_result(result)
-        paper["query"] = query
-        papers.append(paper)
+        pass
 
     return papers
 
@@ -218,12 +231,42 @@ def retrieve_papers(queries, limit=5, papers_per_query=DEFAULT_PAPERS_PER_QUERY)
     """
     Retrieve papers for one or more arXiv query strings.
     Results are deduplicated and truncated to `limit`.
+    Also returns which queries failed (returned no papers).
     """
     if isinstance(queries, str):
         queries = [queries]
 
     all_papers = []
+    failed_queries = []
     for query in queries:
-        all_papers.extend(retrieve_with_query(query, limit=papers_per_query))
+        batch = retrieve_with_query(query, limit=papers_per_query)
+        if batch:
+            all_papers.extend(batch)
+        else:
+            failed_queries.append(query)
 
-    return dedupe_papers(all_papers)[:limit]
+    return dedupe_papers(all_papers)[:limit], failed_queries
+
+
+def format_papers_for_prompt(papers, max_abstract_chars=400):
+    """Format retrieved papers as context for LLM prompts."""
+    if not papers:
+        return "No retrieved papers available."
+
+    blocks = []
+    for index, paper in enumerate(papers, start=1):
+        abstract = paper["abstract"]
+        if len(abstract) > max_abstract_chars:
+            abstract = abstract[:max_abstract_chars] + "..."
+
+        authors = ", ".join(paper["authors"][:3])
+        blocks.append(
+            f"Paper {index}:\n"
+            f"Title: {paper['title']}\n"
+            f"Authors: {authors}\n"
+            f"Published: {paper['published']}\n"
+            f"URL: {paper['url']}\n"
+            f"Abstract: {abstract}"
+        )
+
+    return "\n\n".join(blocks)
