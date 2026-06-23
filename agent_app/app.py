@@ -8,6 +8,7 @@ from agents import (
     detect_homogeneity,
     diversity_expander_agent,
     generate_human_question,
+    retrieve_literature,
 )
 from evaluator import (
     evaluate_cognitive_diversity,
@@ -90,6 +91,16 @@ def save_human_evaluation(topic, output_type, human_scores, comment):
         new_df = pd.DataFrame([row])
 
     new_df.to_csv(file_path, index=False)
+use_llm_queries = st.checkbox(
+    "Use LLM-generated arXiv queries",
+    value=True,
+    help=(
+        "When enabled, Ollama/OpenAI generates search queries. "
+        "If that fails, the app falls back to topic-based queries automatically."
+    ),
+)
+
+paper_limit = st.slider("Number of papers to retrieve", min_value=3, max_value=10, value=5)
 
 if st.button("Run Agent Comparison"):
     with st.spinner("Generating traditional LLM response..."):
@@ -98,8 +109,20 @@ if st.button("Run Agent Comparison"):
     with st.spinner("Detecting idea homogenization..."):
         critique = detect_homogeneity(topic, baseline)
 
-    with st.spinner("Generating cognitively diverse research directions..."):
-        expanded = diversity_expander_agent(topic, baseline, critique)
+    with st.spinner("Retrieving literature from arXiv..."):
+        literature = retrieve_literature(
+            topic,
+            limit=paper_limit,
+            use_llm_queries=use_llm_queries,
+        )
+
+    with st.spinner("Generating cognitively diverse, literature-informed research directions..."):
+        expanded = diversity_expander_agent(
+            topic,
+            baseline,
+            critique,
+            papers=literature["papers"],
+        )
 
     with st.spinner("Generating researcher-in-the-loop question..."):
         human_question = generate_human_question(topic, baseline, critique)
@@ -139,10 +162,38 @@ if "baseline" in st.session_state:
     st.subheader("2. Homogeneity Critique")
     st.write(critique)
 
-    st.subheader("3. Cognitive-Diversity-Preserving Agent")
+    st.subheader("3. Retrieved Literature")
+    source_label = {
+        "llm": "LLM-generated",
+        "fallback": "topic-based fallback",
+        "llm+fallback": "LLM-generated with fallback retrieval",
+    }.get(literature["query_source"], literature["query_source"])
+    st.caption(f"Query source: {source_label}")
+
+    if literature.get("failed_queries"):
+        st.warning(
+            f"{len(literature['failed_queries'])} arXiv query(s) failed; "
+            "results may come from other queries or fallback."
+        )
+
+    with st.expander("arXiv search queries used", expanded=False):
+        for index, query in enumerate(literature["queries"], start=1):
+            st.code(query, language=None)
+
+    if literature["papers"]:
+        for index, paper in enumerate(literature["papers"], start=1):
+            with st.expander(f"{index}. {paper['title']} ({paper['published']})"):
+                st.markdown(f"**Authors:** {', '.join(paper['authors'][:5])}")
+                st.markdown(f"**URL:** {paper['url']}")
+                st.write(paper["abstract"][:600] + ("..." if len(paper["abstract"]) > 600 else ""))
+    else:
+        st.warning("No papers retrieved. Try a broader topic or disable LLM-generated queries.")
+
+    st.subheader("4. Cognitive-Diversity-Preserving Agent")
+    st.caption("Directions below are generated using the retrieved arXiv papers above.")
     st.write(expanded)
 
-    st.subheader("4. Human-in-the-Loop Question")
+    st.subheader("5. Human-in-the-Loop Question")
     st.info(human_question)
 
     st.subheader("5. LLM-as-a-Judge Evaluation")
@@ -253,3 +304,6 @@ if "baseline" in st.session_state:
     #         model=None,
     #     )
 
+    st.subheader("Evaluation Summary")
+    for _, row in df.iterrows():
+        st.markdown(f"**{row['Agent']}**: {row['summary']}")
