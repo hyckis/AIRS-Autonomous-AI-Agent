@@ -1,4 +1,4 @@
-#### /update_diary
+#### see /update_diary for daily progress record
 
 ## Autonomous AI Research agent Summary
 The problem: Monotony in ideas, trend slop (not good business advice)  
@@ -20,18 +20,53 @@ Backend implementations of User data storage
 Memory Loop ← High-scoring creative directions → Reusable creativity tactics 
 
 
-## Research flow
-1: Traditional LLM
+## Prototype flow
+1: User Research Topic
 User enters research topic
+
+2: Traditional LLM
 LLM generates ideas
 Agent clusters ideas into themes
 
-2: Homogeneity Critic
+3: Homogeneity Critic
 Agent detects homogeneity
-Cognitive-Diversity-Preserving Agent output
-Human-in-the-Loop Question
-Evaluation in Traditional LLM & Diversity Agent
-Score table & Bar chart & Summary
+System analyzes baseline output 
+ - repeated themes
+ - dominant assumptions
+ - mainstream research directions
+ - missing perspectives
+ - possible blind spots
+
+4: Cognitive Diversity Agent
+expands the idea space by applying alternative divergence lenses
+ - contrarian perspectives
+ - historical analogy
+ - cross-disciplinary thinking
+ - failure modes
+ - cultural and social context
+ - underrepresented stakeholders
+ - long-term consequences
+
+Output: 
+ - Human-in-the-Loop Question
+ - Evaluation in Traditional LLM & Diversity Agent
+ Metrics:
+  - novelty
+  - diversity
+  - usefulness
+  - assumption challenge
+ - Score table & Bar chart & Summary
+
+## Long-term system goal
+1: Research Planning Agent
+2: Multi-Source Retrieval Layer
+3: Evidence Synthesis Agent
+4: Consensus and Assumption Analysis
+5: Cognitive Diversity Engine
+6: Human Steering Layer
+7: Autonomous Exploration Agent
+8: Map Generator
+9: Evaluation and Diversity Metrics
 
 ## TO RUN ON LAB COMPUTER
 git pull
