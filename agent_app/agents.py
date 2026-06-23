@@ -1,4 +1,11 @@
 from llm_backend import call_llm
+from retrieval import (
+    DEFAULT_MIN_YEAR,
+    build_fallback_queries,
+    normalize_queries,
+    parse_query_list,
+    retrieve_papers,
+)
 
 def baseline_research_agent(topic):
     prompt = f"""
@@ -71,6 +78,56 @@ def diversity_expander_agent(topic, baseline_response, critique):
     4. Why it preserves cognitive diversity
     """
     return call_llm(prompt, temperature=0.95)
+
+
+def generate_arxiv_queries(topic, min_year=DEFAULT_MIN_YEAR):
+    prompt = f"""
+    You generate arXiv API search queries for a research topic.
+
+    Topic:
+    {topic}
+
+    Rules:
+    - Return ONLY a JSON array of 2-3 query strings.
+    - Each query must use arXiv boolean syntax with ti: and/or abs: field prefixes.
+    - Derive all search terms from the topic itself. Do not assume a fixed domain.
+    - Each query should combine multiple topic-specific terms with AND so generic
+      single-word matches are avoided.
+    - Prefer quoted phrases for multi-word concepts from the topic.
+    - Include this recency filter in every query:
+      submittedDate:[{min_year}0101 TO *]
+    - Keep each query reasonably short so arXiv does not reject it.
+
+    Example for topic "protein folding with deep learning":
+    [
+      "(abs:\\"protein folding\\" OR ti:\\"protein folding\\") AND (abs:\\"deep learning\\" OR abs:learning) AND submittedDate:[20200101 TO *]",
+      "(abs:protein AND abs:folding AND abs:learning) AND submittedDate:[20200101 TO *]"
+    ]
+    """
+    try:
+        result = call_llm(prompt, temperature=0.2)
+        queries = parse_query_list(result)
+        if queries:
+            return normalize_queries(queries, min_year=min_year), "llm"
+    except Exception:
+        pass
+
+    return build_fallback_queries(topic, min_year=min_year), "fallback"
+
+
+def retrieve_literature(topic, limit=5, min_year=DEFAULT_MIN_YEAR, use_llm_queries=True):
+    if use_llm_queries:
+        queries, query_source = generate_arxiv_queries(topic, min_year=min_year)
+    else:
+        queries = build_fallback_queries(topic, min_year=min_year)
+        query_source = "fallback"
+
+    papers = retrieve_papers(queries, limit=limit)
+    return {
+        "queries": queries,
+        "papers": papers,
+        "query_source": query_source,
+    }
 
 
 def generate_human_question(topic, baseline_response, critique):

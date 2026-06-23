@@ -6,6 +6,7 @@ from agents import (
     detect_homogeneity,
     diversity_expander_agent,
     generate_human_question,
+    retrieve_literature,
 )
 from evaluator import evaluate_cognitive_diversity
 
@@ -21,12 +22,30 @@ topic = st.text_area(
     "AI agents in education"
 )
 
+use_llm_queries = st.checkbox(
+    "Use LLM-generated arXiv queries",
+    value=True,
+    help=(
+        "When enabled, Ollama/OpenAI generates search queries. "
+        "If that fails, the app falls back to topic-based queries automatically."
+    ),
+)
+
+paper_limit = st.slider("Number of papers to retrieve", min_value=3, max_value=10, value=5)
+
 if st.button("Run Agent Comparison"):
     with st.spinner("Generating traditional LLM response..."):
         baseline = baseline_research_agent(topic)
 
     with st.spinner("Detecting idea homogenization..."):
         critique = detect_homogeneity(topic, baseline)
+
+    with st.spinner("Retrieving literature from arXiv..."):
+        literature = retrieve_literature(
+            topic,
+            limit=paper_limit,
+            use_llm_queries=use_llm_queries,
+        )
 
     with st.spinner("Generating cognitively diverse research directions..."):
         expanded = diversity_expander_agent(topic, baseline, critique)
@@ -40,10 +59,27 @@ if st.button("Run Agent Comparison"):
     st.subheader("2. Homogeneity Critique")
     st.write(critique)
 
-    st.subheader("3. Cognitive-Diversity-Preserving Agent")
+    st.subheader("3. Retrieved Literature")
+    source_label = "LLM-generated" if literature["query_source"] == "llm" else "topic-based fallback"
+    st.caption(f"Query source: {source_label}")
+
+    with st.expander("arXiv search queries used", expanded=False):
+        for index, query in enumerate(literature["queries"], start=1):
+            st.code(query, language=None)
+
+    if literature["papers"]:
+        for index, paper in enumerate(literature["papers"], start=1):
+            with st.expander(f"{index}. {paper['title']} ({paper['published']})"):
+                st.markdown(f"**Authors:** {', '.join(paper['authors'][:5])}")
+                st.markdown(f"**URL:** {paper['url']}")
+                st.write(paper["abstract"][:600] + ("..." if len(paper["abstract"]) > 600 else ""))
+    else:
+        st.warning("No papers retrieved. Try a broader topic or disable LLM-generated queries.")
+
+    st.subheader("4. Cognitive-Diversity-Preserving Agent")
     st.write(expanded)
 
-    st.subheader("4. Human-in-the-Loop Question")
+    st.subheader("5. Human-in-the-Loop Question")
     st.info(human_question)
 
     with st.spinner("Evaluating cognitive diversity..."):
