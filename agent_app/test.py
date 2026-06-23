@@ -25,9 +25,13 @@ def test_fallback_queries(topic):
     for index, query in enumerate(queries, start=1):
         print(f"  {index}. {query}")
 
-    papers = retrieve_papers(queries, limit=5)
+    papers, failed_queries = retrieve_papers(queries, limit=5)
     print(f"\nRetrieved {len(papers)} papers:")
     print_papers(papers)
+    if failed_queries:
+        print(f"\nFailed queries ({len(failed_queries)}):")
+        for index, query in enumerate(failed_queries, start=1):
+            print(f"  {index}. {query[:120]}...")
 
 
 def test_retrieve_literature(topic, use_llm_queries):
@@ -43,6 +47,10 @@ def test_retrieve_literature(topic, use_llm_queries):
 
     print(f"\nRetrieved {len(result['papers'])} papers:")
     print_papers(result["papers"])
+    if result.get("failed_queries"):
+        print(f"\nFailed queries ({len(result['failed_queries'])}):")
+        for index, query in enumerate(result["failed_queries"], start=1):
+            print(f"  {index}. {query[:120]}...")
 
 
 def test_llm_query_generation(topic):
@@ -62,6 +70,10 @@ if __name__ == "__main__":
 
     try:
         test_llm_query_generation(TOPICS[0])
+    except Exception as error:
+        print(f"\nLLM query generation failed: {error}")
+
+    try:
         test_retrieve_literature(TOPICS[0], use_llm_queries=True)
     except Exception as error:
-        print(f"\nSkipped LLM tests: {error}")
+        print(f"\nretrieve_literature (LLM) failed: {error}")

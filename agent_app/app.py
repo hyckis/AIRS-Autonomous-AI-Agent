@@ -47,8 +47,13 @@ if st.button("Run Agent Comparison"):
             use_llm_queries=use_llm_queries,
         )
 
-    with st.spinner("Generating cognitively diverse research directions..."):
-        expanded = diversity_expander_agent(topic, baseline, critique)
+    with st.spinner("Generating cognitively diverse, literature-informed research directions..."):
+        expanded = diversity_expander_agent(
+            topic,
+            baseline,
+            critique,
+            papers=literature["papers"],
+        )
 
     with st.spinner("Generating researcher-in-the-loop question..."):
         human_question = generate_human_question(topic, baseline, critique)
@@ -60,8 +65,18 @@ if st.button("Run Agent Comparison"):
     st.write(critique)
 
     st.subheader("3. Retrieved Literature")
-    source_label = "LLM-generated" if literature["query_source"] == "llm" else "topic-based fallback"
+    source_label = {
+        "llm": "LLM-generated",
+        "fallback": "topic-based fallback",
+        "llm+fallback": "LLM-generated with fallback retrieval",
+    }.get(literature["query_source"], literature["query_source"])
     st.caption(f"Query source: {source_label}")
+
+    if literature.get("failed_queries"):
+        st.warning(
+            f"{len(literature['failed_queries'])} arXiv query(s) failed; "
+            "results may come from other queries or fallback."
+        )
 
     with st.expander("arXiv search queries used", expanded=False):
         for index, query in enumerate(literature["queries"], start=1):
@@ -77,6 +92,7 @@ if st.button("Run Agent Comparison"):
         st.warning("No papers retrieved. Try a broader topic or disable LLM-generated queries.")
 
     st.subheader("4. Cognitive-Diversity-Preserving Agent")
+    st.caption("Directions below are generated using the retrieved arXiv papers above.")
     st.write(expanded)
 
     st.subheader("5. Human-in-the-Loop Question")
