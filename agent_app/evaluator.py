@@ -46,7 +46,7 @@ def validate_score_dict(score):
     validated["summary"] = score.get("summary", "")
     return validated
 
-def evaluate_with_llm(topic, response_text, call_llm, backend="local_ollama", model=None):
+def evaluate_with_llm(topic, response_text, backend="local_ollama", model=None):
     prompt = f"""
         You are a strict JSON-only evaluation engine.
         Evaluate the research-agent output below.
