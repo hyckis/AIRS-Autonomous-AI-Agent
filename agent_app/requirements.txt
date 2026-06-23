@@ -3,3 +3,5 @@ pandas
 matplotlib
 openai
 ollama
+requests
+arxiv
