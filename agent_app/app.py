@@ -34,7 +34,7 @@ def make_score_df(baseline_eval, expanded_eval):
             baseline_eval["llm_scores"][metric] for metric in SCORE_METRICS
         ],
         "Diversity-Preserving Agent": [
-            ["llm_scores"][metric] for metric in SCORE_METRICS
+            expanded_eval["llm_scores"][metric] for metric in SCORE_METRICS
         ],
     })
 
@@ -125,94 +125,94 @@ if st.button("Run Agent Comparison"):
     st.session_state["baseline_eval"] = baseline_eval
     st.session_state["expanded_eval"] = expanded_eval
 
-    if "baseline" in st.session_state:
-        baseline = st.session_state["baseline"]
-        critique = st.session_state["critique"]
-        expanded = st.session_state["expanded"]
-        human_question = st.session_state["human_question"]
-        baseline_eval = st.session_state["baseline_eval"]
-        expanded_eval = st.session_state["expanded_eval"]
+if "baseline" in st.session_state:
+    baseline = st.session_state["baseline"]
+    critique = st.session_state["critique"]
+    expanded = st.session_state["expanded"]
+    human_question = st.session_state["human_question"]
+    baseline_eval = st.session_state["baseline_eval"]
+    expanded_eval = st.session_state["expanded_eval"]
 
-        st.subheader("1. Traditional LLM Research Directions")
-        st.write(baseline)
+    st.subheader("1. Traditional LLM Research Directions")
+    st.write(baseline)
 
-        st.subheader("2. Homogeneity Critique")
-        st.write(critique)
+    st.subheader("2. Homogeneity Critique")
+    st.write(critique)
 
-        st.subheader("3. Cognitive-Diversity-Preserving Agent")
-        st.write(expanded)
+    st.subheader("3. Cognitive-Diversity-Preserving Agent")
+    st.write(expanded)
 
-        st.subheader("4. Human-in-the-Loop Question")
-        st.info(human_question)
+    st.subheader("4. Human-in-the-Loop Question")
+    st.info(human_question)
 
-        st.subheader("5. LLM-as-a-Judge Evaluation")
-        score_df = make_score_df(baseline_eval, expanded_eval)
-        st.dataframe(score_df, use_container_width=True)
-        st.bar_chart(score_df.set_index("Metric"))
-        with st.expander("Traditional LLM Evaluation Summary"):
-            st.write(baseline_eval["llm_scores"].get("summary", ""))
-        with st.expander("Diversity-Preserving Agent Evaluation Summary"):
-            st.write(expanded_eval["llm_scores"].get("summary", ""))
+    st.subheader("5. LLM-as-a-Judge Evaluation")
+    score_df = make_score_df(baseline_eval, expanded_eval)
+    st.dataframe(score_df, use_container_width=True)
+    st.bar_chart(score_df.set_index("Metric"))
+    with st.expander("Traditional LLM Evaluation Summary"):
+        st.write(baseline_eval["llm_scores"].get("summary", ""))
+    with st.expander("Diversity-Preserving Agent Evaluation Summary"):
+        st.write(expanded_eval["llm_scores"].get("summary", ""))
 
-        st.subheader("6. Diagnostic Metrics")
-        diagnostic_df = pd.DataFrame({
-            "Metric": ["Word Count", "Diversity Lens Coverage"],
-            "Traditional LLM": [
-                baseline_eval["simple_metrics"]["word_count"],
-                baseline_eval["simple_metrics"]["lens_coverage_count"],
-            ],
-            "Diversity-Preserving Agent": [
-                expanded_eval["simple_metrics"]["word_count"],
-                expanded_eval["simple_metrics"]["lens_coverage_count"],
-            ],
-        })
+    st.subheader("6. Diagnostic Metrics")
+    diagnostic_df = pd.DataFrame({
+        "Metric": ["Word Count", "Diversity Lens Coverage"],
+        "Traditional LLM": [
+            baseline_eval["simple_metrics"]["word_count"],
+            baseline_eval["simple_metrics"]["lens_coverage_count"],
+        ],
+        "Diversity-Preserving Agent": [
+            expanded_eval["simple_metrics"]["word_count"],
+            expanded_eval["simple_metrics"]["lens_coverage_count"],
+        ],
+    })
 
-        st.dataframe(diagnostic_df, use_container_width=True)
+    st.dataframe(diagnostic_df, use_container_width=True)
 
-        with st.expander("Detected Diversity Lenses"):
-            st.write("Traditional LLM")
-            st.json(baseline_eval["simple_metrics"]["lens_coverage"])
-            st.write("Diversity-Preserving Agent")
-            st.json(expanded_eval["simple_metrics"]["lens_coverage"])
+    with st.expander("Detected Diversity Lenses"):
+        st.write("Traditional LLM")
+        st.json(baseline_eval["simple_metrics"]["lens_coverage"])
+        st.write("Diversity-Preserving Agent")
+        st.json(expanded_eval["simple_metrics"]["lens_coverage"])
         
-        st.subheader("7. Human Evaluation")
-        human_expanded_scores = human_evaluation_widget(
-            "Human Evaluation: Diversity-Preserving Agent",
-            key_prefix="human_expanded",
+    st.subheader("7. Human Evaluation")
+    human_expanded_scores = human_evaluation_widget(
+        "Human Evaluation: Diversity-Preserving Agent",
+        key_prefix="human_expanded",
+    )
+
+    st.subheader("8. Human vs LLM Evaluation")
+    human_vs_llm_df = pd.DataFrame({
+        "Metric": SCORE_METRICS,
+        "LLM Judge": [
+            expanded_eval["llm_scores"][metric] for metric in SCORE_METRICS
+        ],
+        "Human Evaluation": [
+            human_expanded_scores[metric] for metric in SCORE_METRICS
+        ],
+    })
+
+    st.markdown("### Diversity-Preserving Agent: Human vs LLM")
+    st.dataframe(human_vs_llm_df, use_container_width=True)
+    st.bar_chart(human_vs_llm_df.set_index("Metric"))
+
+    st.subheader("9. Save Human Evaluation")
+    human_comment = st.text_area("Optional comment", key="human_comment")
+
+    if st.button("Save Human Evaluation"):
+        save_human_evaluation(
+            topic=topic,
+            output_type="traditional_llm",
+            human_scores=human_expanded_scores,
+            comment=human_comment,
         )
-
-        st.subheader("8. Human vs LLM Evaluation")
-        human_vs_llm_df = pd.DataFrame({
-            "Metric": SCORE_METRICS,
-            "LLM Judge": [
-                expanded_eval["llm_scores"][metric] for metric in SCORE_METRICS
-            ],
-            "Human Evaluation": [
-                human_expanded_scores[metric] for metric in SCORE_METRICS
-            ],
-        })
-
-        st.markdown("### Diversity-Preserving Agent: Human vs LLM")
-        st.dataframe(human_vs_llm_df, use_container_width=True)
-        st.bar_chart(human_vs_llm_df.set_index("Metric"))
-
-        st.subheader("9. Save Human Evaluation")
-        human_comment = st.text_area("Optional comment", key="human_comment")
-
-        if st.button("Save Human Evaluation"):
-            save_human_evaluation(
-                topic=topic,
-                output_type="traditional_llm",
-                human_scores=human_baseline_scores,
-                comment=human_comment,
-            )
-            save_human_evaluation(
-                topic=topic,
-                output_type="diversity_preserving_agent",
-                human_scores=human_expanded_scores,
-                comment=human_comment,
-            )
-            st.success("Human evaluation saved.")
+        save_human_evaluation(
+            topic=topic,
+            output_type="diversity_preserving_agent",
+            human_scores=human_expanded_scores,
+            comment=human_comment,
+        )
+        st.success("Human evaluation saved.")
 
 
 # the old evaluator
