@@ -28,6 +28,19 @@ topic = st.text_area(
     "AI agents in education"
 )
 
+# arXiv usage 
+use_llm_queries = st.checkbox(
+    "Use LLM-generated arXiv queries",
+    value=True,
+    help=(
+        "When enabled, Ollama/OpenAI generates search queries. "
+        "If that fails, the app falls back to topic-based queries automatically."
+    ),
+)
+
+paper_limit = st.slider("Number of papers to retrieve", min_value=3, max_value=10, value=5)
+
+# DF for Comparing traditional LLM and the agent
 def make_score_df(baseline_eval, expanded_eval):
     return pd.DataFrame({
         "Metric": SCORE_METRICS,
@@ -39,6 +52,7 @@ def make_score_df(baseline_eval, expanded_eval):
         ],
     })
 
+# Human-in-the-loop scoring
 def human_evaluation_widget(title, key_prefix):
     st.markdown(f"### {title}")
     human_scores = {}
@@ -71,6 +85,7 @@ def human_evaluation_widget(title, key_prefix):
 
     return human_scores
 
+# save human evaluation to csv file
 def save_human_evaluation(topic, output_type, human_scores, comment):
     os.makedirs("results", exist_ok=True)
 
@@ -91,16 +106,6 @@ def save_human_evaluation(topic, output_type, human_scores, comment):
         new_df = pd.DataFrame([row])
 
     new_df.to_csv(file_path, index=False)
-use_llm_queries = st.checkbox(
-    "Use LLM-generated arXiv queries",
-    value=True,
-    help=(
-        "When enabled, Ollama/OpenAI generates search queries. "
-        "If that fails, the app falls back to topic-based queries automatically."
-    ),
-)
-
-paper_limit = st.slider("Number of papers to retrieve", min_value=3, max_value=10, value=5)
 
 if st.button("Run Agent Comparison"):
     with st.spinner("Generating traditional LLM response..."):
@@ -304,6 +309,3 @@ if "baseline" in st.session_state:
     #         model=None,
     #     )
 
-    st.subheader("Evaluation Summary")
-    for _, row in df.iterrows():
-        st.markdown(f"**{row['Agent']}**: {row['summary']}")
