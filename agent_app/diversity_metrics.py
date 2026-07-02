@@ -20,21 +20,54 @@ def split_ideas(text):
     lines = text.splitlines()
     ideas = []
 
+    current_idea = []
+
     for line in lines:
         line = line.strip()
-        if not line:
-            continue
-        # match bullets or numbered items
-        if re.match(r"^(\d+[\).\s]|[-*•])\s*", line):
-            cleaned = re.sub(r"^(\d+[\).\s]|[-*•])\s*", "", line).strip()
-            if len(cleaned.split()) >= 5:
-                ideas.append(cleaned)
-                
-    # fallback: split by paragraphs if no list items found
-    if len(ideas) < 2:
-        paragraphs = [p.strip()]
-        ideas = paragraphs
+        if not line: continue
 
+        # start of a numbered idea
+        if re.match(r"^\d+[\).\s]+", line):
+            if current_idea:
+                ideas.append(" ".join(current_idea).strip())
+                current_idea = []
+            cleaned = re.sub(r"^\d+[\).\s]+", "", line).strip()
+            current_idea.append(cleaned)
+            continue
+
+        # start of a title line
+        if line.lower().startswith("title"):
+            if current_idea:
+                ideas.append(" ".join(current_idea).strip())
+                current_idea = []
+            current_idea.append(line)
+            continue
+
+        # add only high level description, not metadata fields
+        if line.lower().startswith("description"):
+            current_idea.append(line)
+            continue
+
+        # skip supporting metadata from being treated as independent ideas
+        if (
+            line.lower().startswith("differentiation:")
+            or line.lower().startswith("challenges dominant assumption:")
+            or line.lower().startswith("cognitive diversity preservation:")
+            or line.lower().startswith("supporting paper:")
+            or line.lower().startswith("speculative extension:")
+        ): continue
+
+        if current_idea: ideas.append(" ".join(current_idea).strip())
+
+        # fallback: bullet/numbered list extraction
+        if len(ideas) < 2:
+            ideas = []
+            for line in lines:
+                line = line.strip()
+                if re.match(r"^(\d+[\).\s]|[-*•])\s*", line):
+                    cleaned = re.sub(r"^(\d+[\).\s]|[-*•])\s*", "", line).strip()
+                    if len(cleaned.split()) >= 5:
+                        ideas.append(cleaned)
     return ideas
 
 def compute_distinct_n(ideas, n=2):

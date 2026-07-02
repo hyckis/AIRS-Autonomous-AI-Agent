@@ -338,7 +338,13 @@ if "baseline" in st.session_state:
         },
     )
     st.dataframe(human_diversity_df, use_container_width=True)
-    st.bar_chart(human_diversity_df.set_index("Arm"))
+    
+    human_chart_df = human_diversity_df.set_index("Arm")[[
+        "Human Diversity Score",
+        "Vendi Score",
+    ]]
+    st.bar_chart(human_diversity_df)
+    
     # human_expanded_scores = human_evaluation_widget(
     #     "Human Evaluation: Diversity-Preserving Agent",
     #     key_prefix="human_expanded",
