@@ -193,7 +193,7 @@ if "baseline" in st.session_state:
     expanded_diversity = st.session_state["expanded_diversity"]
 
     st.subheader("1. Three-Arm Idea Generation Comparison")
-    col_a, col_b, col_c = st.column(3)
+    col_a, col_b, col_c = st.columns(3)
     with col_a:
         st.markdown("### Arm A: Naive LLM")
         st.write(baseline)
@@ -258,7 +258,7 @@ if "baseline" in st.session_state:
     ])
     st.dataframe(diversity_df, use_container_width=True)
     diversity_chart_df = diversity_df.set_index("Arm")[
-        ["vendi_score", "mean_pairwise_distance", "dinstinct_2"]
+        ["vendi_score", "mean_pairwise_distance", "distinct_2"]
     ]
     st.bar_chart(diversity_chart_df)
     st.caption(
@@ -344,38 +344,38 @@ if "baseline" in st.session_state:
     #     key_prefix="human_expanded",
     # )
 
-    st.subheader("8. Human vs LLM Evaluation")
-    human_vs_llm_df = pd.DataFrame({
-        "Metric": SCORE_METRICS,
-        "LLM Judge": [
-            expanded_eval["llm_scores"][metric] for metric in SCORE_METRICS
-        ],
-        "Human Evaluation": [
-            human_expanded_scores[metric] for metric in SCORE_METRICS
-        ],
-    })
+    # st.subheader("8. Human vs Non-LLM Diversity Evaluation")
+    # human_vs_llm_df = pd.DataFrame({
+    #     "Metric": SCORE_METRICS,
+    #     "LLM Judge": [
+    #         expanded_eval["llm_scores"][metric] for metric in SCORE_METRICS
+    #     ],
+    #     "Human Evaluation": [
+    #         human_expanded_scores[metric] for metric in SCORE_METRICS
+    #     ],
+    # })
 
-    st.markdown("### Diversity-Preserving Agent: Human vs LLM")
-    st.dataframe(human_vs_llm_df, use_container_width=True)
-    st.bar_chart(human_vs_llm_df.set_index("Metric"))
+    # st.markdown("### Diversity-Preserving Agent: Human vs LLM")
+    # st.dataframe(human_vs_llm_df, use_container_width=True)
+    # st.bar_chart(human_vs_llm_df.set_index("Metric"))
 
-    st.subheader("9. Save Human Evaluation")
-    human_comment = st.text_area("Optional comment", key="human_comment")
+    # st.subheader("9. Save Human Evaluation")
+    # human_comment = st.text_area("Optional comment", key="human_comment")
 
-    if st.button("Save Human Evaluation"):
-        save_human_evaluation(
-            topic=topic,
-            output_type="traditional_llm",
-            human_scores=human_expanded_scores,
-            comment=human_comment,
-        )
-        save_human_evaluation(
-            topic=topic,
-            output_type="diversity_preserving_agent",
-            human_scores=human_expanded_scores,
-            comment=human_comment,
-        )
-        st.success("Human evaluation saved.")
+    # if st.button("Save Human Evaluation"):
+    #     save_human_evaluation(
+    #         topic=topic,
+    #         output_type="traditional_llm",
+    #         human_scores=human_expanded_scores,
+    #         comment=human_comment,
+    #     )
+    #     save_human_evaluation(
+    #         topic=topic,
+    #         output_type="diversity_preserving_agent",
+    #         human_scores=human_expanded_scores,
+    #         comment=human_comment,
+    #     )
+    #     st.success("Human evaluation saved.")
 
 
 # the old evaluator
