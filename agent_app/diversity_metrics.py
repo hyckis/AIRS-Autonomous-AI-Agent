@@ -17,57 +17,95 @@ def split_ideas(text):
     Extract idea-like items from model output.
     Works with numbered lists, bullet lists, or paragraphs.
     """
-    lines = text.splitlines()
+    lines = [line.strip() for line in text.splitlines() if line.strip()]
     ideas = []
-
     current_idea = []
 
+    meatdata_prefixes = (
+        "differentiation:",
+        "challenges dominant assumption:",
+        "cognitive diversity preservation",
+        "supporting paper:",
+        "speculative extension:",
+        "evidence:",
+        "rationale:",
+        "method:",
+        "evaluation:",
+    )
+
+    def flush_current():
+        nonlocal current_idea
+        if current_idea:
+            idea = " ".join(current_idea).strip()
+            if len(idea.split()) >= 5: ideas.append(idea)
+            current_idea = []
+
     for line in lines:
+        lower = line.lower()
+        if lower.startswith(meatdata_prefixes): continue
+
         line = line.strip()
         if not line: continue
 
         # start of a numbered idea
-        if re.match(r"^\d+[\).\s]+", line):
-            if current_idea:
-                ideas.append(" ".join(current_idea).strip())
-                current_idea = []
-            cleaned = re.sub(r"^\d+[\).\s]+", "", line).strip()
+        if re.match(r"^\d+[\).\s]+[-*•]\s+", line):
+            flush_current()
+            # if current_idea:
+            #     ideas.append(" ".join(current_idea).strip())
+            #     current_idea = []
+            cleaned = re.sub(r"^\d+[\).\s]+|[-*•])\s+", "", line).strip()
             current_idea.append(cleaned)
             continue
 
         # start of a title line
-        if line.lower().startswith("title"):
-            if current_idea:
-                ideas.append(" ".join(current_idea).strip())
-                current_idea = []
+        # if lower.startswith("title"):
+        #     flush_current()
+        #     # if current_idea:
+        #     #     ideas.append(" ".join(current_idea).strip())
+        #     #     current_idea = []
+        #     cleaned = re.sub(r"^\d+[\).\s]+|[-*•])\s+", "", line).strip()
+        #     current_idea.append(cleaned)
+        #     continue
+
+        if lower.startswith("title"):
+            flush_current()
             current_idea.append(line)
             continue
 
         # add only high level description, not metadata fields
-        if line.lower().startswith("description"):
+        if lower.startswith("description"):
             current_idea.append(line)
             continue
 
+        if current_idea: current_idea.append(line)
+
+    flush_current()
+
         # skip supporting metadata from being treated as independent ideas
-        if (
-            line.lower().startswith("differentiation:")
-            or line.lower().startswith("challenges dominant assumption:")
-            or line.lower().startswith("cognitive diversity preservation:")
-            or line.lower().startswith("supporting paper:")
-            or line.lower().startswith("speculative extension:")
-        ): continue
+        # if (
+        #     line.lower().startswith("differentiation:")
+        #     or line.lower().startswith("challenges dominant assumption:")
+        #     or line.lower().startswith("cognitive diversity preservation:")
+        #     or line.lower().startswith("supporting paper:")
+        #     or line.lower().startswith("speculative extension:")
+        # ): continue
 
-        if current_idea: ideas.append(" ".join(current_idea).strip())
+        # if current_idea: ideas.append(" ".join(current_idea).strip())
 
-        # fallback: bullet/numbered list extraction
-        if len(ideas) < 2:
-            ideas = []
-            for line in lines:
-                line = line.strip()
-                if re.match(r"^(\d+[\).\s]|[-*•])\s*", line):
-                    cleaned = re.sub(r"^(\d+[\).\s]|[-*•])\s*", "", line).strip()
-                    if len(cleaned.split()) >= 5:
-                        ideas.append(cleaned)
+    # fallback: bullet/numbered list extraction
+    if len(ideas) < 2:
+        chunks = re.split(r"\n\s*\n", text)
+        ideas = [
+            chunk.strip()
+            for chunk in chunks
+            if len(chunk.strip().split()) >= 8 
+        ]
+        # for line in lines:
+        #     line = line.strip()
+        #     if re.match(r"^(\d+[\).\s]|[-*•])\s*", line):
+        #         cleaned = re.sub(r"^(\d+[\).\s]|[-*•])\s*", "", line).strip()
+        #         if len(cleaned.split()) >= 5:
+        #             ideas.append(cleaned)
     return ideas
 
 def compute_distinct_n(ideas, n=2):
@@ -103,9 +141,9 @@ def compute_embedding_diversity_metrics(ideas):
     """
     Computes reference-free, non-LLM diversity metrics for a set of ideas.
     """
-    if len(ideas) < 2:
+    if len(ideas) == 0:
         return {
-            "idea_count": len(ideas),
+            "idea_count": 0,
             "vendi_score": 0,
             "mean_pairwise_distance": 0,
             "distinct_1": 0,
@@ -113,10 +151,31 @@ def compute_embedding_diversity_metrics(ideas):
             "self_bleu": 0,
         }
     
+    if len(ideas) == 1:
+        return {
+            "idea_count": 1,
+            "vendi_score": 1,
+            "mean_pairwise_distance": 0,
+            "distinct_1": round(compute_distinct_n(ideas, n=1), 3),
+            "distinct_2": round(compute_distinct_n(ideas, n=2), 3),
+            "self_bleu": 0,
+        }
+    # if len(ideas) < 2:
+    #     return {
+    #         "idea_count": len(ideas),
+    #         "vendi_score": 0,
+    #         "mean_pairwise_distance": 0,
+    #         "distinct_1": 0,
+    #         "distinct_2": 0,
+    #         "self_bleu": 0,
+    #     }
+    
     model = get_embedding_model()
     X = model.encode(ideas)
     vendi_score = float(vendi.score_X(X))
-    Xn = X / np.linalg.norm(X, axis=1, keepdims=True)
+    norms = np.linalg.norm(X, axis=1, keepdims=True)
+    norms[norms==0] = 1
+    Xn = X / norms
     similarity_matrix = Xn @ Xn.T
 
     upper_triangle = np.triu_indices(len(ideas), 1)
