@@ -5,3 +5,7 @@ openai
 ollama
 requests
 arxiv
+sentence-transformers
+vendi-score
+sacrebleu
+torchvision

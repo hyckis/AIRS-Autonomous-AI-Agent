@@ -2,19 +2,21 @@ import os
 from datetime import datetime
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from agents import (
     baseline_research_agent,
     detect_homogeneity,
     diversity_expander_agent,
     generate_human_question,
     retrieve_literature,
+    strong_prompt_baseline_agent,
 )
 from evaluator import (
-    evaluate_cognitive_diversity,
+    # evaluate_cognitive_diversity,
     evaluate_output,
     SCORE_METRICS
 )
+from diversity_metrics import evaluate_idea_set_diversity
 
 st.title("Cognitive Diversity Research Agent")
 
@@ -41,13 +43,16 @@ use_llm_queries = st.checkbox(
 paper_limit = st.slider("Number of papers to retrieve", min_value=3, max_value=10, value=5)
 
 # DF for Comparing traditional LLM and the agent
-def make_score_df(baseline_eval, expanded_eval):
+def make_score_df(baseline_eval, strong_eval, expanded_eval):
     return pd.DataFrame({
         "Metric": SCORE_METRICS,
-        "Traditional LLM": [
+        "A: Naive LLM": [
             baseline_eval["llm_scores"][metric] for metric in SCORE_METRICS
         ],
-        "Diversity-Preserving Agent": [
+        "B: Strong Prompt": [
+            strong_eval["llm_scores"][metric] for metric in SCORE_METRICS
+        ],
+        "C: Lens Agent": [
             expanded_eval["llm_scores"][metric] for metric in SCORE_METRICS
         ],
     })
@@ -108,8 +113,11 @@ def save_human_evaluation(topic, output_type, human_scores, comment):
     new_df.to_csv(file_path, index=False)
 
 if st.button("Run Agent Comparison"):
-    with st.spinner("Generating traditional LLM response..."):
+    with st.spinner("Generating naive LLM response..."):
         baseline = baseline_research_agent(topic)
+    
+    with st.spinner("Generating strong prompt baseline response..."):
+        strong_baseline = strong_prompt_baseline_agent(topic)
 
     with st.spinner("Detecting idea homogenization..."):
         critique = detect_homogeneity(topic, baseline)
@@ -132,10 +140,21 @@ if st.button("Run Agent Comparison"):
     with st.spinner("Generating researcher-in-the-loop question..."):
         human_question = generate_human_question(topic, baseline, critique)
 
+    with st.spinner("Computing non-LLM diversity metrics..."):
+        baseline_diversity = evaluate_idea_set_diversity(baseline)
+        strong_diversity = evaluate_idea_set_diversity(strong_baseline)
+        expanded_diversity = evaluate_idea_set_diversity(expanded)
+
     with st.spinner("Evaluating outputs..."):
         baseline_eval = evaluate_output(
             topic=topic,
             response_text=baseline,
+            backend="local_ollama",
+            model=None,
+        )
+        strong_eval = evaluate_output(
+            topic=topic,
+            response_text=strong_baseline,
             backend="local_ollama",
             model=None,
         )
@@ -149,20 +168,41 @@ if st.button("Run Agent Comparison"):
     st.session_state["baseline"] = baseline
     st.session_state["critique"] = critique
     st.session_state["expanded"] = expanded
+    st.session_state["literature"] = literature
+    st.session_state["strong_baseline"] = strong_baseline
     st.session_state["human_question"] = human_question
     st.session_state["baseline_eval"] = baseline_eval
+    st.session_state["strong_eval"] = strong_eval
     st.session_state["expanded_eval"] = expanded_eval
+    st.session_state["baseline_diversity"] = baseline_diversity
+    st.session_state["strong_diversity"] = strong_diversity
+    st.session_state["expanded_diversity"] = expanded_diversity
 
 if "baseline" in st.session_state:
     baseline = st.session_state["baseline"]
     critique = st.session_state["critique"]
     expanded = st.session_state["expanded"]
+    literature = st.session_state["literature"]
+    strong_baseline = st.session_state["strong_baseline"]
     human_question = st.session_state["human_question"]
     baseline_eval = st.session_state["baseline_eval"]
+    strong_eval = st.session_state["strong_eval"]
     expanded_eval = st.session_state["expanded_eval"]
+    baseline_diversity = st.session_state["baseline_diversity"]
+    strong_diversity = st.session_state["strong_diversity"]
+    expanded_diversity = st.session_state["expanded_diversity"]
 
-    st.subheader("1. Traditional LLM Research Directions")
-    st.write(baseline)
+    st.subheader("1. Three-Arm Idea Generation Comparison")
+    col_a, col_b, col_c = st.columns(3)
+    with col_a:
+        st.markdown("### Arm A: Naive LLM")
+        st.write(baseline)
+    with col_b:
+        st.markdown("### Arm B: Strong Prompt")
+        st.write(strong_baseline)
+    with col_c:
+        st.markdown("### Arm C: Lens Agent")
+        st.write(expanded)
 
     st.subheader("2. Homogeneity Critique")
     st.write(critique)
@@ -201,8 +241,35 @@ if "baseline" in st.session_state:
     st.subheader("5. Human-in-the-Loop Question")
     st.info(human_question)
 
-    st.subheader("5. LLM-as-a-Judge Evaluation")
-    score_df = make_score_df(baseline_eval, expanded_eval)
+    st.subheader("Non-LLM Diversity Metrics")
+    diversity_df = pd.DataFrame([
+        {
+            "Arm": "A: Naive LLM",
+            **baseline_diversity["metrics"],
+        },
+        {
+            "Arm": "B: Strong Prompt",
+            **strong_diversity["metrics"],
+        }, 
+        {
+            "Arm": "C: Lens Agent",
+            **expanded_diversity["metrics"],
+        },
+    ])
+    st.dataframe(diversity_df, use_container_width=True)
+    diversity_chart_df = diversity_df.set_index("Arm")[
+        ["vendi_score", "mean_pairwise_distance", "distinct_2"]
+    ]
+    st.bar_chart(diversity_chart_df)
+    st.caption(
+        "Vendi Score estimates the effective number of distinct ideas. "
+        "Mean pairwise distance measures semantic spread in embedding space. "
+        "Distinct-2 measures lexical diversity. Higher values generally indicate greater diversity. "
+        "Self-BLEU is shown in the table; lower Self-BLEU indicates less repetition."
+    )
+
+    st.subheader("LLM-as-a-Judge Evaluation")
+    score_df = make_score_df(baseline_eval, strong_eval, expanded_eval)
     st.dataframe(score_df, use_container_width=True)
     st.bar_chart(score_df.set_index("Metric"))
     with st.expander("Traditional LLM Evaluation Summary"):
@@ -231,44 +298,90 @@ if "baseline" in st.session_state:
         st.write("Diversity-Preserving Agent")
         st.json(expanded_eval["simple_metrics"]["lens_coverage"])
         
-    st.subheader("7. Human Evaluation")
-    human_expanded_scores = human_evaluation_widget(
-        "Human Evaluation: Diversity-Preserving Agent",
-        key_prefix="human_expanded",
+    st.subheader("7. Human Evaluation - Perceived Diversity")
+    human_baseline_diversity = st.slider(
+        "Human score for Arm A - Naive LLM Diversity",
+        1,
+        5,
+        3,
+        key="human_baseline_diversity",
     )
+    human_strong_diversity = st.slider(
+        "Human score for Arm B - Strong Prompt Diversity",
+        1,
+        5,
+        3,
+        key="human_strong_diversity",
+    )
+    human_agent_diversity = st.slider(
+        "Human score for Arm C - Lens Agent",
+        1,
+        5,
+        3,
+        key="human_agent_diversity",
+    )
+    human_diversity_df = pd.DataFrame(
+        {
+            "Arm": "A - Naive LLM",
+            "Human Diversity Score": human_baseline_diversity,
+            "Vendi Score": baseline_diversity["metrics"]["vendi_score"],
+        }, 
+        {
+            "Arm": "B - Strong Prompt",
+            "Human Diversity Score": human_strong_diversity,
+            "Vendi Score": strong_diversity["metrics"]["vendi_score"],
+        }, 
+        {
+            "Arm": "C - Lens Agent",
+            "Human Diversity Score": human_baseline_diversity,
+            "Vendi Score": baseline_diversity["metrics"]["vendi_score"],
+        },
+    )
+    st.dataframe(human_diversity_df, use_container_width=True)
+    
+    human_chart_df = human_diversity_df.set_index("Arm")[[
+        "Human Diversity Score",
+        "Vendi Score",
+    ]]
+    st.bar_chart(human_diversity_df)
+    
+    # human_expanded_scores = human_evaluation_widget(
+    #     "Human Evaluation: Diversity-Preserving Agent",
+    #     key_prefix="human_expanded",
+    # )
 
-    st.subheader("8. Human vs LLM Evaluation")
-    human_vs_llm_df = pd.DataFrame({
-        "Metric": SCORE_METRICS,
-        "LLM Judge": [
-            expanded_eval["llm_scores"][metric] for metric in SCORE_METRICS
-        ],
-        "Human Evaluation": [
-            human_expanded_scores[metric] for metric in SCORE_METRICS
-        ],
-    })
+    # st.subheader("8. Human vs Non-LLM Diversity Evaluation")
+    # human_vs_llm_df = pd.DataFrame({
+    #     "Metric": SCORE_METRICS,
+    #     "LLM Judge": [
+    #         expanded_eval["llm_scores"][metric] for metric in SCORE_METRICS
+    #     ],
+    #     "Human Evaluation": [
+    #         human_expanded_scores[metric] for metric in SCORE_METRICS
+    #     ],
+    # })
 
-    st.markdown("### Diversity-Preserving Agent: Human vs LLM")
-    st.dataframe(human_vs_llm_df, use_container_width=True)
-    st.bar_chart(human_vs_llm_df.set_index("Metric"))
+    # st.markdown("### Diversity-Preserving Agent: Human vs LLM")
+    # st.dataframe(human_vs_llm_df, use_container_width=True)
+    # st.bar_chart(human_vs_llm_df.set_index("Metric"))
 
-    st.subheader("9. Save Human Evaluation")
-    human_comment = st.text_area("Optional comment", key="human_comment")
+    # st.subheader("9. Save Human Evaluation")
+    # human_comment = st.text_area("Optional comment", key="human_comment")
 
-    if st.button("Save Human Evaluation"):
-        save_human_evaluation(
-            topic=topic,
-            output_type="traditional_llm",
-            human_scores=human_expanded_scores,
-            comment=human_comment,
-        )
-        save_human_evaluation(
-            topic=topic,
-            output_type="diversity_preserving_agent",
-            human_scores=human_expanded_scores,
-            comment=human_comment,
-        )
-        st.success("Human evaluation saved.")
+    # if st.button("Save Human Evaluation"):
+    #     save_human_evaluation(
+    #         topic=topic,
+    #         output_type="traditional_llm",
+    #         human_scores=human_expanded_scores,
+    #         comment=human_comment,
+    #     )
+    #     save_human_evaluation(
+    #         topic=topic,
+    #         output_type="diversity_preserving_agent",
+    #         human_scores=human_expanded_scores,
+    #         comment=human_comment,
+    #     )
+    #     st.success("Human evaluation saved.")
 
 
 # the old evaluator

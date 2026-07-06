@@ -174,4 +174,36 @@ def generate_human_question(topic, baseline_response, critique):
     """
     return call_llm(prompt, temperature=0.7)
 
+def strong_prompt_baseline_agent(topic, backend="local_ollama", model=None):
+    prompt = f"""
+You are an expert research ideation assistant.
 
+Your goal is to generate a diverse set of research directions for the topic below.
+
+Use the following strategy:
+1. Think from multiple expert personas:
+   - technical researcher
+   - social scientist
+   - educator or practitioner
+   - policy or ethics expert
+   - skeptical critic
+2. Make the ideas intentionally different from each other.
+3. Avoid repeating the same assumption across ideas.
+4. Include both mainstream and non-obvious directions.
+5. Generate 8 concise but researchable ideas.
+
+Topic:
+{topic}
+
+Return the output as a numbered list of 8 distinct research directions.
+For each direction, include:
+- title
+- one-sentence description
+- why it is different from the others
+"""
+    return call_llm(
+        prompt,
+        backend=backend,
+        model=model,
+        temperature=0.8,
+    )
