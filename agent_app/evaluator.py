@@ -154,19 +154,20 @@ Return exactly this JSON structure:
         cleaned_idea_scores = []
         for item in idea_scores:
             cleaned = {
-                "idea_index": item.get("idea_index, len(cleaned_idea_scores) + 1"),
+                "idea_index": item.get("idea_index", len(cleaned_idea_scores) + 1),
                 "default_assumption": item.get("default_assumption", ""),
-                "challenged_assumption": item.get("challenged_asumption", ""),
+                "challenged_assumption": item.get("challenged_assumption", ""),
                 "rationale": item.get("rationale", ""),
             }
-        for metric in SCORE_METRICS:
-            value = item.get(metric, 0)
-            try: value = float(value)
-            except (TypeError, ValueError): value = 0
-            if value > 0: value = max(1, min(5, value))
-            cleaned[metric] = value
+            for metric in SCORE_METRICS:
+                value = item.get(metric, 0)
+                try: value = float(value)
+                except (TypeError, ValueError): value = 0
+                if value > 0: value = max(1, min(5, value))
+                cleaned[metric] = value
 
-        cleaned_idea_scores.append(cleaned)
+            cleaned_idea_scores.append(cleaned)
+
         if not cleaned_idea_scores: raise ValueError("No valid idea_scores returned")
 
         averaged = {}

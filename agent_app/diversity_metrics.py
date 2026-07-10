@@ -17,7 +17,7 @@ def split_ideas(text):
     Extract idea-like items from model output.
     Works with numbered lists, bullet lists, or paragraphs.
     """
-    lines = [line.strip() for line in text.splitlines() if line.strip()]
+    lines = text.splitlines()
     ideas = []
     current_idea = []
 
@@ -33,79 +33,54 @@ def split_ideas(text):
         "evaluation:",
     )
 
-    def flush_current():
-        nonlocal current_idea
+    def flush():
         if current_idea:
-            idea = " ".join(current_idea).strip()
-            if len(idea.split()) >= 5: ideas.append(idea)
-            current_idea = []
+            ideas.append(" ".join(current_idea).strip())
+            current_idea.clear()
 
     for line in lines:
-        lower = line.lower()
-        if lower.startswith(meatdata_prefixes): continue
-
         line = line.strip()
         if not line: continue
-
         # start of a numbered idea
-        if re.match(r"^\d+[\).\s]+[-*•]\s+", line):
-            flush_current()
-            # if current_idea:
-            #     ideas.append(" ".join(current_idea).strip())
-            #     current_idea = []
-            cleaned = re.sub(r"^\d+[\).\s]+|[-*•])\s+", "", line).strip()
-            current_idea.append(cleaned)
+        if re.match(r"^\d+[\).\s]+", line):
+            flush()
+            current_idea.append(re.sub(r"^\d+[\).\s]+", "", line).strip())
             continue
-
         # start of a title line
-        # if lower.startswith("title"):
-        #     flush_current()
-        #     # if current_idea:
-        #     #     ideas.append(" ".join(current_idea).strip())
-        #     #     current_idea = []
-        #     cleaned = re.sub(r"^\d+[\).\s]+|[-*•])\s+", "", line).strip()
-        #     current_idea.append(cleaned)
-        #     continue
-
-        if lower.startswith("title"):
-            flush_current()
+        if line.lower().startswith("title"):
+            flush()
             current_idea.append(line)
             continue
-
         # add only high level description, not metadata fields
-        if lower.startswith("description"):
+        if line.lower().startswith("description"):
             current_idea.append(line)
             continue
+        if line.lower.startswith((
+            "differentiation:", 
+            "challenges dominant assumption:",
+            "cognitive diversity preservation:", 
+            "supporting paper:",
+            "speculative extension:",
+        )): continue
+        current_idea.append(line)
 
-        if current_idea: current_idea.append(line)
-
-    flush_current()
-
-        # skip supporting metadata from being treated as independent ideas
-        # if (
-        #     line.lower().startswith("differentiation:")
-        #     or line.lower().startswith("challenges dominant assumption:")
-        #     or line.lower().startswith("cognitive diversity preservation:")
-        #     or line.lower().startswith("supporting paper:")
-        #     or line.lower().startswith("speculative extension:")
-        # ): continue
-
-        # if current_idea: ideas.append(" ".join(current_idea).strip())
+    flush()
 
     # fallback: bullet/numbered list extraction
     if len(ideas) < 2:
-        chunks = re.split(r"\n\s*\n", text)
-        ideas = [
-            chunk.strip()
-            for chunk in chunks
-            if len(chunk.strip().split()) >= 8 
-        ]
-        # for line in lines:
-        #     line = line.strip()
-        #     if re.match(r"^(\d+[\).\s]|[-*•])\s*", line):
-        #         cleaned = re.sub(r"^(\d+[\).\s]|[-*•])\s*", "", line).strip()
-        #         if len(cleaned.split()) >= 5:
-        #             ideas.append(cleaned)
+        ideas = []
+        for line in lines:
+            line = line.strip()
+            m = re.match(r"^(\d+[\).\s]|[-*•])\s*", line)
+            if m:
+                cleaned = re.sub(r"^(\d+[\).\s]|[-*•])\s*", "", line).strip()
+                if len(cleaned.split()) >= 5: ideas.append(cleaned)
+        # chunks = re.split(r"\n\s*\n", text)
+        # ideas = [
+        #     chunk.strip()
+        #     for chunk in chunks
+        #     if len(chunk.strip().split()) >= 8 
+        # ]
     return ideas
 
 def compute_distinct_n(ideas, n=2):
