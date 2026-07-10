@@ -55,7 +55,7 @@ def split_ideas(text):
         if line.lower().startswith("description"):
             current_idea.append(line)
             continue
-        if line.lower.startswith((
+        if line.lower().startswith((
             "differentiation:", 
             "challenges dominant assumption:",
             "cognitive diversity preservation:", 
