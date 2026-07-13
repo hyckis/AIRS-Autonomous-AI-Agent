@@ -18,6 +18,7 @@ from evaluator import (
 )
 from diversity_metrics import evaluate_idea_set_diversity
 from literature_metrics import compute_literature_grounded_metrics
+from assumption_bank import generate_assumption_bank
 
 st.title("Cognitive Diversity Research Agent")
 
@@ -122,6 +123,10 @@ if st.button("Run Agent Comparison"):
 
     with st.spinner("Detecting idea homogenization..."):
         critique = detect_homogeneity(topic, baseline)
+    
+    with st.spinner("Building assumption bank..."):
+        assumption_bank = generate_assumption_bank(topic, critique)
+        print(type(assumption_bank), assumption_bank)
 
     with st.spinner("Retrieving literature from arXiv..."):
         literature = retrieve_literature(
@@ -165,6 +170,7 @@ if st.button("Run Agent Comparison"):
             topic=topic,
             response_text=baseline,
             ideas=baseline_diversity["ideas"],
+            assumption_bank=assumption_bank,
             backend="local_ollama",
             model=None,
         )
@@ -172,6 +178,7 @@ if st.button("Run Agent Comparison"):
             topic=topic,
             response_text=strong_baseline,
             ideas=strong_diversity["ideas"],
+            assumption_bank=assumption_bank,
             backend="local_ollama",
             model=None,
         )
@@ -179,6 +186,7 @@ if st.button("Run Agent Comparison"):
             topic=topic,
             response_text=expanded,
             ideas=expanded_diversity["ideas"],
+            assumption_bank=assumption_bank,
             backend="local_ollama",
             model=None,
         )
@@ -192,6 +200,7 @@ if st.button("Run Agent Comparison"):
     st.session_state["baseline_literature_metrics"] = baseline_literature_metrics
     st.session_state["strong_literature_metrics"] = strong_literature_metrics
     st.session_state["expanded_literature_metrics"] = expanded_literature_metrics
+    st.session_state["assumption_bank"] = assumption_bank
     st.session_state["baseline_eval"] = baseline_eval
     st.session_state["strong_eval"] = strong_eval
     st.session_state["expanded_eval"] = expanded_eval
@@ -209,6 +218,7 @@ if "baseline" in st.session_state:
     baseline_literature_metrics = st.session_state["baseline_literature_metrics"]
     strong_literature_metrics = st.session_state["strong_literature_metrics"]
     expanded_literature_metrics = st.session_state["expanded_literature_metrics"]
+    assumption_bank = st.session_state["assumption_bank"]
     baseline_eval = st.session_state["baseline_eval"]
     strong_eval = st.session_state["strong_eval"]
     expanded_eval = st.session_state["expanded_eval"]
@@ -264,6 +274,13 @@ if "baseline" in st.session_state:
 
     st.subheader("5. Human-in-the-Loop Question")
     st.info(human_question)
+
+    with st.expander("Assumption Bank (shared across all arms)"):
+        print("assumption_bank:", assumption_bank)
+        print(type(assumption_bank))
+        for item in assumption_bank:
+            st.markdown(f"**{item['assumption']}**")
+            st.markdown(item['challenge_criteria'])
 
     st.subheader("Non-LLM Diversity Metrics")
     diversity_df = pd.DataFrame([

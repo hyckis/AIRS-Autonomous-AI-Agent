@@ -1,6 +1,31 @@
 import json
 
-def evaluate_with_llm_prompt(topic, ideas, response_text):
+def assumption_bank_prompt(topic, critique):
+    return f""" 
+You are identifying the dominant assumptions in a research field, based on a homogeneity critique of standard LLM responses. 
+
+Topic: 
+{topic} 
+
+Homogeneity critique: 
+{critique} 
+
+Identify 3-5 dominant assumptions commonly held in this research area. 
+For each assumption, also state what would count as genuinely challenging it 
+(not just implementing it differently, but questioning whether it should hold at all). 
+
+Return ONLY valid JSON, no markdown: 
+{{ 
+    "assumptions": [ 
+        {{ 
+            "assumption": "A short, named statement of the dominant assumption.", 
+            "challenge_criteria": "What a research direction would need to do to genuinely challenge this assumption, as opposed to just varying its implementation." 
+        }} 
+    ] 
+}} 
+""" 
+
+def evaluate_with_llm_prompt(topic, bank_text, ideas, response_text):
     return f"""
 You are a strict JSON-only evaluation engine.
 Evaluate the research-agent output below.
@@ -12,6 +37,10 @@ Do not include explanations outside the JSON.
 
 Topic:
 {topic}
+
+Pre-identified dominant assumptions in this field 
+(use these as your primary reference; only identify a new assumption if none of these apply):
+{bank_text}
 
 Ideas:
 {json.dumps(ideas, ensure_ascii=False, indent=2)}
@@ -59,31 +88,33 @@ How useful, researchable, and valuable is this idea for research planning?
 5 = highly valuable, feasible, and researchable
 
 4. assumption_challenge:
-Does this idea challenge a dominant assumption rather than simply extending mainstream ideas?
-1 = conformist; accepts dominant assumptions
-2 = surface variation; changes implementation but keeps assumptions intact
-3 = partial challenge; questions a secondary assumption
-4 = strong challenge; questions an important assumption
-5 = core premise reversal; reverses or undermines a central premise
+First, decide which assumption from the list above (if any) this idea relates to. 
+Then judge how strongly it challenges that assumption according to its stated challenge_criteria. 
 
-Important rule for assumption_challenge:
-Do not give a score of 4 or 5 unless you can explicitly name the assumption being challenged.
+1 = conformist; accepts the assumption 
+2 = surface variation; changes implementation but the assumption from the bank still holds 
+3 = partial challenge; meets the challenge_criteria for a secondary aspect of the assumption 
+4 = strong challenge; meets the challenge_criteria for a core aspect 
+5 = core premise reversal; the challenge_criteria is fully met and the assumption no longer holds if this idea is adopted 
 
-Return exactly this JSON structure:
-{{
-"idea_scores": [
-{{
-"idea_index": 1,
-"novelty": 1,
-"diversity": 1,
-"usefulness": 1,
-"assumption_challenge": 1,
-"default_assumption": "...",
-"challenged_assumption": "...",
-"rationale": "One short explanation."
-}}
-],
-"summary": "Brief explanation of the overall evaluation."
+Do not give a score of 4 or 5 unless the idea's challenged_assumption field names 
+one of the assumptions listed above (or explicitly explains why none apply), 
+AND meets that assumption's stated challenge_criteria. 
+
+Return exactly this JSON structure: 
+{{ 
+    "idea_scores": [ 
+    {{ 
+        "idea_index": 1, 
+        "novelty": 1, 
+        "diversity": 1, 
+        "usefulness": 1, 
+        "assumption_challenge": 1, 
+        "challenged_assumption": "...", 
+        "rationale": "One short explanation referencing the challenge_criteria." 
+    }} 
+    ], 
+    "summary": "..." 
 }}
 
         """

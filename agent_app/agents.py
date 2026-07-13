@@ -82,8 +82,3 @@ def retrieve_literature(topic, limit=5, min_year=DEFAULT_MIN_YEAR, use_llm_queri
 def generate_human_question(topic, baseline_response, critique):
     prompt = human_question_prompt(topic, baseline_response, critique)
     return call_llm(prompt, temperature=0.7)
-
-# for assumption_challenge evaluation
-def build_assumption_bank(topic, papers, backend="local_ollama", model=None):
-    literature_context = format_pepers_for_prompt(papers or [])
-    prompt = assumption_bank_prompt(topic, literature_context)

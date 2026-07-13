@@ -1,11 +1,13 @@
 import re
 import json
 import numpy as np
+from util import extract_json
 from llm_backend import call_llm
 from prompts_evaluator import (
     evaluate_with_llm_prompt,
     evaluate_cognitive_diversity_prompt,
 )
+from assumption_bank import format_assumption_bank_for_prompt
 
 SCORE_METRICS = [
     "novelty",
@@ -13,26 +15,6 @@ SCORE_METRICS = [
     "usefulness",
     "assumption_challenge"
 ]
-
-def extract_json(text):
-    text = text.strip()
-
-    # case 1: ```json
-    text = re.sub(r"^```json\s", "", text)
-    text = re.sub(r"^```\s*", "", text)
-    text = re.sub(r"\s*```$", "", text)
-
-    # case 2: direct parsing
-    try: return json.loads(text)
-    except json.JSONDecodeError: pass
-
-    # case 3: extract first json obj inside the txt
-    match = re.search(r"\{[\s\S]*\}", text)
-    if match:
-        try: return json.loads(match.group(0))
-        except json.JSONDecodeError: "No json obj found"
-    
-    raise ValueError("No json obj found")
 
 def validate_score_dict(score):
     """
@@ -51,14 +33,14 @@ def validate_score_dict(score):
     validated["summary"] = score.get("summary", "")
     return validated
 
-def evaluate_with_llm(topic, response_text, ideas=None, backend="local_ollama", model=None):
+def evaluate_with_llm(topic, response_text, ideas=None, assumption_bank=None, backend="local_ollama", model=None):
     """
     G-Eval inspired per-idea LLM rubric evaluation.
     Scores each idea separately, then averages scores in Python.
     """
     if ideas is None: ideas = [response_text] if response_text else []
-
-    prompt = evaluate_with_llm_prompt(topic, ideas, response_text)
+    bank_text = format_assumption_bank_for_prompt(assumption_bank)
+    prompt = evaluate_with_llm_prompt(topic, bank_text, ideas, response_text)
     
     raw_result = call_llm(
         prompt,
@@ -71,10 +53,11 @@ def evaluate_with_llm(topic, response_text, ideas=None, backend="local_ollama", 
         parsed = extract_json(raw_result)
         idea_scores = parsed.get("idea_scores", [])
         cleaned_idea_scores = []
+        
         for item in idea_scores:
             cleaned = {
                 "idea_index": item.get("idea_index", len(cleaned_idea_scores) + 1),
-                "default_assumption": item.get("default_assumption", ""),
+                #"default_assumption": item.get("default_assumption", ""),
                 "challenged_assumption": item.get("challenged_assumption", ""),
                 "rationale": item.get("rationale", ""),
             }
@@ -89,12 +72,16 @@ def evaluate_with_llm(topic, response_text, ideas=None, backend="local_ollama", 
 
         if not cleaned_idea_scores: raise ValueError("No valid idea_scores returned")
 
-        averaged = {}
-        for metric in SCORE_METRICS:
-            averaged[metric] = round(
-                float(np.mean([item[metric] for item in cleaned_idea_scores])),
-                3
-            )
+        averaged = {
+            metric: round(float(np.mean([item[metric] for item in cleaned_idea_scores])), 3)
+            for metric in SCORE_METRICS
+        }
+        # averaged = {}
+        # for metric in SCORE_METRICS:
+        #     averaged[metric] = round(
+        #         float(np.mean([item[metric] for item in cleaned_idea_scores])),
+        #         3
+        #     )
         averaged["summary"] = parsed.get("summary", "")
         averaged["idea_scores"] = cleaned_idea_scores
 
@@ -135,7 +122,7 @@ def compute_simple_metrics(response_text):
         "lens_coverage": lens_coverage,
     }
 
-def evaluate_output(topic, response_text, ideas=None, backend="local_ollama", model=None):
+def evaluate_output(topic, response_text, ideas=None, assumption_bank=None, backend="local_ollama", model=None):
     """
     Combined evaluation
     1: LLM as a judge
@@ -144,6 +131,8 @@ def evaluate_output(topic, response_text, ideas=None, backend="local_ollama", mo
     llm_scores = evaluate_with_llm(
         topic=topic,
         response_text=response_text,
+        ideas=ideas,
+        assumption_bank=assumption_bank,
         backend=backend,
         model=model
     )
