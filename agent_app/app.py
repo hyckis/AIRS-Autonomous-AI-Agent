@@ -17,6 +17,8 @@ from evaluator import (
     SCORE_METRICS
 )
 from diversity_metrics import evaluate_idea_set_diversity
+from literature_metrics import compute_literature_grounded_metrics
+from assumption_bank import generate_assumption_bank
 
 st.title("Cognitive Diversity Research Agent")
 
@@ -121,6 +123,10 @@ if st.button("Run Agent Comparison"):
 
     with st.spinner("Detecting idea homogenization..."):
         critique = detect_homogeneity(topic, baseline)
+    
+    with st.spinner("Building assumption bank..."):
+        assumption_bank = generate_assumption_bank(topic, critique)
+        print(type(assumption_bank), assumption_bank)
 
     with st.spinner("Retrieving literature from arXiv..."):
         literature = retrieve_literature(
@@ -145,22 +151,42 @@ if st.button("Run Agent Comparison"):
         strong_diversity = evaluate_idea_set_diversity(strong_baseline)
         expanded_diversity = evaluate_idea_set_diversity(expanded)
 
+    with st.spinner("Computing literature-grounded novelty and evidence-support metrics..."):
+        baseline_literature_metrics = compute_literature_grounded_metrics(
+            baseline_diversity["ideas"],
+            literature["papers"],
+        )
+        strong_literature_metrics = compute_literature_grounded_metrics(
+            strong_diversity["ideas"],
+            literature["papers"],
+        )
+        expanded_literature_metrics = compute_literature_grounded_metrics(
+            expanded_diversity["ideas"],
+            literature["papers"],
+        )
+
     with st.spinner("Evaluating outputs..."):
         baseline_eval = evaluate_output(
             topic=topic,
             response_text=baseline,
+            ideas=baseline_diversity["ideas"],
+            assumption_bank=assumption_bank,
             backend="local_ollama",
             model=None,
         )
         strong_eval = evaluate_output(
             topic=topic,
             response_text=strong_baseline,
+            ideas=strong_diversity["ideas"],
+            assumption_bank=assumption_bank,
             backend="local_ollama",
             model=None,
         )
         expanded_eval = evaluate_output(
             topic=topic,
             response_text=expanded,
+            ideas=expanded_diversity["ideas"],
+            assumption_bank=assumption_bank,
             backend="local_ollama",
             model=None,
         )
@@ -171,6 +197,10 @@ if st.button("Run Agent Comparison"):
     st.session_state["literature"] = literature
     st.session_state["strong_baseline"] = strong_baseline
     st.session_state["human_question"] = human_question
+    st.session_state["baseline_literature_metrics"] = baseline_literature_metrics
+    st.session_state["strong_literature_metrics"] = strong_literature_metrics
+    st.session_state["expanded_literature_metrics"] = expanded_literature_metrics
+    st.session_state["assumption_bank"] = assumption_bank
     st.session_state["baseline_eval"] = baseline_eval
     st.session_state["strong_eval"] = strong_eval
     st.session_state["expanded_eval"] = expanded_eval
@@ -185,6 +215,10 @@ if "baseline" in st.session_state:
     literature = st.session_state["literature"]
     strong_baseline = st.session_state["strong_baseline"]
     human_question = st.session_state["human_question"]
+    baseline_literature_metrics = st.session_state["baseline_literature_metrics"]
+    strong_literature_metrics = st.session_state["strong_literature_metrics"]
+    expanded_literature_metrics = st.session_state["expanded_literature_metrics"]
+    assumption_bank = st.session_state["assumption_bank"]
     baseline_eval = st.session_state["baseline_eval"]
     strong_eval = st.session_state["strong_eval"]
     expanded_eval = st.session_state["expanded_eval"]
@@ -241,6 +275,13 @@ if "baseline" in st.session_state:
     st.subheader("5. Human-in-the-Loop Question")
     st.info(human_question)
 
+    with st.expander("Assumption Bank (shared across all arms)"):
+        print("assumption_bank:", assumption_bank)
+        print(type(assumption_bank))
+        for item in assumption_bank:
+            st.markdown(f"**{item['assumption']}**")
+            st.markdown(item['challenge_criteria'])
+
     st.subheader("Non-LLM Diversity Metrics")
     diversity_df = pd.DataFrame([
         {
@@ -268,6 +309,70 @@ if "baseline" in st.session_state:
         "Self-BLEU is shown in the table; lower Self-BLEU indicates less repetition."
     )
 
+    st.subheader("Literature-Grounded Metrics")
+
+    literature_metric_df = pd.DataFrame([
+        {
+            "Arm": "A: Naive LLM",
+            "Avg Novelty": baseline_literature_metrics["average_novelty"],
+            "Avg Evidence Count": baseline_literature_metrics["average_evidence_count"],
+            "Avg Evidence Ratio": baseline_literature_metrics["average_evidence_ratio"],
+        },
+        {
+            "Arm": "B: Strong Prompt",
+            "Avg Novelty": strong_literature_metrics["average_novelty"],
+            "Avg Evidence Count": strong_literature_metrics["average_evidence_count"],
+            "Avg Evidence Ratio": strong_literature_metrics["average_evidence_ratio"],
+        },
+        {
+            "Arm": "C: Lens Agent",
+            "Avg Novelty": expanded_literature_metrics["average_novelty"],
+            "Avg Evidence Count": expanded_literature_metrics["average_evidence_count"],
+            "Avg Evidence Ratio": expanded_literature_metrics["average_evidence_ratio"],
+        },
+    ])
+
+    st.dataframe(literature_metric_df, use_container_width=True)
+
+    st.bar_chart(
+        literature_metric_df.set_index("Arm")[
+            ["Avg Novelty", "Avg Evidence Ratio"]
+        ]
+    )
+
+    st.caption(
+        "Novelty is computed as 1 minus the maximum cosine similarity between an idea and the retrieved papers. "
+        "Evidence Ratio is the proportion of retrieved papers whose similarity to the idea exceeds the support threshold. "
+        "These are retrieved-literature proxies, not claim-level proof."
+    )
+
+    with st.expander("Per-Idea Literature-Grounded Details"):
+        selected_arm = st.selectbox(
+            "Select arm",
+            ["A: Naive LLM", "B: Strong Prompt", "C: Lens Agent"],
+            key="literature_detail_arm",
+        )
+
+        if selected_arm == "A: Naive LLM":
+            details = baseline_literature_metrics["per_idea"]
+        elif selected_arm == "B: Strong Prompt":
+            details = strong_literature_metrics["per_idea"]
+        else:
+            details = expanded_literature_metrics["per_idea"]
+
+        for idx, item in enumerate(details, start=1):
+            st.markdown(f"### Idea {idx}")
+            st.write(item["idea"])
+            st.markdown(f"**Novelty:** {item['novelty']}")
+            st.markdown(f"**Evidence Count:** {item['evidence_count']}")
+            st.markdown(f"**Evidence Ratio:** {item['evidence_ratio']}")
+
+            if item["closest_paper"]:
+                st.markdown("**Closest Paper:**")
+                st.write(item["closest_paper"]["title"])
+                st.write(item["closest_paper"]["url"])
+                st.write(f"Similarity: {item['closest_paper']['similarity']}")
+
     st.subheader("LLM-as-a-Judge Evaluation")
     score_df = make_score_df(baseline_eval, strong_eval, expanded_eval)
     st.dataframe(score_df, use_container_width=True)
@@ -276,6 +381,26 @@ if "baseline" in st.session_state:
         st.write(baseline_eval["llm_scores"].get("summary", ""))
     with st.expander("Diversity-Preserving Agent Evaluation Summary"):
         st.write(expanded_eval["llm_scores"].get("summary", ""))
+
+    with st.expander("Per-Idea LLM Judge Details"):
+        selected_arm = st.selectbox(
+            "Select arm for LLM judge details",
+            ["A: Naive LLM", "B: Strong Prompt", "C: Lens Agent"],
+            key="llm_detail_arm",
+        )
+
+        if selected_arm == "A: Naive LLM":
+            idea_scores = baseline_eval["llm_scores"].get("idea_scores", [])
+        elif selected_arm == "B: Strong Prompt":
+            idea_scores = strong_eval["llm_scores"].get("idea_scores", [])
+        else:
+            idea_scores = expanded_eval["llm_scores"].get("idea_scores", [])
+
+        if idea_scores:
+            st.dataframe(pd.DataFrame(idea_scores), use_container_width=True)
+        else:
+            st.warning("No per-idea LLM judge details available.")
+
 
     st.subheader("6. Diagnostic Metrics")
     diagnostic_df = pd.DataFrame({
@@ -320,7 +445,7 @@ if "baseline" in st.session_state:
         3,
         key="human_agent_diversity",
     )
-    human_diversity_df = pd.DataFrame(
+    human_diversity_df = pd.DataFrame([
         {
             "Arm": "A - Naive LLM",
             "Human Diversity Score": human_baseline_diversity,
@@ -333,10 +458,10 @@ if "baseline" in st.session_state:
         }, 
         {
             "Arm": "C - Lens Agent",
-            "Human Diversity Score": human_baseline_diversity,
-            "Vendi Score": baseline_diversity["metrics"]["vendi_score"],
+            "Human Diversity Score": human_agent_diversity,
+            "Vendi Score": expanded_diversity["metrics"]["vendi_score"],
         },
-    )
+    ])
     st.dataframe(human_diversity_df, use_container_width=True)
     
     human_chart_df = human_diversity_df.set_index("Arm")[[
