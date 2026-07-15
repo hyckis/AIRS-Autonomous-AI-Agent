@@ -1,8 +1,18 @@
 import json
 import re
 
+# sometimes json output contains “”; ‘’ rather than "" that makes parsing failed
+def normalize_quotes(text):
+    return (
+        text.replace("“", '"')
+            .replace("”", '"')
+            .replace("‘", "'")
+            .replace("’", "'")
+    )
+
 def extract_json(text):
     text = text.strip()
+    text = normalize_quotes(text)
 
     # case 1: ```json
     text = re.sub(r"^```json\s", "", text)

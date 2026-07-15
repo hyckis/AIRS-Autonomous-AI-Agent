@@ -10,11 +10,37 @@ Topic:
 Homogeneity critique: 
 {critique} 
 
-Identify 3-5 dominant assumptions commonly held in this research area. 
-For each assumption, also state what would count as genuinely challenging it 
-(not just implementing it differently, but questioning whether it should hold at all). 
+Identify 3–5 dominant assumptions that researchers in this field typically accept without questioning.
 
-Return ONLY valid JSON, no markdown: 
+Definition:
+An assumption is a belief that much of the literature implicitly treats as true.
+It is not:
+- a design choice,
+- an implementation detail,
+- a benchmark,
+- or a recommendation.
+
+For each assumption, describe what would constitute genuinely challenging it.
+
+A genuine challenge:
+- questions whether the assumption itself should hold,
+- proposes an alternative worldview,
+- or demonstrates that the assumption is fundamentally flawed.
+
+A genuine challenge is NOT:
+- improving the assumption,
+- making it more efficient,
+- changing the implementation,
+- or applying it in another domain.
+
+Requirements:
+- Focus on assumptions of the research field, not a single paper.
+- Make each assumption distinct and non-overlapping.
+- Assumptions should be concise (under 20 words).
+- Challenge criteria should be under 80 words.
+
+Output must be exactly one JSON.
+Return exactly this JSON structure: 
 {{ 
     "assumptions": [ 
         {{ 
@@ -23,6 +49,10 @@ Return ONLY valid JSON, no markdown:
         }} 
     ] 
 }} 
+
+Do not include markdown.
+Do not wrap the JSON in ```json.
+Do not include explanations outside the JSON.
 """ 
 
 def evaluate_with_llm_prompt(topic, bank_text, ideas, response_text):
