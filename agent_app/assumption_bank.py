@@ -28,4 +28,4 @@ def format_assumption_bank_for_prompt(bank):
     lines = []
     for i, item in enumerate(bank, start=1):
         lines.append(f"{i}. Assumption: {item['assumption']}\n Challenge criteria: {item['challenge_criteria']}")
-    return "/n".join(lines)
+    return "\n".join(lines)
