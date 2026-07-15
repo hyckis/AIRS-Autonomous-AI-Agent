@@ -9,20 +9,29 @@ The current prototype evaluates outputs using four LLM-based metrics:
     - LLM rubric score, panel-only
     - Novelty = 1 - max_p∈P_k(cos(e_idea, e_p))
     - Facet-level novelty
+    - HindSight validation: https://hindsight.vectorize.io/ 
+    - Cross validation: cosine similarity & LLM evaluation (Ollama Gemma-3; Jarvis)
 2. Diversity
     - Vendi Score: https://arxiv.org/abs/2210.02410
         - Effective number of distinct ideas, 
-        - choose similarity function
+        - Similarity function: text embedding vs core concept embedding
 3. Usefulness
     - G-Eval: https://arxiv.org/abs/2303.16634
     - jury/poll LLM-judge
+    - pairwise tournament (Baek et al. (2025), Si et al. (2024))
 4. Assumption challenge
     - Assumption bank (form-filling paradigm from G-eval)
-    - Prompt: idea's assumption; classify challenge depth; rationale; score
+    - Prompt: idea's assumption; classify challenge depth; rationale; score/pairwise
     - Multi-agent debate
     - Reward hacking prevention
     - Human evaluation correction
     - Few-shot exemplar
+    - pairwise tournament scoring
+    - LLM generated task-specific criteria
+    - Ref: Conceptual blending - optimality metrics
+      https://www.computationalcreativity.net/iccc2016/wp-content/uploads/2016/01/Optimality-Principles-in-Computational-Approaches-to-Conceptual-Blending.pdf 
+    - Ref: Evaluation Illusion (2603.11027,Tencent 2026)
+    - Ref: P-creativity vs transformational creativity
 5. Evidence-support
     - Count retrieved sources whose cosine to the idea exceeds a threshold
     - Evidence-support(i)=∣{p∈Pk​:cos(ei​,ep​)>τ}∣
@@ -31,6 +40,9 @@ The current prototype evaluates outputs using four LLM-based metrics:
     - RAGAS
     - ALCE
     - panel-only rigorous check
+    - Historical Difference + Conformity Degree -> Overall Novelty
+    - Cross validation: LLM evaluation - Ollama Gemma-3; Jarvis
+6. Feasibility?
 
 ## Future Evaluation Metrics
 Layer 1: LLM-as-a-judge

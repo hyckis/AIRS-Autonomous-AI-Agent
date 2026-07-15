@@ -278,6 +278,7 @@ if "baseline" in st.session_state:
     with st.expander("Assumption Bank (shared across all arms)"):
         print("assumption_bank:", assumption_bank)
         print(type(assumption_bank))
+        if not assumption_bank: st.markdown("No assumption bank generated or parsing failed.")
         for item in assumption_bank:
             st.markdown(f"**{item['assumption']}**")
             st.markdown(item['challenge_criteria'])
