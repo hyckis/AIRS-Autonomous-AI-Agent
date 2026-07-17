@@ -161,6 +161,74 @@ def evaluate_cognitive_diversity(topic, response_text):
             "summary": f"Evaluation parsing failed: {e}. Raw output: {result[:500]}"
         }
 
+def audit_evaluation_results(eval_df, assumption_bank, expected_idea_count=None):
+    """
+    Basic sanity checks for per-idea LLM judge outputs.
+    Returns a list of warnings.
+    """
+    warnings = []
+
+    if eval_df is None or eval_df.empty: return ["Evaluation result is empty"]
+
+    # 1. idea count check
+    idea_count = len(eval_df)
+    if expected_idea_count is not None and idea_count != expected_idea_count: 
+        warnings.append(
+            f"Idea count mismatch: expected {expected_idea_count}, got {idea_count}"
+        )
+
+    # 2. assumption bank usage check
+    bank_assumptions = [
+        item.get("assumption", "").strip().lower()
+        for item in assumption_bank
+        if isinstance(item, dict) and item.get("assumption")
+    ]
+    for _, row in eval_df.iterrows():
+        idx = row.get("idea_index", "unknown")
+        challenged = str(row.get("challenged_assumption", "")).strip()
+        challenged_lower = challenged.lower()
+        score = row.get("assumption_challenge", None)
+        rationale = str(row.get("rationale", "")).lower()
+
+        try: score = float(row.get("assumption_challenge", 0))
+        except Exception: score = 0
+
+        # 3. no assumption but score too high
+        if "no specific assumption" in challenged_lower and score >= 3:
+            warnings.append(
+                f"Idea {idx}: says no specific assumption is addressed,"
+                f"but assumption_challenge score is {score}."
+            )
+
+        # 4. weak rationale but high score
+        weak_words = ["implicitly", "partially", "doesn't directly", 
+                      "does not directly", "indirectly", "not directly",]
+
+        if score >= 4 and any(word in rationale for word in weak_words):
+            warnings.append(
+                f"Idea {idx}: rationale sounds weak/indirect, "
+                f"but assumption_challenge score is high({score})."
+            )
+
+        # 5. check if challenged assumption seems connected to bank
+        if (challenged and "no specific assumption" not in challenged_lower and bank_assumptions):
+            matched = any(
+                bank_assumption in challenged_lower
+                or challenged_lower in bank_assumption
+                for bank_assumption in bank_assumptions
+            )
+            # allow labels like "Assumption 1"
+            has_assumption_number = "assumption " in challenged_lower
+
+            if not matched and not has_assumption_number:
+                warnings.append(
+                    f"Idea {idx}: challenged assumption may not come from the assumption bank: "
+                    f"{challenged}"
+                )
+    
+    return warnings
+
+
 def extract_json_old(text):
     match = re.search(
         r"\{.*\}",
