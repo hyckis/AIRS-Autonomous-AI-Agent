@@ -300,19 +300,41 @@ if "baseline" in st.session_state:
         },
     ])
     st.dataframe(diversity_df, use_container_width=True)
-    diversity_chart_df = diversity_df.set_index("Arm")[
-        ["vendi_score", "mean_pairwise_distance", "distinct_2"]
-    ]
+    diversity_chart_df = diversity_df.set_index("Arm")[[
+        "vendi_score", 
+        "core_concept_vendi_score",
+        "mean_pairwise_distance", 
+        "distinct_2"
+    ]]
     st.bar_chart(diversity_chart_df)
     st.caption(
         "Vendi Score estimates the effective number of distinct ideas. "
+        "Core Concept Vendi Score recomputes diversity after extracting each idea's title/description-level core concept, "
         "Mean pairwise distance measures semantic spread in embedding space. "
         "Distinct-2 measures lexical diversity. Higher values generally indicate greater diversity. "
         "Self-BLEU is shown in the table; lower Self-BLEU indicates less repetition."
     )
 
-    st.subheader("Literature-Grounded Metrics")
+    with st.expander("Extracted Core Concepts"):
+        selected_core_arm = st.selectbox(
+        "Select arm for core concepts",
+        ["A: Naive LLM", "B: Strong Prompt", "C: Lens Agent"],
+        key="core_concept_arm",
+    )
 
+    if selected_core_arm == "A: Naive LLM":
+        core_concepts = baseline_diversity.get("core_concepts", [])
+    elif selected_core_arm == "B: Strong Prompt":
+        core_concepts = strong_diversity.get("core_concepts", [])
+    else:
+        core_concepts = expanded_diversity.get("core_concepts", [])
+
+    for i, concept in enumerate(core_concepts, start=1):
+        st.markdown(f"**Core concept {i}**")
+        st.write(concept)
+
+
+    st.subheader("Literature-Grounded Metrics")
     literature_metric_df = pd.DataFrame([
         {
             "Arm": "A: Naive LLM",

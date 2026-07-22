@@ -1,13 +1,18 @@
 import re
 import json
 import numpy as np
-from util import extract_json
+from util import (
+    extract_json,
+    extract_idea_title,
+    normalize_idea_scores,
+)
 from llm_backend import call_llm
 from prompts_evaluator import (
     evaluate_with_llm_prompt,
     evaluate_cognitive_diversity_prompt,
 )
 from assumption_bank import format_assumption_bank_for_prompt
+from pairwise_tournament import run_usefulness_pairwise
 
 SCORE_METRICS = [
     "novelty",
@@ -40,7 +45,14 @@ def evaluate_with_llm(topic, response_text, ideas=None, assumption_bank=None, ba
     """
     if ideas is None: ideas = [response_text] if response_text else []
     bank_text = format_assumption_bank_for_prompt(assumption_bank)
-    prompt = evaluate_with_llm_prompt(topic, bank_text, ideas, response_text)
+    idea_payloads = []
+    for i, idea in enumerate(ideas, start=1):
+        idea_payloads.append({
+            "idea_index": i,
+            "idea_title": extract_idea_title(idea),
+            "idea_text": idea,
+        })
+    prompt = evaluate_with_llm_prompt(topic, bank_text, idea_payloads)
     
     raw_result = call_llm(
         prompt,
@@ -126,19 +138,72 @@ def evaluate_output(topic, response_text, ideas=None, assumption_bank=None, back
     """
     Combined evaluation
     1: LLM as a judge
-    2: Simple non LLM diagnostic metrics
+    2. Pairwise usefulness tournament
+    3: Simple non LLM diagnostic metrics
     """
+    if ideas is None: ideas = []
+    if assumption_bank is None: assumption_bank = []
+
+    # LLM as a judge evaluation
     llm_scores = evaluate_with_llm(
         topic=topic,
         response_text=response_text,
         ideas=ideas,
         assumption_bank=assumption_bank,
         backend=backend,
-        model=model
+        model=model,
     )
 
-    simple_metrics = compute_simple_metrics(response_text)
+    # Add idea_title and normalize assumption_id/challenged_assumption
+    llm_scores = normalize_idea_scores(
+        llm_scores=llm_scores,
+        ideas=ideas,
+        assumption_bank=assumption_bank,
+    )
 
+    # Pairwise tournament - usefulness
+    pairwise_usefulness = run_usefulness_pairwise(
+        topic=topic,
+        ideas=ideas,
+        backend=backend,
+        model=model,
+    )
+
+    pairwise_by_index = {
+        item["idea_index"]: item
+        for item in pairwise_usefulness["idea_scores"]
+    }
+
+    for item in llm_scores.get("idea_scores", []):
+        idx = item.get("idea_index")
+        pairwise_item = pairwise_by_index.get(idx)
+
+        if pairwise_item:
+            # keep original llm absolute usefulness score
+            item["usefulness_llm"] = item.get("usefulness", 0)
+            # add pairwise fields
+            item["usefulness_pairwise"] = pairwise_item["usefulness_pairwise"]
+            item["usefulness_win_rate"] = pairwise_item["usefulness_win_rate"]
+            # replace original usefulness score with pairwise score
+            item["usefulness"] = pairwise_item["usefulness_pairwise"]
+
+    llm_scores["usefulness_pairwise_comparisons"] = pairwise_usefulness.get(
+        "comparisons", [],
+    )
+
+    # Recompute average scores from normalized per-idea scores
+    idea_scores = llm_scores.get("idea_scores", [])
+
+    for metric in SCORE_METRICS: 
+        values = []
+        for item in idea_scores:
+            try: values.append(float(item.get(metric, 0)))
+            except Exception: pass
+        llm_scores[metric] = round(sum(values) / len(values), 3) if values else 0
+
+    # simple non llm diagnostics
+    simple_metrics = compute_simple_metrics(response_text)
+    
     return {
         "llm_scores": llm_scores,
         "simple_metrics": simple_metrics

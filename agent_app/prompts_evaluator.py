@@ -41,24 +41,31 @@ Requirements:
 
 Output must be exactly one JSON.
 Return exactly this JSON structure: 
-{{ 
-    "assumptions": [ 
-        {{ 
-            "assumption": "A short, named statement of the dominant assumption.", 
-            "challenge_criteria": "What a research direction would need to do to genuinely challenge this assumption, as opposed to just varying its implementation." 
-        }} 
-    ] 
-}} 
+{{
+  "assumptions": [
+    {{
+      "id": 1,
+      "assumption": "A short statement of the dominant assumption.",
+      "challenge_criteria": "What a research direction would need to do to genuinely challenge this assumption."
+    }},
+    {{
+      "id": 2,
+      "assumption": "A short statement of another dominant assumption.",
+      "challenge_criteria": "What a research direction would need to do to genuinely challenge this assumption."
+    }}
+  ]
+}}
 
 Do not include markdown.
 Do not wrap the JSON in ```json.
 Do not include explanations outside the JSON.
 """ 
 
-def evaluate_with_llm_prompt(topic, bank_text, ideas, response_text):
+def evaluate_with_llm_prompt(topic, bank_text, idea_payloads):
     return f"""
 You are a strict JSON-only evaluation engine.
-Evaluate the research-agent output below.
+
+Evaluate each research idea below using the provided topic-level assumption bank.
 
 Return ONLY one valid JSON object.
 Do not include markdown.
@@ -68,26 +75,14 @@ Do not include explanations outside the JSON.
 Topic:
 {topic}
 
-Pre-identified dominant assumptions in this field 
-(use these as your primary reference; only identify a new assumption if none of these apply):
+Pre-identified dominant assumptions:
+Use these assumptions as the primary reference for assumption_challenge scoring.
+Only use assumption_id = null if none of the listed assumptions clearly apply.
+
 {bank_text}
 
-Ideas:
-{json.dumps(ideas, ensure_ascii=False, indent=2)}
-
-Use a 1-5 scale for each metric.
-
-Metric definitions:
-    - novelty: Are the research directions original, non-obvious, or unexpected?
-    - diversity: Does the output explore multiple distinct perspectives, stakeholders, methods, or assumptions?
-    - usefulness: Are the ideas relevant and potentially valuable for research planning?
-    - assumption_challenge: Does the output challenge dominant assumptions instead of simply extending mainstream ideas?
-
-Topic:
-{topic}
-
-Research-agent output:
-{response_text}
+Ideas to evaluate:
+{json.dumps(idea_payloads, ensure_ascii=False, indent=2)}
 
 Use a 1-5 scale for each metric.
 
@@ -118,35 +113,42 @@ How useful, researchable, and valuable is this idea for research planning?
 5 = highly valuable, feasible, and researchable
 
 4. assumption_challenge:
-First, decide which assumption from the list above (if any) this idea relates to. 
-Then judge how strongly it challenges that assumption according to its stated challenge_criteria. 
+First, identify which assumption from the assumption bank the idea challenges.
+Then judge how strongly the idea challenges that assumption according to the assumption's challenge_criteria.
 
-1 = conformist; accepts the assumption 
-2 = surface variation; changes implementation but the assumption from the bank still holds 
-3 = partial challenge; meets the challenge_criteria for a secondary aspect of the assumption 
-4 = strong challenge; meets the challenge_criteria for a core aspect 
-5 = core premise reversal; the challenge_criteria is fully met and the assumption no longer holds if this idea is adopted 
+1 = conformist; accepts the dominant assumption
+2 = surface variation; changes implementation but the dominant assumption still holds
+3 = partial challenge; challenges a secondary aspect of the assumption
+4 = strong challenge; challenges a core aspect of the assumption
+5 = core premise reversal; the assumption would no longer hold if this idea were adopted
 
-Do not give a score of 4 or 5 unless the idea's challenged_assumption field names 
-one of the assumptions listed above (or explicitly explains why none apply), 
-AND meets that assumption's stated challenge_criteria. 
+Rules for assumption_id:
+- assumption_id must be one of the IDs from the assumption bank.
+- If no listed assumption is clearly challenged, set assumption_id to null.
+- If assumption_id is null, challenged_assumption must be "No specific assumption directly addressed".
+- If assumption_id is null, assumption_challenge must be 1 or 2.
+- Do not assign assumption_challenge >= 3 unless the idea clearly challenges one listed assumption.
+- Do not assign assumption_challenge >= 4 unless the idea directly reverses, undermines, or reframes a core part of one listed assumption.
+- idea_title must copy the provided idea_title exactly.
 
-Return exactly this JSON structure: 
-{{ 
-    "idea_scores": [ 
-    {{ 
-        "idea_index": 1, 
-        "novelty": 1, 
-        "diversity": 1, 
-        "usefulness": 1, 
-        "assumption_challenge": 1, 
-        "challenged_assumption": "...", 
-        "rationale": "One short explanation referencing the challenge_criteria." 
-    }} 
-    ], 
-    "summary": "..." 
+Return exactly this JSON structure:
+
+{{
+  "idea_scores": [
+    {{
+      "idea_index": 1,
+      "idea_title": "copy the provided idea_title exactly",
+      "assumption_id": 1,
+      "challenged_assumption": "copy the matched assumption text, or 'No specific assumption directly addressed'",
+      "novelty": 1,
+      "diversity": 1,
+      "usefulness": 1,
+      "assumption_challenge": 1,
+      "rationale": "One short explanation referencing the matched assumption and challenge_criteria."
+    }}
+  ],
+  "summary": "One short summary of the evaluation."
 }}
-
         """
 
 
@@ -202,3 +204,42 @@ Return only valid JSON:
       "summary": ""
     }}
     """
+
+def pairwise_usefulness_prompt(topic, idea_a, idea_b):
+    return f"""
+You are evaluating research idea usefulness.
+
+Topic:
+{topic}
+
+Compare the two research ideas below.
+
+Usefulness means:
+- relevant to the research topic
+- feasible to investigate
+- clear enough to guide research planning
+- likely to produce meaningful findings
+- not merely interesting but difficult to operationalize
+
+Idea A:
+{idea_a}
+
+Idea B:
+{idea_b}
+
+Choose which idea is more useful for research planning.
+
+Return ONLY valid JSON.
+Do not include markdown.
+Do not wrap the JSON in ```json.
+
+Return exactly this structure:
+{{
+  "winner": "A",
+  "reason": "One short explanation."
+}}
+
+Rules:
+- winner must be "A", "B", or "Tie".
+- Choose "Tie" only if both ideas are similarly useful.
+"""

@@ -61,3 +61,52 @@ def extract_idea_title(idea_text, max_words=14):
     # case 3: fallback
     words = text.split()
     return " ".join(words[:max_words]) + ("..." if len(words) > max_words else "")
+
+def normalize_idea_scores(llm_scores, ideas, assumption_bank):
+    """
+    Add idea_title and normalize assumption_id / challenged_assumption.
+    """
+    if ideas is None: ideas = []
+    if assumption_bank is None: assumption_bank = []
+
+    raw_idea_scores = llm_scores.get("idea_scores", [])
+    normalized_scores = []
+    valid_assumption_ids = set(range(1, len(assumption_bank) + 1))
+
+    for i, idea in enumerate(ideas, start=1):
+        # try to align by position
+        item = raw_idea_scores[i - 1] if i - 1 < len(raw_idea_scores) else {}
+        if not isinstance(item, dict): item = {}
+        idea_title = item.get("idea_title") or extract_idea_title(idea)
+
+        try: assumption_id = int(assumption_id) if assumption_id is not None else None
+        except Exception: assumption_id = None
+
+        if assumption_id not in valid_assumption_ids: assumption_id = None
+        if assumption_id is None: 
+            challenged_assumption = item.get(
+                "challenged_assumption",
+                "No specific assumption directly addressed",
+            )
+            if not challenged_assumption:
+                challenged_assumption = "No specific assumption directly addressed"
+        else:
+            challenged_assumption = item.get(
+                "challenged_assumption",
+                "No specific assumption directly addressed",
+            )
+
+        normalized_scores.append({
+            "idea_index": item.get("idea_index", i),
+            "idea_title": idea_title,
+            "assumption_id": assumption_id,
+            "challenged_assumption": challenged_assumption,
+            "rationale": item.get("rationale", ""),
+            "novelty": item.get("novelty", 0),
+            "diversity": item.get("diversity", 0),
+            "usefulness": item.get("usefulness", 0),
+            "assumption_challenge": item.get("assumption_challenge", 0),
+        })
+
+        llm_scores["idea_scores"] = normalized_scores
+        return llm_scores
