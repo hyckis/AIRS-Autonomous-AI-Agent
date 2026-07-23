@@ -18,11 +18,36 @@ def split_ideas(text):
     Works with numbered lists, bullet lists, or paragraphs.
     """
     text = text.strip()
+    # "research direction #"
+    text = re.sub(r"(?<!\n)(Research Direction\s*\d+\s*:)", r"\n\1", text, flags=re.IGNORECASE,)
     text = re.sub(r"(?<!\n)(\d+\.\s*Title:)", r"\n\1", text)
-    text = re.sub(r"^Okay,[\s\S]*?(?=\n\s*1\.\s*Title:|\n\s*Title:|\n\s*\d+[\).\s]+)", "", text, flags=re.IGNORECASE)
+    text = re.sub(r"^Okay,[\s\S]*?(?=\n\s*1\.\s*Title:|\n\s*Title:|\n\s*Research Direction\s*\d+\s*:|\n\s*\d+[\).\s]+)", "", text, flags=re.IGNORECASE)
     text = re.sub(r"\n?(I believe these directions|Do you want me|Would you like me)[\s\S]*$", "", text, flags=re.IGNORECASE)
 
     ideas = []
+
+    # case 0: arm c nested format
+    rd_pattern = (
+        r"(?:^|\n)\s*Research Direction\s+\d+\s*:?\s*"
+        r"([\s\S]*?)(?=\n\s*Research Direction\s*\d+\s*:|\Z)"
+    )
+    rd_matches = re.findall(rd_pattern, text, flags=re.IGNORECASE)
+    if rd_matches:
+        for match in rd_matches:
+            idea = match.strip()
+            # remove internal numbering from fields
+            idea = re.sub(
+                r"(?:^|\n)\s*\d+[\).\s]+(?=(Title|Description|Challenges|Challenge|Preserves|Supporting|Support|Speculative|Evidence|Rationale|Method|Evaluation)\b)", 
+                r"\n", idea, flags=re.IGNORECASE,
+            )
+            idea = re.sub(r"http\S+", "", idea)
+            idea = re.sub(r"\s+", " ", idea).strip()
+            if len(idea.split()) >= 8: ideas.append(idea)
+
+        return ideas
+
+    # only normalize numbered title format after research direction parsing
+    text = re.sub(r"(?:^|\n)(\d+\.\s*Title:)", r"\n\1", text, flags=re.IGNORECASE,)
 
     # case 1: lens agent format "1. Title: ..."
     pattern = r"(?:^|\n)\s*\d+\.\s*Title:\s*([\s\S]*?)(?=\n\s*\d+\.\s*Title:|\Z)"

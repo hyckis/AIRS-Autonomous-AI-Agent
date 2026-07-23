@@ -127,7 +127,6 @@ if st.button("Run Agent Comparison"):
     
     with st.spinner("Building assumption bank..."):
         assumption_bank = generate_assumption_bank(topic, critique)
-        print(type(assumption_bank), assumption_bank)
 
     with st.spinner("Retrieving literature from arXiv..."):
         literature = retrieve_literature(
@@ -277,8 +276,7 @@ if "baseline" in st.session_state:
     st.info(human_question)
 
     with st.expander("Assumption Bank (shared across all arms)"):
-        print("assumption_bank:", assumption_bank)
-        print(type(assumption_bank))
+        print(f"assumption_bank {assumption_bank[0]["id"]}:", assumption_bank)
         if not assumption_bank: st.markdown("No assumption bank generated or parsing failed.")
         for item in assumption_bank:
             st.markdown(f"**{item['assumption']}**")
@@ -322,16 +320,16 @@ if "baseline" in st.session_state:
         key="core_concept_arm",
     )
 
-    if selected_core_arm == "A: Naive LLM":
-        core_concepts = baseline_diversity.get("core_concepts", [])
-    elif selected_core_arm == "B: Strong Prompt":
-        core_concepts = strong_diversity.get("core_concepts", [])
-    else:
-        core_concepts = expanded_diversity.get("core_concepts", [])
+        if selected_core_arm == "A: Naive LLM":
+            core_concepts = baseline_diversity.get("core_concepts", [])
+        elif selected_core_arm == "B: Strong Prompt":
+            core_concepts = strong_diversity.get("core_concepts", [])
+        else:
+            core_concepts = expanded_diversity.get("core_concepts", [])
 
-    for i, concept in enumerate(core_concepts, start=1):
-        st.markdown(f"**Core concept {i}**")
-        st.write(concept)
+        for i, concept in enumerate(core_concepts, start=1):
+            st.markdown(f"**Core concept {i}**")
+            st.write(concept)
 
 
     st.subheader("Literature-Grounded Metrics")

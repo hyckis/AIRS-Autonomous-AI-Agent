@@ -203,6 +203,11 @@ def evaluate_output(topic, response_text, ideas=None, assumption_bank=None, back
 
     # simple non llm diagnostics
     simple_metrics = compute_simple_metrics(response_text)
+
+    print("DEBUG: ideas len = ", len(ideas))
+    print("DEBUG: raw idea scores len = ", len(llm_scores.get("idea_scores", [])))
+    print("DEBUG: raw idea scores = ", llm_scores.get("idea_scores", []))
+    print("DEBUG normalized idea scores len = ", len(llm_scores.get("idea_scores", [])))
     
     return {
         "llm_scores": llm_scores,
