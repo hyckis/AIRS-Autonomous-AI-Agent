@@ -1,17 +1,17 @@
 import re
 import json
 import numpy as np
-from util import (
-    extract_json,
-    extract_idea_title,
-    normalize_idea_scores,
-)
+from util import extract_json
 from llm_backend import call_llm
 from prompts_evaluator import (
     evaluate_with_llm_prompt,
     evaluate_cognitive_diversity_prompt,
 )
-from assumption_bank import format_assumption_bank_for_prompt
+from assumption_bank import (
+    format_assumption_bank_for_prompt,
+    extract_idea_title,
+    normalize_idea_scores,
+)
 from pairwise_tournament import run_usefulness_pairwise
 
 SCORE_METRICS = [
@@ -69,6 +69,8 @@ def evaluate_with_llm(topic, response_text, ideas=None, assumption_bank=None, ba
         for item in idea_scores:
             cleaned = {
                 "idea_index": item.get("idea_index", len(cleaned_idea_scores) + 1),
+                "idea_title": item.get("idea_title", ""),
+                "assumption_id": item.get("assumption_id", None),
                 #"default_assumption": item.get("default_assumption", ""),
                 "challenged_assumption": item.get("challenged_assumption", ""),
                 "rationale": item.get("rationale", ""),
@@ -208,7 +210,7 @@ def evaluate_output(topic, response_text, ideas=None, assumption_bank=None, back
     print("DEBUG: raw idea scores len = ", len(llm_scores.get("idea_scores", [])))
     print("DEBUG: raw idea scores = ", llm_scores.get("idea_scores", []))
     print("DEBUG normalized idea scores len = ", len(llm_scores.get("idea_scores", [])))
-    
+
     return {
         "llm_scores": llm_scores,
         "simple_metrics": simple_metrics

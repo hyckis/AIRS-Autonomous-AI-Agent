@@ -243,3 +243,146 @@ Rules:
 - winner must be "A", "B", or "Tie".
 - Choose "Tie" only if both ideas are similarly useful.
 """
+
+# for multi-agent debate
+def advocate_prompt(topic, idea_text, assumption_item):
+    return f"""
+You are the Advocate in a research evaluation debate.
+
+Your role:
+Argue that the research idea genuinely challenges the given dominant assumption.
+
+Topic:
+{topic}
+
+Research idea:
+{idea_text}
+
+Dominant assumption:
+{assumption_item.get("assumption", "")}
+
+Challenge criteria:
+{assumption_item.get("challenge_criteria", "")}
+
+Task:
+Explain the strongest case that this idea satisfies the challenge criteria.
+
+Return ONLY valid JSON.
+Do not include markdown.
+
+Return exactly:
+{{
+  "advocate_argument": "A concise argument for why the idea challenges the assumption.",
+  "criteria_met": "Which part of the challenge criteria is met.",
+  "suggested_score": 1
+}}
+
+Score guide:
+1 = does not challenge the assumption
+2 = surface variation
+3 = partial challenge
+4 = strong challenge
+5 = core premise reversal
+"""
+
+
+def skeptic_prompt(topic, idea_text, assumption_item, advocate_argument):
+    return f"""
+You are the Skeptic in a research evaluation debate.
+
+Your role:
+Critically examine whether the research idea actually challenges the dominant assumption,
+or whether it only changes implementation details while preserving the assumption.
+
+Topic:
+{topic}
+
+Research idea:
+{idea_text}
+
+Dominant assumption:
+{assumption_item.get("assumption", "")}
+
+Challenge criteria:
+{assumption_item.get("challenge_criteria", "")}
+
+Advocate argument:
+{advocate_argument}
+
+Task:
+Identify the strongest reason this idea may NOT genuinely satisfy the challenge criteria.
+
+Return ONLY valid JSON.
+Do not include markdown.
+
+Return exactly:
+{{
+  "skeptic_argument": "A concise critique of the advocate's claim.",
+  "criteria_gap": "Which part of the challenge criteria is missing or weak.",
+  "suggested_score": 1
+}}
+
+Score guide:
+1 = does not challenge the assumption
+2 = surface variation
+3 = partial challenge
+4 = strong challenge
+5 = core premise reversal
+"""
+
+
+def judge_prompt(topic, idea_text, assumption_item, advocate_result, skeptic_result):
+    return f"""
+You are the Judge in a research evaluation debate.
+
+Your role:
+Decide the final assumption_challenge score based on:
+- the research idea,
+- the dominant assumption,
+- the challenge criteria,
+- the Advocate's argument,
+- the Skeptic's critique.
+
+Topic:
+{topic}
+
+Research idea:
+{idea_text}
+
+Dominant assumption:
+{assumption_item.get("assumption", "")}
+
+Challenge criteria:
+{assumption_item.get("challenge_criteria", "")}
+
+Advocate result:
+{advocate_result}
+
+Skeptic result:
+{skeptic_result}
+
+Scoring rubric:
+1 = conformist; accepts the dominant assumption
+2 = surface variation; changes implementation but the dominant assumption still holds
+3 = partial challenge; challenges a secondary aspect of the assumption
+4 = strong challenge; challenges a core aspect of the assumption
+5 = core premise reversal; the assumption would no longer hold if this idea were adopted
+
+Important rules:
+- Do not give 4 or 5 unless the idea clearly satisfies the challenge criteria.
+- Do not give 5 unless the idea reverses or invalidates the core premise of the assumption.
+- If the idea is interesting but does not challenge the assumption itself, give 1 or 2.
+- If the idea only improves, optimizes, or implements the assumption differently, give 2.
+
+Return ONLY valid JSON.
+Do not include markdown.
+
+Return exactly:
+{{
+  "assumption_challenge": 1,
+  "final_decision": "A concise explanation of the final score.",
+  "advocate_validity": "How convincing the advocate was.",
+  "skeptic_validity": "How convincing the skeptic was.",
+  "confidence": 0.0
+}}
+"""

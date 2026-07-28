@@ -423,7 +423,7 @@ if "baseline" in st.session_state:
         else:
             st.warning("No per-idea LLM judge details available.")
 
-    st.subheader("Evalutor Sanity Check")
+    st.subheader("Evaluator Sanity Check")
     eval_dfs = {
         "A: Naive LLM": pd.DataFrame(baseline_eval["llm_scores"].get("idea_scores", [])),
         "B: Strong Prompt": pd.DataFrame(strong_eval["llm_scores"].get("idea_scores", [])),
@@ -442,7 +442,7 @@ if "baseline" in st.session_state:
         )
         with st.expander(f"{arm_name} sanity check"):
             st.write(f"Expected ideas: {expected_counts[arm_name]}")
-            st.write(f"Evalutated ideas: {len(eval_df)}")
+            st.write(f"Evaluated ideas: {len(eval_df)}")
 
             if warnings:
                 st.warning(f"{len(warnings)} potential evaluator issue(s) found.")
