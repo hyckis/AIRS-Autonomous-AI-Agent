@@ -45,12 +45,11 @@ Use these lenses:
 Generate 8 alternative research directions.
 
 For each direction, include:
-    1. Title
-    2. Short description
-    3. Which dominant assumption it challenges
-    4. Why it preserves cognitive diversity
-    5. Supporting papers (cite title and URL from the retrieved literature above),
-       or label as "speculative extension" if not directly supported by a retrieved paper
+    Title
+    Short description
+    Which dominant assumption it challenges
+    Why it preserves cognitive diversity
+    Supporting papers (cite title and URL from the retrieved literature above), or label as "speculative extension" if not directly supported by a retrieved paper
 
 Only cite papers from the retrieved literature list. Do not invent citations.
     """

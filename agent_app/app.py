@@ -14,6 +14,7 @@ from agents import (
 from evaluator import (
     # evaluate_cognitive_diversity,
     evaluate_output,
+    audit_evaluation_results,
     SCORE_METRICS
 )
 from diversity_metrics import evaluate_idea_set_diversity
@@ -40,6 +41,12 @@ use_llm_queries = st.checkbox(
         "When enabled, Ollama/OpenAI generates search queries. "
         "If that fails, the app falls back to topic-based queries automatically."
     ),
+)
+
+# multi agent debate for challenge assumption
+run_debate = st.checkbox(
+    "Run multi-agent debate for assumption challenge",
+    value=False,
 )
 
 paper_limit = st.slider("Number of papers to retrieve", min_value=3, max_value=10, value=5)
@@ -126,7 +133,6 @@ if st.button("Run Agent Comparison"):
     
     with st.spinner("Building assumption bank..."):
         assumption_bank = generate_assumption_bank(topic, critique)
-        print(type(assumption_bank), assumption_bank)
 
     with st.spinner("Retrieving literature from arXiv..."):
         literature = retrieve_literature(
@@ -173,6 +179,7 @@ if st.button("Run Agent Comparison"):
             assumption_bank=assumption_bank,
             backend="local_ollama",
             model=None,
+            run_debate=False,
         )
         strong_eval = evaluate_output(
             topic=topic,
@@ -181,6 +188,7 @@ if st.button("Run Agent Comparison"):
             assumption_bank=assumption_bank,
             backend="local_ollama",
             model=None,
+            run_debate=False,
         )
         expanded_eval = evaluate_output(
             topic=topic,
@@ -189,6 +197,7 @@ if st.button("Run Agent Comparison"):
             assumption_bank=assumption_bank,
             backend="local_ollama",
             model=None,
+            run_debate=run_debate,
         )
     
     st.session_state["baseline"] = baseline
@@ -276,8 +285,7 @@ if "baseline" in st.session_state:
     st.info(human_question)
 
     with st.expander("Assumption Bank (shared across all arms)"):
-        print("assumption_bank:", assumption_bank)
-        print(type(assumption_bank))
+        print(f"assumption_bank {assumption_bank[0]["id"]}:", assumption_bank)
         if not assumption_bank: st.markdown("No assumption bank generated or parsing failed.")
         for item in assumption_bank:
             st.markdown(f"**{item['assumption']}**")
@@ -299,19 +307,41 @@ if "baseline" in st.session_state:
         },
     ])
     st.dataframe(diversity_df, use_container_width=True)
-    diversity_chart_df = diversity_df.set_index("Arm")[
-        ["vendi_score", "mean_pairwise_distance", "distinct_2"]
-    ]
+    diversity_chart_df = diversity_df.set_index("Arm")[[
+        "vendi_score", 
+        "core_concept_vendi_score",
+        "mean_pairwise_distance", 
+        "distinct_2"
+    ]]
     st.bar_chart(diversity_chart_df)
     st.caption(
         "Vendi Score estimates the effective number of distinct ideas. "
+        "Core Concept Vendi Score recomputes diversity after extracting each idea's title/description-level core concept, "
         "Mean pairwise distance measures semantic spread in embedding space. "
         "Distinct-2 measures lexical diversity. Higher values generally indicate greater diversity. "
         "Self-BLEU is shown in the table; lower Self-BLEU indicates less repetition."
     )
 
-    st.subheader("Literature-Grounded Metrics")
+    with st.expander("Extracted Core Concepts"):
+        selected_core_arm = st.selectbox(
+        "Select arm for core concepts",
+        ["A: Naive LLM", "B: Strong Prompt", "C: Lens Agent"],
+        key="core_concept_arm",
+    )
 
+        if selected_core_arm == "A: Naive LLM":
+            core_concepts = baseline_diversity.get("core_concepts", [])
+        elif selected_core_arm == "B: Strong Prompt":
+            core_concepts = strong_diversity.get("core_concepts", [])
+        else:
+            core_concepts = expanded_diversity.get("core_concepts", [])
+
+        for i, concept in enumerate(core_concepts, start=1):
+            st.markdown(f"**Core concept {i}**")
+            st.write(concept)
+
+
+    st.subheader("Literature-Grounded Metrics")
     literature_metric_df = pd.DataFrame([
         {
             "Arm": "A: Naive LLM",
@@ -402,6 +432,31 @@ if "baseline" in st.session_state:
         else:
             st.warning("No per-idea LLM judge details available.")
 
+    st.subheader("Evaluator Sanity Check")
+    eval_dfs = {
+        "A: Naive LLM": pd.DataFrame(baseline_eval["llm_scores"].get("idea_scores", [])),
+        "B: Strong Prompt": pd.DataFrame(strong_eval["llm_scores"].get("idea_scores", [])),
+        "C: Lens Agent": pd.DataFrame(expanded_eval["llm_scores"].get("idea_scores", [])),
+    }
+    expected_counts = {
+        "A: Naive LLM": len(baseline_diversity.get("ideas", [])),
+        "B: Strong Prompt": len(strong_diversity.get("ideas", [])),
+        "C: Lens Agent": len(expanded_diversity.get("ideas", [])),
+    }
+    for arm_name, eval_df in eval_dfs.items():
+        warnings = audit_evaluation_results(
+            eval_df=eval_df,
+            assumption_bank=assumption_bank,
+            expected_idea_count=expected_counts[arm_name]
+        )
+        with st.expander(f"{arm_name} sanity check"):
+            st.write(f"Expected ideas: {expected_counts[arm_name]}")
+            st.write(f"Evaluated ideas: {len(eval_df)}")
+
+            if warnings:
+                st.warning(f"{len(warnings)} potential evaluator issue(s) found.")
+                for warning in warnings: st.write("Warning: ", warning)
+            else: st.success("No obvious evaluator issues found.")
 
     st.subheader("6. Diagnostic Metrics")
     diagnostic_df = pd.DataFrame({
@@ -469,7 +524,7 @@ if "baseline" in st.session_state:
         "Human Diversity Score",
         "Vendi Score",
     ]]
-    st.bar_chart(human_diversity_df)
+    st.bar_chart(human_chart_df)
     
     # human_expanded_scores = human_evaluation_widget(
     #     "Human Evaluation: Diversity-Preserving Agent",

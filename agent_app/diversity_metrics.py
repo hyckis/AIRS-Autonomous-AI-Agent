@@ -18,11 +18,36 @@ def split_ideas(text):
     Works with numbered lists, bullet lists, or paragraphs.
     """
     text = text.strip()
+    # "research direction #"
+    text = re.sub(r"(?<!\n)(Research Direction\s*\d+\s*:)", r"\n\1", text, flags=re.IGNORECASE,)
     text = re.sub(r"(?<!\n)(\d+\.\s*Title:)", r"\n\1", text)
-    text = re.sub(r"^Okay,[\s\S]*?(?=\n\s*1\.\s*Title:|\n\s*Title:|\n\s*\d+[\).\s]+)", "", text, flags=re.IGNORECASE)
+    text = re.sub(r"^Okay,[\s\S]*?(?=\n\s*1\.\s*Title:|\n\s*Title:|\n\s*Research Direction\s*\d+\s*:|\n\s*\d+[\).\s]+)", "", text, flags=re.IGNORECASE)
     text = re.sub(r"\n?(I believe these directions|Do you want me|Would you like me)[\s\S]*$", "", text, flags=re.IGNORECASE)
 
     ideas = []
+
+    # case 0: arm c nested format
+    rd_pattern = (
+        r"(?:^|\n)\s*Research Direction\s+\d+\s*:?\s*"
+        r"([\s\S]*?)(?=\n\s*Research Direction\s*\d+\s*:|\Z)"
+    )
+    rd_matches = re.findall(rd_pattern, text, flags=re.IGNORECASE)
+    if rd_matches:
+        for match in rd_matches:
+            idea = match.strip()
+            # remove internal numbering from fields
+            idea = re.sub(
+                r"(?:^|\n)\s*\d+[\).\s]+(?=(Title|Description|Challenges|Challenge|Preserves|Supporting|Support|Speculative|Evidence|Rationale|Method|Evaluation)\b)", 
+                r"\n", idea, flags=re.IGNORECASE,
+            )
+            idea = re.sub(r"http\S+", "", idea)
+            idea = re.sub(r"\s+", " ", idea).strip()
+            if len(idea.split()) >= 8: ideas.append(idea)
+
+        return ideas
+
+    # only normalize numbered title format after research direction parsing
+    text = re.sub(r"(?:^|\n)(\d+\.\s*Title:)", r"\n\1", text, flags=re.IGNORECASE,)
 
     # case 1: lens agent format "1. Title: ..."
     pattern = r"(?:^|\n)\s*\d+\.\s*Title:\s*([\s\S]*?)(?=\n\s*\d+\.\s*Title:|\Z)"
@@ -80,8 +105,8 @@ def split_ideas(text):
             current_idea = []
 
     for line in lines:
-        # line = line.strip()
-        # if not line: continue
+        line = line.strip()
+        if not line: continue
 
         lower = line.lower()
         if lower.startswith(metadata_prefixes): 
@@ -125,6 +150,84 @@ def split_ideas(text):
         # ]
     return ideas
 
+def extract_core_concept_text(idea):
+    """
+    Extract the core research concept from an idea block.
+    Removes template/meta fields such as supporting paper, assumption challenge,
+    cognitive diversity preservation, and implementation notes.
+
+    Goal:
+    full idea text -> core concept text for cleaner embedding-based diversity.
+    """
+    if not idea: return ""
+
+    text = re.sub(r"http\S+", "", idea)
+    text = re.sub(r"\s+", " ", text).strip()
+
+    # Remove parenthetical implementation notes that can distort embeddings
+    text = re.sub(
+        r"\([^)]*(LLM strength|Potential Limitation|Potential limitation)[^)]*\)",
+        "",
+        text,
+        flags=re.IGNORECASE,
+    ).strip()
+
+    stop_fields = (
+        "Differentiation",
+        "Challenges Dominant Assumption",
+        "Challenges Assumption",
+        "Preserves Cognitive Diversity",
+        "Cognitive Diversity Preservation",
+        "Supporting Paper",
+        "Speculative Extension",
+        "Evidence",
+        "Rationale",
+        "Method",
+        "Evaluation",
+    )    
+
+    stop_pattern = "|".join(re.escape(field) for field in stop_fields)
+
+    # Case 1: structured format with Title and Description
+    title_match = re.search(
+        rf"\bTitle:\s*(.*?)(?=\s+Description:|\s+(?:{stop_pattern})\s*:|$)",
+        text,
+        flags=re.IGNORECASE,
+    )
+
+    desc_match = re.search(
+        rf"\bDescription:\s*(.*?)(?=\s+(?:{stop_pattern})\s*:|$)",
+        text,
+        flags=re.IGNORECASE,
+    )
+
+    parts = []
+
+    if title_match: parts.append(title_match.group(1).strip())
+    if desc_match: parts.append(desc_match.group(1).strip())
+    if parts:
+        core = " ".join(parts)
+        return re.sub(r"\s+", " ", core).strip()
+    
+    # Case 2: naive format like "Personalized Learning Pathway: Research could..."
+    if ":" in text:
+        heading, body = text.split(":", 1)
+        heading = heading.strip()
+        body = body.strip()
+
+        if 2<= len(heading.split()) <= 16:
+            # Keep heading plus first 1-2 sentences of body
+            sentences = re.split(r"(?<=[.!?])\s+", body)
+            body_summary = " ".join(sentences[:2]).strip()
+            core = f"{heading}: {body_summary}"
+            return re.sub(r"\s+", " ", core).strip()
+    
+    # Case 3: fallback to first 2 sentences
+    sentences = re.split(r"(?<=[.!?])\s+", text)
+    core = " ".join(sentences[:2]).strip()
+
+    return re.sub(r"\s+", " ", core).strip()
+
 def compute_distinct_n(ideas, n=2):
     ngrams = []
     total = 0
@@ -154,50 +257,75 @@ def compute_self_bleu(ideas):
     if not scores: return 0
     return float(np.mean(scores))
 
+def compute_embedding_spread_metrics(texts):
+    """
+    Compute embedding-based diversity metrics for a list of text units.
+    Used by both full ideas and core concepts.
+    """
+    if len(texts) == 0:
+        return {
+            "vendi_score": 0,
+            "mean_pairwise_distance": 0,
+        }
+    
+    if len(texts) == 1:
+        return {
+            "vendi_score": 1,
+            "mean_pairwise_distance": 0,
+        }
+    
+    model = get_embedding_model()
+    X = model.encode(texts)
+
+    vendi_score = float(vendi.score_X(X))
+
+    norms = np.linalg.norm(X, axis=1, keepdims=True)
+    norms[norms == 0] = 1
+    Xn = X / norms
+
+    similarity_matrix = Xn @ Xn.T
+    upper_triangle = np.triu_indices(len(texts), 1)
+
+    mean_pairwise_similarity = similarity_matrix[upper_triangle].mean()
+    mean_pairwise_distance = float(1 - mean_pairwise_similarity)
+
+    return {
+        "vendi_score": round(vendi_score, 3),
+        "mean_pairwise_distance": round(mean_pairwise_distance, 3),
+    }
+
+
 def compute_embedding_diversity_metrics(ideas):
     """
     Computes reference-free, non-LLM diversity metrics for a set of ideas.
+    Includes:
+    - full-text embedding diversity
+    - core-concept embedding diversity
+    - lexical diversity diagnostics
     """
     if len(ideas) == 0:
         return {
             "idea_count": 0,
             "vendi_score": 0,
             "mean_pairwise_distance": 0,
+            "core_concept_vendi_score": 0,
+            "core_concept_mean_pairwise_distance": 0,
             "distinct_1": 0,
             "distinct_2": 0,
             "self_bleu": 0,
         }
     
-    if len(ideas) == 1:
-        return {
-            "idea_count": 1,
-            "vendi_score": 1,
-            "mean_pairwise_distance": 0,
-            "distinct_1": round(compute_distinct_n(ideas, n=1), 3),
-            "distinct_2": round(compute_distinct_n(ideas, n=2), 3),
-            "self_bleu": 0,
-        }
-    # if len(ideas) < 2:
-    #     return {
-    #         "idea_count": len(ideas),
-    #         "vendi_score": 0,
-    #         "mean_pairwise_distance": 0,
-    #         "distinct_1": 0,
-    #         "distinct_2": 0,
-    #         "self_bleu": 0,
-    #     }
-    
-    model = get_embedding_model()
-    X = model.encode(ideas)
-    vendi_score = float(vendi.score_X(X))
-    norms = np.linalg.norm(X, axis=1, keepdims=True)
-    norms[norms==0] = 1
-    Xn = X / norms
-    similarity_matrix = Xn @ Xn.T
+    core_concepts = [
+        extract_core_concept_text(idea) for idea in ideas
+    ]
+    # remove accidental empty core concepts by falling back to original idea
+    core_concepts = [
+        core if core else ideas
+        for core, idea in zip(core_concepts, ideas)
+    ]
 
-    upper_triangle = np.triu_indices(len(ideas), 1)
-    mean_pairwise_similarity = similarity_matrix[upper_triangle].mean()
-    mean_pairwise_distance = float(1 - mean_pairwise_similarity)
+    full_embedding_metrics = compute_embedding_spread_metrics(ideas)
+    core_embedding_metrics = compute_embedding_spread_metrics(core_concepts)
 
     distinct_1 = compute_distinct_n(ideas, n=1)
     distinct_2 = compute_distinct_n(ideas, n=2)
@@ -205,8 +333,13 @@ def compute_embedding_diversity_metrics(ideas):
 
     return {
         "idea_count": len(ideas),
-        "vendi_score": round(vendi_score, 3),
-        "mean_pairwise_distance": round(mean_pairwise_distance, 3),
+        # full idea text embedding metrics
+        "vendi_score": full_embedding_metrics["vendi_score"],
+        "mean_pairwise_distance": full_embedding_metrics["mean_pairwise_distance"],
+        # core concept embedding metrics
+        "core_concept_vendi_score": core_embedding_metrics["vendi_score"],
+        "core_concept_mean_pairwise_distance": core_embedding_metrics["mean_pairwise_distance"],
+        # lexical diagnostics
         "distinct_1": round(distinct_1, 3),
         "distinct_2": round(distinct_2, 3),
         "self_bleu": round(self_bleu, 3),
@@ -215,7 +348,16 @@ def compute_embedding_diversity_metrics(ideas):
 def evaluate_idea_set_diversity(output_text):
     ideas = split_ideas(output_text)
     metrics = compute_embedding_diversity_metrics(ideas)
+    core_concepts = [
+        extract_core_concept_text(idea)
+        for idea in ideas
+    ]
+    core_concepts = [
+        core if core else idea
+        for core, idea in zip(core_concepts, ideas)
+    ]
     return {
         "ideas": ideas,
         "metrics": metrics,
+        "core_concepts": core_concepts,
     }

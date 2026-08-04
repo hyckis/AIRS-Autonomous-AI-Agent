@@ -7,7 +7,13 @@ from prompts_evaluator import (
     evaluate_with_llm_prompt,
     evaluate_cognitive_diversity_prompt,
 )
-from assumption_bank import format_assumption_bank_for_prompt
+from assumption_bank import (
+    format_assumption_bank_for_prompt,
+    extract_idea_title,
+    normalize_idea_scores,
+)
+from pairwise_tournament import run_usefulness_pairwise
+from debate_evaluator import apply_assumption_debate_to_scores
 
 SCORE_METRICS = [
     "novelty",
@@ -40,7 +46,14 @@ def evaluate_with_llm(topic, response_text, ideas=None, assumption_bank=None, ba
     """
     if ideas is None: ideas = [response_text] if response_text else []
     bank_text = format_assumption_bank_for_prompt(assumption_bank)
-    prompt = evaluate_with_llm_prompt(topic, bank_text, ideas, response_text)
+    idea_payloads = []
+    for i, idea in enumerate(ideas, start=1):
+        idea_payloads.append({
+            "idea_index": i,
+            "idea_title": extract_idea_title(idea),
+            "idea_text": idea,
+        })
+    prompt = evaluate_with_llm_prompt(topic, bank_text, idea_payloads)
     
     raw_result = call_llm(
         prompt,
@@ -57,6 +70,8 @@ def evaluate_with_llm(topic, response_text, ideas=None, assumption_bank=None, ba
         for item in idea_scores:
             cleaned = {
                 "idea_index": item.get("idea_index", len(cleaned_idea_scores) + 1),
+                "idea_title": item.get("idea_title", ""),
+                "assumption_id": item.get("assumption_id", None),
                 #"default_assumption": item.get("default_assumption", ""),
                 "challenged_assumption": item.get("challenged_assumption", ""),
                 "rationale": item.get("rationale", ""),
@@ -122,22 +137,99 @@ def compute_simple_metrics(response_text):
         "lens_coverage": lens_coverage,
     }
 
-def evaluate_output(topic, response_text, ideas=None, assumption_bank=None, backend="local_ollama", model=None):
+def evaluate_output(
+        topic, 
+        response_text, 
+        ideas=None, 
+        assumption_bank=None, 
+        backend="local_ollama", 
+        model=None,
+        run_debate=False
+    ):
     """
     Combined evaluation
     1: LLM as a judge
-    2: Simple non LLM diagnostic metrics
+    2. Pairwise usefulness tournament
+    3: Simple non LLM diagnostic metrics
     """
+    if ideas is None: ideas = []
+    if assumption_bank is None: assumption_bank = []
+
+    # LLM as a judge evaluation
     llm_scores = evaluate_with_llm(
         topic=topic,
         response_text=response_text,
         ideas=ideas,
         assumption_bank=assumption_bank,
         backend=backend,
-        model=model
+        model=model,
     )
 
+    # Add idea_title and normalize assumption_id/challenged_assumption
+    llm_scores = normalize_idea_scores(
+        llm_scores=llm_scores,
+        ideas=ideas,
+        assumption_bank=assumption_bank,
+    )
+
+    # multi agent debate for assumption challenge
+    if run_debate: 
+        llm_scores["idea_scores"] = apply_assumption_debate_to_scores(
+            topic=topic,
+            idea_scores=llm_scores.get("idea_scores", []),
+            ideas=ideas,
+            assumption_bank=assumption_bank,
+            backend=backend,
+            model=model,
+        )
+
+    # Pairwise tournament - usefulness
+    pairwise_usefulness = run_usefulness_pairwise(
+        topic=topic,
+        ideas=ideas,
+        backend=backend,
+        model=model,
+    )
+
+    pairwise_by_index = {
+        item["idea_index"]: item
+        for item in pairwise_usefulness["idea_scores"]
+    }
+
+    for item in llm_scores.get("idea_scores", []):
+        idx = item.get("idea_index")
+        pairwise_item = pairwise_by_index.get(idx)
+
+        if pairwise_item:
+            # keep original llm absolute usefulness score
+            item["usefulness_llm"] = item.get("usefulness", 0)
+            # add pairwise fields
+            item["usefulness_pairwise"] = pairwise_item["usefulness_pairwise"]
+            item["usefulness_win_rate"] = pairwise_item["usefulness_win_rate"]
+            # replace original usefulness score with pairwise score
+            item["usefulness"] = pairwise_item["usefulness_pairwise"]
+
+    llm_scores["usefulness_pairwise_comparisons"] = pairwise_usefulness.get(
+        "comparisons", [],
+    )
+
+    # Recompute average scores from normalized per-idea scores
+    idea_scores = llm_scores.get("idea_scores", [])
+
+    for metric in SCORE_METRICS: 
+        values = []
+        for item in idea_scores:
+            try: values.append(float(item.get(metric, 0)))
+            except Exception: pass
+        llm_scores[metric] = round(sum(values) / len(values), 3) if values else 0
+
+    # simple non llm diagnostics
     simple_metrics = compute_simple_metrics(response_text)
+
+    print("DEBUG: ideas len = ", len(ideas))
+    print("DEBUG: raw idea scores len = ", len(llm_scores.get("idea_scores", [])))
+    print("DEBUG: raw idea scores = ", llm_scores.get("idea_scores", []))
+    print("DEBUG normalized idea scores len = ", len(llm_scores.get("idea_scores", [])))
 
     return {
         "llm_scores": llm_scores,
@@ -160,6 +252,74 @@ def evaluate_cognitive_diversity(topic, response_text):
             "assumption_challenge": 0,
             "summary": f"Evaluation parsing failed: {e}. Raw output: {result[:500]}"
         }
+
+def audit_evaluation_results(eval_df, assumption_bank, expected_idea_count=None):
+    """
+    Basic sanity checks for per-idea LLM judge outputs.
+    Returns a list of warnings.
+    """
+    warnings = []
+
+    if eval_df is None or eval_df.empty: return ["Evaluation result is empty"]
+
+    # 1. idea count check
+    idea_count = len(eval_df)
+    if expected_idea_count is not None and idea_count != expected_idea_count: 
+        warnings.append(
+            f"Idea count mismatch: expected {expected_idea_count}, got {idea_count}"
+        )
+
+    # 2. assumption bank usage check
+    bank_assumptions = [
+        item.get("assumption", "").strip().lower()
+        for item in assumption_bank
+        if isinstance(item, dict) and item.get("assumption")
+    ]
+    for _, row in eval_df.iterrows():
+        idx = row.get("idea_index", "unknown")
+        challenged = str(row.get("challenged_assumption", "")).strip()
+        challenged_lower = challenged.lower()
+        score = row.get("assumption_challenge", None)
+        rationale = str(row.get("rationale", "")).lower()
+
+        try: score = float(row.get("assumption_challenge", 0))
+        except Exception: score = 0
+
+        # 3. no assumption but score too high
+        if "no specific assumption" in challenged_lower and score >= 3:
+            warnings.append(
+                f"Idea {idx}: says no specific assumption is addressed,"
+                f"but assumption_challenge score is {score}."
+            )
+
+        # 4. weak rationale but high score
+        weak_words = ["implicitly", "partially", "doesn't directly", 
+                      "does not directly", "indirectly", "not directly",]
+
+        if score >= 4 and any(word in rationale for word in weak_words):
+            warnings.append(
+                f"Idea {idx}: rationale sounds weak/indirect, "
+                f"but assumption_challenge score is high({score})."
+            )
+
+        # 5. check if challenged assumption seems connected to bank
+        if (challenged and "no specific assumption" not in challenged_lower and bank_assumptions):
+            matched = any(
+                bank_assumption in challenged_lower
+                or challenged_lower in bank_assumption
+                for bank_assumption in bank_assumptions
+            )
+            # allow labels like "Assumption 1"
+            has_assumption_number = "assumption " in challenged_lower
+
+            if not matched and not has_assumption_number:
+                warnings.append(
+                    f"Idea {idx}: challenged assumption may not come from the assumption bank: "
+                    f"{challenged}"
+                )
+    
+    return warnings
+
 
 def extract_json_old(text):
     match = re.search(
