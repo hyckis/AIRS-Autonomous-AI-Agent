@@ -13,6 +13,7 @@ from assumption_bank import (
     normalize_idea_scores,
 )
 from pairwise_tournament import run_usefulness_pairwise
+from debate_evaluator import apply_assumption_debate_to_scores
 
 SCORE_METRICS = [
     "novelty",
@@ -136,7 +137,15 @@ def compute_simple_metrics(response_text):
         "lens_coverage": lens_coverage,
     }
 
-def evaluate_output(topic, response_text, ideas=None, assumption_bank=None, backend="local_ollama", model=None):
+def evaluate_output(
+        topic, 
+        response_text, 
+        ideas=None, 
+        assumption_bank=None, 
+        backend="local_ollama", 
+        model=None,
+        run_debate=False
+    ):
     """
     Combined evaluation
     1: LLM as a judge
@@ -162,6 +171,17 @@ def evaluate_output(topic, response_text, ideas=None, assumption_bank=None, back
         ideas=ideas,
         assumption_bank=assumption_bank,
     )
+
+    # multi agent debate for assumption challenge
+    if run_debate: 
+        llm_scores["idea_scores"] = apply_assumption_debate_to_scores(
+            topic=topic,
+            idea_scores=llm_scores.get("idea_scores", []),
+            ideas=ideas,
+            assumption_bank=assumption_bank,
+            backend=backend,
+            model=model,
+        )
 
     # Pairwise tournament - usefulness
     pairwise_usefulness = run_usefulness_pairwise(

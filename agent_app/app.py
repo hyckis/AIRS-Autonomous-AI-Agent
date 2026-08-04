@@ -43,6 +43,12 @@ use_llm_queries = st.checkbox(
     ),
 )
 
+# multi agent debate for challenge assumption
+run_debate = st.checkbox(
+    "Run multi-agent debate for assumption challenge",
+    value=False,
+)
+
 paper_limit = st.slider("Number of papers to retrieve", min_value=3, max_value=10, value=5)
 
 # DF for Comparing traditional LLM and the agent
@@ -173,6 +179,7 @@ if st.button("Run Agent Comparison"):
             assumption_bank=assumption_bank,
             backend="local_ollama",
             model=None,
+            run_debate=False,
         )
         strong_eval = evaluate_output(
             topic=topic,
@@ -181,6 +188,7 @@ if st.button("Run Agent Comparison"):
             assumption_bank=assumption_bank,
             backend="local_ollama",
             model=None,
+            run_debate=False,
         )
         expanded_eval = evaluate_output(
             topic=topic,
@@ -189,6 +197,7 @@ if st.button("Run Agent Comparison"):
             assumption_bank=assumption_bank,
             backend="local_ollama",
             model=None,
+            run_debate=run_debate,
         )
     
     st.session_state["baseline"] = baseline

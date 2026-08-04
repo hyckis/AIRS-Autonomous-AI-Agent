@@ -1,4 +1,4 @@
-import json
+import re
 from llm_backend import call_llm
 from util import extract_json
 from prompts_evaluator import assumption_bank_prompt
