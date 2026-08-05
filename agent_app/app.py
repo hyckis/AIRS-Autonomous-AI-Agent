@@ -53,6 +53,10 @@ paper_limit = st.slider("Number of papers to retrieve", min_value=3, max_value=1
 
 # DF for Comparing traditional LLM and the agent
 def make_score_df(baseline_eval, strong_eval, expanded_eval):
+    print("DEBUG before score df")
+    print("A: ", {m: baseline_eval["llm_scores"].get(m) for m in SCORE_METRICS})
+    print("B: ", {m: strong_eval["llm_scores"].get(m) for m in SCORE_METRICS})
+    print("C: ", {m: expanded_eval["llm_scores"].get(m) for m in SCORE_METRICS})
     return pd.DataFrame({
         "Metric": SCORE_METRICS,
         "A: Naive LLM": [
@@ -406,6 +410,14 @@ if "baseline" in st.session_state:
 
     st.subheader("LLM-as-a-Judge Evaluation")
     score_df = make_score_df(baseline_eval, strong_eval, expanded_eval)
+    print("DEBUG score df: ")
+    print(score_df)
+    print("DEBUG A llm scores: ", baseline_eval["llm_scores"])
+    print("DEBUG A idea scores: ", baseline_eval["llm_scores"].get("idea_scores", []))
+    print("DEBUG B llm scores: ", strong_eval["llm_scores"])
+    print("DEBUG B idea scores: ", strong_eval["llm_scores"].get("idea_scores", []))
+    print("DEBUG C llm scores: ", expanded_eval["llm_scores"])
+    print("DEBUG C idea scores: ", expanded_eval["llm_scores"].get("idea_scores", []))
     st.dataframe(score_df, use_container_width=True)
     st.bar_chart(score_df.set_index("Metric"))
     with st.expander("Traditional LLM Evaluation Summary"):
@@ -457,6 +469,57 @@ if "baseline" in st.session_state:
                 st.warning(f"{len(warnings)} potential evaluator issue(s) found.")
                 for warning in warnings: st.write("Warning: ", warning)
             else: st.success("No obvious evaluator issues found.")
+
+    st.subheader("Assumption-Challenge Debate Audit")
+    if not run_debate: st.info("Multi-agent debate is disabled. Enable it to audit assumption_challenge scores.")
+    else:
+        debate_df = pd.DataFrame(
+            expanded_eval["llm_scores"].get("idea_scores", [])
+        )
+        if debate_df.empty: st.warning("No debate results available")
+        else:
+            summary_cols = [
+                "idea_index", 
+                "idea_title", 
+                "assumption_id", 
+                "challenged_assumption", 
+                "assumption_challenge_llm", 
+                "assumption_challenge_debate", 
+                "assumption_challenge", 
+                "debate_decision", 
+                "advocate_argument", 
+                "skeptic_argument", 
+            ]
+            available_cols = [
+                col for col in summary_cols
+                if col in debate_df.columns
+            ]
+            st.markdown("Debate Score Summary")
+            st.dataframe(
+                debate_df[available_cols],
+                width="stretch",
+            )
+            st.markdown("Per-idea debate details")
+            idea_options = {
+                f"{row.get('idea_index')}. {row.get('idea_title', '')}": idx
+                for idx, row in debate_df.iterrows()
+            }
+            selected_label = st.selectbox(
+                "Select idea for debate details",
+                list(idea_options.keys())
+            )
+            selected_idx = idea_options[selected_label]
+            row = debate_df.loc[selected_idx]
+            st.markdown("Scores")
+            st.write({
+                "LLM judge score: ": row.get("asssumption_challenge_llm"),
+                "Debate score: ": row.get("assumption_challenge_debate"),
+                "Final score: ": row.get("assumption_cuallenge"),
+                "Confidence: ": row.get("confidence"),
+            })
+            with st.expander("Advocate argument"): st.write(row.get("advocate_argument", ""))
+            with st.expander("Skeptic argument"): st.write(row.get("skeptic_argument", ""))
+            with st.expander("Judge decision"): st.write(row.get("debate_decision", ""))
 
     st.subheader("6. Diagnostic Metrics")
     diagnostic_df = pd.DataFrame({

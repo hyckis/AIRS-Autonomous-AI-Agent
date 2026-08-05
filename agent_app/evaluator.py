@@ -164,6 +164,8 @@ def evaluate_output(
         backend=backend,
         model=model,
     )
+    print("DEBUG after evaluate with llm: ")
+    print(llm_scores)
 
     # Add idea_title and normalize assumption_id/challenged_assumption
     llm_scores = normalize_idea_scores(
@@ -226,10 +228,10 @@ def evaluate_output(
     # simple non llm diagnostics
     simple_metrics = compute_simple_metrics(response_text)
 
-    print("DEBUG: ideas len = ", len(ideas))
-    print("DEBUG: raw idea scores len = ", len(llm_scores.get("idea_scores", [])))
-    print("DEBUG: raw idea scores = ", llm_scores.get("idea_scores", []))
-    print("DEBUG normalized idea scores len = ", len(llm_scores.get("idea_scores", [])))
+    # print("DEBUG: ideas len = ", len(ideas))
+    # print("DEBUG: raw idea scores len = ", len(llm_scores.get("idea_scores", [])))
+    # print("DEBUG: raw idea scores = ", llm_scores.get("idea_scores", []))
+    # print("DEBUG normalized idea scores len = ", len(llm_scores.get("idea_scores", [])))
 
     return {
         "llm_scores": llm_scores,
