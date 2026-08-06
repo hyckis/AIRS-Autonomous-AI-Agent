@@ -444,6 +444,51 @@ if "baseline" in st.session_state:
         else:
             st.warning("No per-idea LLM judge details available.")
 
+    st.subheader("Pairwise Usefulness Tournament")
+    pairwise_eval_map = {
+        "A: Naive LLM": baseline_eval,
+        "B: Strong Prompt": strong_eval,
+        "C: Lens Agent": expanded_eval,
+    }
+    selected_pairwise_arm = st.selectbox(
+        "Select arm for pairwise usefulness details",
+        list(pairwise_eval_map.keys()),
+        key="pairwise_arm_select",
+    )
+    selected_pairwise_eval = pairwise_eval_map[selected_pairwise_arm]
+    selected_llm_scores = selected_pairwise_eval["llm_scores"]
+    idea_scores = selected_llm_scores.get("idea_scores", [])
+    comparisons = selected_llm_scores.get("usefulness_pairwise_comparisons", [])
+
+    idea_df = pd.DataFrame(idea_scores)
+    if idea_df.empty: st.warning("No per-idea usefulness scores available.")
+    else: 
+        usefulness_cols = [
+            "idea_index",
+            "idea_title",
+            "usefulness_llm",
+            "usefulness_pairwise",
+            "usefulness_win_rate",
+            "usefulness",
+        ]
+        available_cols = [
+            col for col in usefulness_cols
+            if col in idea_df.columns
+        ]
+        st.markdown("Per-idea usefulness scores")
+        st.dataframe(
+            idea_df[available_cols],
+            width="stretch",
+        )
+    comparison_df = pd.DataFrame(comparisons)
+    if comparison_df.empty: st.info("No pairwise comparisons available")
+    else:
+        st.markdown("Pairwise comparisons available")
+        st.dataframe(
+            comparison_df,
+            width="stretch",
+        )
+
     st.subheader("Evaluator Sanity Check")
     eval_dfs = {
         "A: Naive LLM": pd.DataFrame(baseline_eval["llm_scores"].get("idea_scores", [])),
