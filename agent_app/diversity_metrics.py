@@ -21,6 +21,7 @@ def split_ideas(text):
     # "research direction #"
     text = re.sub(r"(?<!\n)(Research Direction\s*\d+\s*:)", r"\n\1", text, flags=re.IGNORECASE,)
     text = re.sub(r"(?<!\n)(\d+\.\s*Title:)", r"\n\1", text)
+    text = re.sub(r"(?<!\n)(\d+\.\s*Title\s*:)", r"\n\1", text, flags=re.IGNORECASE,)
     text = re.sub(r"^Okay,[\s\S]*?(?=\n\s*1\.\s*Title:|\n\s*Title:|\n\s*Research Direction\s*\d+\s*:|\n\s*\d+[\).\s]+)", "", text, flags=re.IGNORECASE)
     text = re.sub(r"\n?(I believe these directions|Do you want me|Would you like me)[\s\S]*$", "", text, flags=re.IGNORECASE)
 
