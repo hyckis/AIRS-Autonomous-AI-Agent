@@ -5,6 +5,7 @@ from util import extract_json
 from llm_backend import call_llm
 from prompts_evaluator import (
     evaluate_with_llm_prompt,
+    evaluate_single_idea_prompt,
     evaluate_cognitive_diversity_prompt,
 )
 from assumption_bank import (
@@ -99,17 +100,116 @@ def evaluate_with_llm(topic, response_text, ideas=None, assumption_bank=None, ba
         #     )
         averaged["summary"] = parsed.get("summary", "")
         averaged["idea_scores"] = cleaned_idea_scores
+        averaged["parse_failed"] = False
 
         return averaged
     
     except Exception as e:
         return {
-            "novelty": 0,
-            "diversity": 0,
-            "usefulness": 0,
-            "assumption_challenge": 0,
+            "novelty": None,
+            "diversity": None,
+            "usefulness": None,
+            "assumption_challenge": None,
             "summary": f"Evaluation parsing failed: {e}. Raw output: {raw_result[:500]}",
+            "idea_scores": [],
+            "parse_failed": True,
+            "raw_output": raw_result[:3000] if raw_result else "",
         }    
+
+def evaluate_with_llm_idea_batch(topic, response_text, ideas=None, assumption_bank=None, backend="local_ollama", model=None):
+    """
+    First try batch evaluation.
+    If batch parsing fails, fall back to evaluating one idea at a time
+    using evaluate_with_llm 
+    """
+    # 1. try original batch judge
+    batch_result = evaluate_with_llm(
+        topic=topic,
+        response_text=response_text,
+        ideas=ideas,
+        assumption_bank=assumption_bank,
+        backend=backend,
+        model=model,
+    )
+    if not batch_result.get("parse_failed"):
+        batch_result["evaluation_mode"] = ""
+        return batch_result
+    print("Batch LLM judge failed, falling back to per-idea judge")
+
+    # 2. fallback: call evaluate_with_llm once per idea
+    per_idea_scores = []
+    for i, idea in enumerate(ideas, start=1):
+        single_result = evaluate_with_llm(
+            topic=topic,
+            response_text=response_text,
+            ideas=[idea],
+            assumption_bank=assumption_bank,
+            backend=backend,
+            model=model,
+        )
+        if single_result.get("parse_failed"):
+            per_idea_scores.append({
+                "idea_index": i,
+                "idea_title": extract_idea_title(idea),
+                "assumption_id": None,
+                "challenged_assumption": "Evaluation parsing failed",
+                "rationale": single_result.get("summary", ""),
+                "novelty": None,
+                "diversity": None,
+                "usefulness": None,
+                "assumption_challenge": None,
+                "parse_failed": True,
+            })
+            continue
+
+        idea_scores = single_result.get("idea_scores", [])
+        if idea_scores:
+            item = idea_scores[0]
+            item["idea_index"] = i
+            item["idea_title"] = item.get("idea_title") or extract_idea_title(idea)
+            item["parse_failed"] = False
+            per_idea_scores.append(item)
+        else:
+            per_idea_scores.append({
+                "idea_index": i,
+                "idea_title": extract_idea_title(idea),
+                "assumption_id": None,
+                "challenged_assumption": "No idea score returned",
+                "rationale": single_result.get("summary", ""),
+                "novelty": None,
+                "diversity": None,
+                "usefulness": None,
+                "assumption_challenge": None,
+                "parse_failed": True,
+            })
+    
+    # 3. average per-idea scores
+    averaged = {}
+    for metric in SCORE_METRICS:
+        values = []
+        for item in per_idea_scores:
+            value = item.get(metric, None)
+            if value is None: continue
+            try: values.append(float(value))
+            except Exception: pass
+        averaged[metric] = round(sum(values) / len(values), 3) if values else None
+    
+    parse_failed_count = sum(
+        1 for item in per_idea_scores
+        if item.get("parse_failed")
+    )
+
+    averaged["summary"] = (
+        f"Batch judge failed; used per-idea fallback. "
+        f"Parse failures: {parse_failed_count}/{len(per_idea_scores)}."
+    )
+    averaged["idea_scores"] = per_idea_scores
+    averaged["parse_failed"] = parse_failed_count == len(per_idea_scores)
+    averaged["parse_failed_count"] = parse_failed_count
+    averaged["evaluation_mode"] = "per_idea_fallback"
+
+    return averaged
+
 
 def compute_simple_metrics(response_text):
     words = response_text.split()
@@ -156,7 +256,8 @@ def evaluate_output(
     if assumption_bank is None: assumption_bank = []
 
     # LLM as a judge evaluation
-    llm_scores = evaluate_with_llm(
+    #llm_scores = evaluate_with_llm(
+    llm_scores = evaluate_with_llm_idea_batch(
         topic=topic,
         response_text=response_text,
         ideas=ideas,
@@ -221,7 +322,10 @@ def evaluate_output(
     for metric in SCORE_METRICS: 
         values = []
         for item in idea_scores:
-            try: values.append(float(item.get(metric, 0)))
+            value = item.get(metric, None)
+            if value is None: continue
+            try: values.append(float(value))
+            #try: values.append(float(item.get(metric, 0)))
             except Exception: pass
         llm_scores[metric] = round(sum(values) / len(values), 3) if values else 0
 
