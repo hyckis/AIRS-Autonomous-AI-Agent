@@ -113,7 +113,7 @@ def infer_assumption_id_from_text(challenged_assumption, assumption_by_id):
 
     raw = str(challenged_assumption).strip()
     challenged = normalize_text_for_match(raw)
-    print("DEBUG: challenged_assumption: ", challenged)
+    # print("DEBUG: challenged_assumption: ", challenged)
     if not challenged: 
         print("DEBUG: no challenged")
         return None
@@ -186,7 +186,7 @@ def normalize_idea_scores(llm_scores, ideas, assumption_bank):
     raw_idea_scores = llm_scores.get("idea_scores", [])
 
     # print("DEBUG assumption_bank: ", assumption_bank)
-    print("DEBUG assumption_bank type: ", type(assumption_bank))
+    # print("DEBUG assumption_bank type: ", type(assumption_bank))
 
     assumption_by_id = {
         int(item.get("id", i)): item
@@ -196,9 +196,9 @@ def normalize_idea_scores(llm_scores, ideas, assumption_bank):
     valid_assumption_ids = set(assumption_by_id.keys())
     normalized_scores = []
 
-    print("DEBUG assumption by id: ", assumption_by_id)
-    print("DEBUG valid assumption ids: ", valid_assumption_ids)
-    print("DEBUG raw first idea score: ", raw_idea_scores[0] if raw_idea_scores else None)
+    # print("DEBUG assumption by id: ", assumption_by_id)
+    # print("DEBUG valid assumption ids: ", valid_assumption_ids)
+    # print("DEBUG raw first idea score: ", raw_idea_scores[0] if raw_idea_scores else None)
 
     for i, idea in enumerate(ideas, start=1):
         # try to align by position
@@ -247,9 +247,9 @@ def normalize_idea_scores(llm_scores, ideas, assumption_bank):
             "assumption_challenge": item.get("assumption_challenge", 0),
         })
 
-        print("DEBUG: idea declared assumption: ", idea_declared_assumption)
-        print("DEBUG: evaluator challenged assumption: ", item.get("challenged_assumption"))
-        print("DEBUG: inferred assumption id: ", assumption_id)
+        # print("DEBUG: idea declared assumption: ", idea_declared_assumption)
+        # print("DEBUG: evaluator challenged assumption: ", item.get("challenged_assumption"))
+        # print("DEBUG: inferred assumption id: ", assumption_id)
 
     llm_scores["idea_scores"] = normalized_scores
     llm_scores["raw_idea_score_count"] = len(raw_idea_scores)
