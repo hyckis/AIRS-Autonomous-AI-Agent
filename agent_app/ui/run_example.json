@@ -1,0 +1,104 @@
+{
+  "topic": "How might we reduce food waste in university dining halls?",
+  "generated_at": "2026-07-13T14:00:00Z",
+  "discussion_prompt": "Arm C reframed the question from “how do we waste less?” to “who decides what counts as waste?” Which reframing changes what you'd actually build?",
+
+  "arms": {
+    "A": {
+      "label": "Naive baseline",
+      "sublabel": "Arm A",
+      "ideas": [
+        { "title": "Add compost bins in every hall", "detail": "Diverts waste but doesn't reduce over-production." },
+        { "title": "Portion-control / smaller plates", "detail": "Nudge diners to take less. Modest effect." },
+        { "title": "Awareness posters & campaigns", "detail": "Low cost, low durability." },
+        { "title": "An app to track waste", "detail": "Log what's thrown out to surface trends." },
+        { "title": "Donate leftovers to shelters", "detail": "Redistribute surplus at end of service." }
+      ]
+    },
+    "B": {
+      "label": "Strong ChatGPT baseline",
+      "sublabel": "Arm B",
+      "ideas": [
+        { "title": "Dynamic pricing near closing time", "detail": "Discount perishables in the last hour. Borrowed from grocery retail." },
+        { "title": "“Ugly produce” feature station", "detail": "Cook with cosmetically-rejected produce." },
+        { "title": "Inter-dorm waste competition", "detail": "Gamified leaderboard for lowest-waste hall." },
+        { "title": "AI demand forecasting for kitchens", "detail": "Predict attendance to cook closer to demand." },
+        { "title": "Trayless dining", "detail": "Remove trays so diners take less." }
+      ]
+    },
+    "C": {
+      "label": "Divergent directions",
+      "sublabel": "Assumption-critique + 8 cognitive lenses - Arm C",
+      "directions": [
+        {
+          "title": "Design for generous surplus, not scarcity",
+          "lens": "Anti-efficiency",
+          "oneline": "Treat extra food as planned hospitality, not error.",
+          "detail": "Route a dignified surplus to a pickup fridge instead of squeezing waste to zero.",
+          "breaks": "that waste is always something to minimize.",
+          "evidence": { "type": "paper", "citation": "Edwards & Mercer, 2019 - surplus redistribution", "url": "https://arxiv.org/abs/0000.00000" }
+        },
+        {
+          "title": "Center dining staff & food-insecure students",
+          "lens": "Marginalized users",
+          "oneline": "Surplus becomes quiet access, co-designed by the people closest to it.",
+          "detail": "A waste-to-access pipeline built with the people who plate the food and the students who skip meals.",
+          "breaks": "that the diner is the only user worth designing for.",
+          "evidence": { "type": "paper", "citation": "El Bilali, 2021 - campus food justice", "url": "https://arxiv.org/abs/0000.00000" }
+        },
+        {
+          "title": "What if tracking creates a shaming culture?",
+          "lens": "Failure-mode",
+          "oneline": "Design the counter-move before the tracking app exists.",
+          "detail": "Aggregate-only data, no per-person scores, so low-income eaters aren't surveilled for taking extra.",
+          "breaks": "that more measurement is automatically better.",
+          "evidence": { "type": "speculative" }
+        },
+        {
+          "title": "Family-style communal serving tables",
+          "lens": "Cultural difference",
+          "oneline": "Shift portioning from the tray to the table.",
+          "detail": "Shared platters (thali, izakaya, mensa) cut per-plate waste where individual trays are the Western default.",
+          "breaks": "that individual portioning is the natural baseline.",
+          "evidence": { "type": "paper", "citation": "Rozin, 2011 - cultural framing of portions", "url": "https://arxiv.org/abs/0000.00000" }
+        },
+        {
+          "title": "Forecasting AI hides structural over-buying",
+          "lens": "Long-term risk",
+          "oneline": "Good prediction can automate waste out of sight, not out of existence.",
+          "detail": "Demand models optimize around procurement contracts that reward over-ordering.",
+          "breaks": "that better prediction fixes the root cause.",
+          "evidence": { "type": "speculative" }
+        },
+        {
+          "title": "Student-run “food rescue guild”",
+          "lens": "Collective intelligence",
+          "oneline": "Give a self-governing student crew real budget and keys.",
+          "detail": "Distribute the problem instead of running it top-down through dining services.",
+          "breaks": "that the institution must own the solution.",
+          "evidence": { "type": "paper", "citation": "Ostrom, 1990 - commons governance", "url": "https://arxiv.org/abs/0000.00000" }
+        }
+      ]
+    }
+  },
+
+  "assumptions": [
+    { "assumed": "Waste is a problem to minimize toward zero.", "reframe": "A planned surplus can create access.", "lens": "Anti-efficiency lens" },
+    { "assumed": "The diner is the user; behavior is the lever.", "reframe": "Staff & food-insecure students hold the leverage.", "lens": "Marginalized-users lens" },
+    { "assumed": "More data and tracking is always better.", "reframe": "Tracking can surveil - the failure is the brief.", "lens": "Failure-mode lens" }
+  ],
+
+  "metrics": {
+    "vendi": { "A": 2.1, "B": 3.4, "C": 4.8 },
+    "crosschecks": [
+      { "name": "Mean pairwise dist", "c": ".61", "b": ".44", "better": "higher" },
+      { "name": "Distinct-2", "c": ".89", "b": ".71", "better": "higher" },
+      { "name": "Self-BLEU", "c": ".12", "b": ".27", "better": "lower" }
+    ]
+  },
+
+  "human_eval": {
+    "ratings": { "A": 1.9, "B": 3.5, "C": 4.4 },
+    "note": "Ranking agrees (A < B < C). Where humans and Vendi disagree is the more interesting discussion."
+  }
+}

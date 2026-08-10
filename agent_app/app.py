@@ -1,6 +1,7 @@
 import os
 from datetime import datetime
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd
 # import matplotlib.pyplot as plt
 from agents import (
@@ -20,6 +21,8 @@ from evaluator import (
 from diversity_metrics import evaluate_idea_set_diversity
 from literature_metrics import compute_literature_grounded_metrics
 from assumption_bank import generate_assumption_bank
+from ui.run_builder import build_run
+from ui.render_airs import render as render_airs
 
 st.title("Cognitive Diversity Research Agent")
 
@@ -239,6 +242,22 @@ if "baseline" in st.session_state:
     strong_diversity = st.session_state["strong_diversity"]
     expanded_diversity = st.session_state["expanded_diversity"]
 
+    # ---- New UI: AIRS Divergence Studio -------------------------------------
+    # The pipeline outputs are shaped into a single run dict and rendered by the
+    # standalone HTML view. The view computes nothing; see agent_app/ui/.
+    run = build_run(st.session_state, topic)
+    components.html(render_airs(run), height=1500, scrolling=True)
+
+    st.divider()
+    show_legacy = st.checkbox(
+        "Show detailed tables, charts & scoring (legacy view)",
+        value=False,
+        help="The full per-idea tables, LLM-judge details, sanity checks, and "
+             "human-evaluation sliders. Turn on for debugging or deep dives.",
+    )
+    if not show_legacy:
+        st.stop()
+
     st.subheader("1. Three-Arm Idea Generation Comparison")
     col_a, col_b, col_c = st.columns(3)
     with col_a:
@@ -289,7 +308,6 @@ if "baseline" in st.session_state:
     st.info(human_question)
 
     with st.expander("Assumption Bank (shared across all arms)"):
-        print(f"assumption_bank {assumption_bank[0]["id"]}:", assumption_bank)
         if not assumption_bank: st.markdown("No assumption bank generated or parsing failed.")
         for item in assumption_bank:
             st.markdown(f"**{item['assumption']}**")

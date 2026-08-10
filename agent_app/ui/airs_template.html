@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIRS — Divergence Studio</title>
+<style>
+  :root{
+    --ink:#1b2028; --sub:#5c6672; --faint:#8a93a0;
+    --paper:#ffffff; --canvas:#f5f4f0; --line:#e7e4dd; --line2:#efece6;
+    --armA:#9aa3ad; --armB:#3f6ea3;
+    --armC:#0f9488; --armC-soft:#e4f4f1; --armC-line:#bfe3dd;
+    --win:#c9862a; --win-soft:#fbf1df;
+    --radius:14px;
+    --shadow:0 1px 2px rgba(27,32,40,.05), 0 4px 14px rgba(27,32,40,.06);
+    --font:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:var(--font);background:var(--canvas);color:var(--ink);
+    -webkit-font-smoothing:antialiased;line-height:1.5;font-size:14px}
+  h1,h2,h3,h4{margin:0;font-weight:650;letter-spacing:-.01em}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 22px}
+
+  header{position:sticky;top:0;z-index:30;background:rgba(245,244,240,.85);
+    backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topbar{display:flex;align-items:center;gap:18px;height:60px}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:750;letter-spacing:-.02em;font-size:16px}
+  .logo .mark{width:26px;height:26px;border-radius:8px;flex:0 0 auto;
+    background:conic-gradient(from 210deg,var(--armC),var(--armB),var(--win),var(--armC));
+    box-shadow:inset 0 0 0 3px #fff, 0 1px 3px rgba(0,0,0,.15)}
+  .logo small{font-weight:500;color:var(--faint);font-size:11px;letter-spacing:.02em;margin-left:2px}
+  .spacer{flex:1}
+  .modeswitch{display:flex;background:#eceae4;border:1px solid var(--line);border-radius:11px;padding:3px}
+  .modeswitch button{border:0;background:transparent;font-family:inherit;font-size:12.5px;
+    font-weight:600;color:var(--sub);padding:7px 15px;border-radius:8px;cursor:pointer;
+    display:flex;align-items:center;gap:6px;transition:.15s}
+  .modeswitch button .dot{width:7px;height:7px;border-radius:50%;background:currentColor;opacity:.5}
+  .modeswitch button.on{background:#fff;color:var(--ink);box-shadow:var(--shadow)}
+  .modeswitch button.on .dot{opacity:1}
+  .ghostbtn{border:1px solid var(--line);background:#fff;border-radius:9px;padding:7px 13px;
+    font-family:inherit;font-size:12.5px;font-weight:600;color:var(--sub);cursor:pointer}
+
+  .topicbar{padding:22px 0 4px}
+  .modeblurb{font-size:12.5px;color:var(--sub);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+  .modeblurb .pill{font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;letter-spacing:.02em}
+  .pill.workshop{background:var(--armC-soft);color:#0b6b62}
+  .pill.classroom{background:#eef1f7;color:#39548a}
+  .askrow{display:flex;gap:10px;align-items:stretch}
+  .askrow .field{flex:1;display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);
+    border-radius:12px;padding:2px 6px 2px 16px;box-shadow:var(--shadow)}
+  .askrow .field .lab{font-size:11px;font-weight:700;color:var(--faint);text-transform:uppercase;letter-spacing:.06em}
+  .askrow input{flex:1;border:0;outline:0;font-family:inherit;font-size:15px;color:var(--ink);padding:13px 4px;background:transparent}
+  .runbtn{border:0;border-radius:12px;background:var(--ink);color:#fff;font-family:inherit;font-weight:650;
+    font-size:14px;padding:0 22px;cursor:pointer;display:flex;align-items:center;gap:8px}
+  .runbtn:hover{background:#000}
+
+  .flow{display:flex;flex-direction:column;gap:18px;margin:18px 0 30px}
+  .sec-h{display:flex;align-items:baseline;gap:10px;margin-bottom:2px}
+  .sec-h h3{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--faint)}
+  .sec-h .meta{font-size:11.5px;color:var(--faint)}
+
+  .feature{background:#fff;border:1px solid var(--armC-line);border-radius:var(--radius);
+    box-shadow:0 2px 6px rgba(15,148,136,.08),0 12px 30px rgba(15,148,136,.10);overflow:hidden}
+  .feature-head{display:flex;align-items:center;gap:12px;padding:16px 20px 14px;
+    background:linear-gradient(180deg,var(--armC-soft),#fff);border-bottom:1px solid var(--line2)}
+  .feature-head .fmark{width:11px;height:11px;border-radius:3px;background:var(--armC);flex:0 0 auto}
+  .feature-head h2{font-size:16px}
+  .feature-head .fsub{font-size:12px;color:var(--sub);margin-top:2px}
+  .feature-head .fright{margin-left:auto;text-align:right;font-size:11px;color:var(--faint)}
+  .feature-head .fright b{display:block;font-size:15px;color:var(--armC);font-weight:750}
+  .lensgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px}
+
+  .lcard{border:1px solid var(--line2);border-radius:11px;padding:13px 14px;cursor:pointer;transition:.15s;background:#fff}
+  .lcard:hover{border-color:var(--armC-line);background:#fbfefd}
+  .lcard .lctop{display:flex;align-items:flex-start;gap:9px}
+  .lcard h4{font-size:14px;font-weight:650;line-height:1.32;flex:1}
+  .lcard .chev{color:var(--armC);font-size:11px;transition:.2s;margin-top:3px}
+  .lcard.open .chev{transform:rotate(90deg)}
+  .lcard .lens{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.02em;
+    padding:2px 8px;border-radius:20px;background:var(--armC-soft);color:#0b6b62;margin-top:9px}
+  .lcard .lens.spec{background:#f3eefc;color:#6b4ba8}
+  .lcard .oneline{font-size:12.5px;color:var(--sub);margin-top:9px}
+  .lcard .body{max-height:0;overflow:hidden;transition:max-height .25s ease;font-size:12.5px;color:var(--sub)}
+  .lcard.open .body{max-height:300px}
+  .lcard .body .inner{padding-top:10px;margin-top:10px;border-top:1px dashed var(--line)}
+  .lcard .breaks{display:none;margin-top:9px;font-size:11.5px;background:var(--win-soft);border-radius:8px;padding:8px 10px;color:#7a5313}
+  .lcard .breaks b{color:var(--win)}
+  .lcard .cite{margin-top:9px;font-size:11px;color:var(--faint);display:flex;align-items:center;gap:6px}
+  .lcard .cite a{color:var(--armB);text-decoration:none;font-weight:600}
+  .lcard .cite .spectag{background:#f3eefc;color:#6b4ba8;font-weight:700;padding:1px 7px;border-radius:12px;font-size:10px}
+
+  .assumps{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+  .assumps .ah{padding:15px 18px 13px;border-bottom:1px solid var(--line2)}
+  .assumps .ah h3{font-size:14px;display:flex;align-items:center;gap:9px}
+  .assumps .ah .ico{width:22px;height:22px;border-radius:7px;display:grid;place-items:center;font-size:12px;background:var(--win-soft);color:var(--win)}
+  .assumps .ah p{margin:5px 0 0;font-size:12px;color:var(--faint)}
+  .assumps .ab{padding:12px 14px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .assump{padding:12px;border-radius:10px;border:1px solid var(--line2)}
+  .assump .was{font-size:10.5px;color:var(--faint);text-transform:uppercase;letter-spacing:.05em;font-weight:700}
+  .assump .claim{font-size:12.5px;font-weight:600;margin:4px 0 8px;color:var(--sub);text-decoration:line-through;text-decoration-color:#d9b8b8}
+  .assump .arrow{display:flex;gap:7px;align-items:flex-start}
+  .assump .arrow .a{color:var(--armC);font-weight:800;flex:0 0 auto}
+  .assump .broke{font-size:12.5px;font-weight:600;color:var(--ink)}
+  .assump .who{font-size:10.5px;color:var(--armC);font-weight:700;margin-top:6px}
+
+  .discuss{background:#eef1f7;border:1px solid #dbe2ef;border-radius:12px;padding:13px 16px;
+    display:flex;align-items:flex-start;gap:11px}
+  .discuss .q{font-size:11px;font-weight:800;color:#39548a;letter-spacing:.04em;text-transform:uppercase;flex:0 0 auto;
+    background:#fff;padding:3px 9px;border-radius:20px;margin-top:1px}
+  .discuss p{margin:0;font-size:13.5px;color:#2f3f63;font-weight:500}
+
+  .baselines .bl-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px}
+  .col{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+  .colhead{padding:12px 14px;border-bottom:1px solid var(--line2);display:flex;align-items:center;gap:9px}
+  .colhead .swatch{width:9px;height:9px;border-radius:3px;flex:0 0 auto}
+  .swA{background:var(--armA)} .swB{background:var(--armB)}
+  .colhead h3{font-size:13px}
+  .colhead .sub{font-size:11px;color:var(--faint);margin-left:auto}
+  .cards{padding:9px;display:flex;flex-direction:column;gap:6px}
+  .scard{border:1px solid var(--line2);border-radius:9px;padding:9px 11px;cursor:pointer;transition:.15s;font-size:12.5px}
+  .scard:hover{background:#fdfcfa;border-color:#d8d3c9}
+  .scard .st{display:flex;align-items:center;gap:8px}
+  .scard h4{font-size:12.5px;font-weight:600;flex:1;color:var(--sub)}
+  .scard .chev{color:var(--faint);font-size:10px;transition:.2s}
+  .scard.open .chev{transform:rotate(90deg)}
+  .scard .body{max-height:0;overflow:hidden;transition:max-height .2s;color:var(--faint)}
+  .scard.open .body{max-height:120px}
+  .scard .body .inner{padding-top:7px;margin-top:7px;border-top:1px dashed var(--line)}
+
+  .verdict{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+  .verdict .vh{padding:14px 20px 12px;display:flex;align-items:baseline;gap:12px;border-bottom:1px solid var(--line2)}
+  .verdict .vh h3{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--faint)}
+  .verdict .vh span{font-size:11.5px;color:var(--faint)}
+  .verdict .vbody{display:flex;gap:26px;padding:16px 20px;flex-wrap:wrap}
+  .chart{flex:1;min-width:280px}
+  .bar{display:grid;grid-template-columns:82px 1fr 40px;align-items:center;gap:10px;margin:8px 0}
+  .bar .bl{font-size:11.5px;font-weight:650;color:var(--sub);white-space:nowrap}
+  .bar .track{height:16px;background:var(--line2);border-radius:6px;overflow:hidden}
+  .bar .fill{height:100%;border-radius:6px;width:0;transition:width .9s cubic-bezier(.2,.7,.2,1)}
+  .bar .bv{font-size:12px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
+  .fillA{background:var(--armA)} .fillB{background:var(--armB)}
+  .fillC{background:linear-gradient(90deg,var(--armC),#12b3a3)}
+  .bar.winrow .bl{color:var(--armC)}
+  .crosscheck{flex:1;min-width:240px;align-self:center;display:flex;flex-direction:column;gap:7px}
+  .cc{font-size:11.5px;color:var(--sub)}
+  .cc b{color:var(--ink);font-variant-numeric:tabular-nums}
+  .cc .up{color:var(--armC);font-weight:700}
+
+  .hv{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+  .hv .hvh{padding:14px 18px 12px;border-bottom:1px solid var(--line2)}
+  .hv .hvh h3{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--faint)}
+  .hv .hvbody{padding:10px 18px}
+  .hv-row{display:grid;grid-template-columns:92px 1fr 1fr;gap:14px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line2);font-size:12px}
+  .hv-row.head{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--faint);font-weight:700}
+  .hv-row .bl{font-weight:650}
+  .hv-bar{height:9px;border-radius:5px;background:var(--line2);position:relative;overflow:hidden}
+  .hv-bar i{position:absolute;left:0;top:0;bottom:0;border-radius:5px}
+  .hv-note{padding:11px 18px;font-size:12px;color:var(--sub);background:#fcfbf9;border-top:1px solid var(--line2)}
+  .hv-note b{color:var(--ink)}
+
+  .wsactions{display:flex;gap:10px;flex-wrap:wrap}
+  .wsactions button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 15px;
+    font-family:inherit;font-size:12.5px;font-weight:600;color:var(--sub);cursor:pointer;display:flex;gap:7px;align-items:center;box-shadow:var(--shadow)}
+  .wsactions button.prim{background:var(--armC);color:#fff;border-color:var(--armC)}
+
+  .footnote{color:var(--faint);font-size:11px;text-align:center;padding:6px 0 40px}
+
+  #assumptions,#discuss,#humanmetric{display:none}
+  .lcard .cite{display:flex}
+  body[data-mode="workshop"] #feature{order:1}
+  body[data-mode="workshop"] #wsactions{order:2}
+  body[data-mode="workshop"] #baselines{order:3}
+  body[data-mode="workshop"] #verdict{order:4}
+  body[data-mode="workshop"] #wsactions{display:flex}
+  body[data-mode="workshop"] .lcard .cite{display:none}
+  body[data-mode="classroom"] #feature{order:1}
+  body[data-mode="classroom"] #discuss{order:2;display:flex}
+  body[data-mode="classroom"] #assumptions{order:3;display:block}
+  body[data-mode="classroom"] #baselines{order:4}
+  body[data-mode="classroom"] #verdict{order:5}
+  body[data-mode="classroom"] #humanmetric{order:6;display:block}
+  body[data-mode="classroom"] #wsactions{display:none}
+  body[data-mode="classroom"] .lcard .breaks{display:block}
+
+  @media(max-width:900px){
+    .lensgrid,.assumps .ab,.baselines .bl-grid{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body data-mode="workshop">
+
+<header>
+  <div class="wrap topbar">
+    <div class="logo"><span class="mark"></span>AIRS <small>Divergence Studio</small></div>
+    <div class="spacer"></div>
+    <div class="modeswitch" id="modeswitch">
+      <button data-m="workshop" class="on"><span class="dot"></span>Workshop</button>
+      <button data-m="classroom"><span class="dot"></span>Classroom</button>
+    </div>
+    <button class="ghostbtn">Share run</button>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="topicbar">
+    <div class="modeblurb">
+      <span class="pill workshop" id="modepill">FACILITATOR</span>
+      <span id="modetext">Divergent directions up top. Baselines and metrics below.</span>
+    </div>
+    <div class="askrow">
+      <div class="field">
+        <span class="lab">Topic</span>
+        <input value="{{TOPIC}}" />
+      </div>
+      <button class="runbtn">&#8635; Re-run</button>
+    </div>
+  </section>
+
+  <div class="flow">
+
+    <section id="feature" class="feature">
+      <div class="feature-head">
+        <span class="fmark"></span>
+        <div>
+          <h2>{{C_LABEL}}</h2>
+          <div class="fsub">{{C_SUBLABEL}}</div>
+        </div>
+        <div class="fright">{{C_META}}</div>
+      </div>
+      <div class="lensgrid">
+{{FEATURE_CARDS}}
+      </div>
+    </section>
+
+    <div id="discuss" class="discuss">
+      <span class="q">Discuss</span>
+      <p>{{DISCUSSION}}</p>
+    </div>
+
+    <section id="assumptions" class="assumps">
+      <div class="ah">
+        <h3><span class="ico">&#9670;</span>Assumptions the lenses broke</h3>
+        <p>What the baselines took for granted &mdash; and the reframe each lens offered.</p>
+      </div>
+      <div class="ab">
+{{ASSUMPTIONS}}
+      </div>
+    </section>
+
+    <section id="baselines" class="baselines">
+      <div class="sec-h"><h3>Baselines for comparison</h3><span class="meta">the sets Arm C diverges from</span></div>
+      <div class="bl-grid">
+        <div class="col">
+          <div class="colhead"><span class="swatch swA"></span><h3>{{A_LABEL}}</h3><span class="sub">{{A_SUB}}</span></div>
+          <div class="cards">
+{{BASELINE_A}}
+          </div>
+        </div>
+        <div class="col">
+          <div class="colhead"><span class="swatch swB"></span><h3>{{B_LABEL}}</h3><span class="sub">{{B_SUB}}</span></div>
+          <div class="cards">
+{{BASELINE_B}}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="verdict" class="verdict">
+      <div class="vh"><h3>Diversity check</h3><span>Vendi score &middot; non-LLM &middot; effective number of distinct ideas</span></div>
+      <div class="vbody">
+        <div class="chart">
+{{VENDI_BARS}}
+        </div>
+        <div class="crosscheck">
+{{CROSSCHECKS}}
+        </div>
+      </div>
+    </section>
+
+    <section id="humanmetric" class="hv">
+      <div class="hvh"><h3>Humans vs. the metric</h3></div>
+      <div class="hvbody">
+        <div class="hv-row head"><span>Arm</span><span>Class rating (avg)</span><span>Vendi score</span></div>
+{{HUMAN_ROWS}}
+      </div>
+      <div class="hv-note">{{HUMAN_NOTE}}</div>
+    </section>
+
+    <div id="wsactions" class="wsactions">
+      <button class="prim">&#65291; Send picks to Miro board</button>
+      <button>&#8595; Export directions</button>
+      <button>&#9670; Vote as a group</button>
+      <button>&#8634; Push Arm C deeper</button>
+    </div>
+
+  </div>
+
+  <div class="footnote">Generated from run data &middot; click any card to expand</div>
+
+</main>
+
+<script>
+  window.addEventListener('load',function(){
+    document.querySelectorAll('.fill').forEach(function(f){f.style.width=f.dataset.w+'%';});
+  });
+  document.querySelectorAll('.lcard,.scard').forEach(function(c){
+    c.addEventListener('click',function(){c.classList.toggle('open');});
+  });
+  var body=document.body,
+      blurbText=document.getElementById('modetext'),
+      pill=document.getElementById('modepill');
+  var copy={
+    workshop:{cls:'workshop',pill:'FACILITATOR',txt:'Divergent directions up top. Baselines and metrics below.'},
+    classroom:{cls:'classroom',pill:'EDUCATOR',txt:'Directions and the assumptions they broke up top. Baselines and metrics below.'}
+  };
+  document.querySelectorAll('#modeswitch button').forEach(function(b){
+    b.addEventListener('click',function(){
+      document.querySelectorAll('#modeswitch button').forEach(function(x){x.classList.remove('on');});
+      b.classList.add('on');
+      var m=b.dataset.m; body.dataset.mode=m;
+      pill.className='pill '+copy[m].cls; pill.textContent=copy[m].pill;
+      blurbText.textContent=copy[m].txt;
+      window.scrollTo({top:0,behavior:'smooth'});
+    });
+  });
+</script>
+</body>
+</html>
