@@ -22,7 +22,6 @@ from datetime import datetime, timezone
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from assumption_bank import (  # noqa: E402
-    extract_idea_title,
     extract_challenged_assumption_from_idea,
 )
 
@@ -78,6 +77,39 @@ def _first_sentence(text, max_chars=150):
     return first
 
 
+# Splits an idea at the first structured field label, so the text before it can
+# be recovered as a title. gemma3 often runs the Title / Description / Challenges
+# / Preserves sections together in one block with no explicit "Title:" prefix.
+_FIELD_SPLIT_RE = re.compile(
+    r"\s+(?:Short\s+description|Description|Challeng\w*|Preserv\w*|"
+    r"Cognitive\s+Diversity|Supporting|Speculativ\w*|Differentiation|"
+    r"Evidence|Rationale|Method|Evaluation)\b\s*:?",
+    re.IGNORECASE,
+)
+
+
+def _short_title(idea, max_words=12):
+    """A short, punchy card title.
+
+    Cut the idea at the first field label, then: if the remaining head reads
+    "Catchy Name: explanatory subtitle", keep just the catchy name; otherwise
+    cap the length. This stops the whole description from bleeding into the
+    title when the model doesn't use a clean "Title:" prefix.
+    """
+    head = _FIELD_SPLIT_RE.split(_clean(idea), maxsplit=1)[0]
+    head = re.sub(r"^\s*\d+[\).\s]+", "", head).strip(" -–—:*\"'")
+    if not head:
+        return _first_sentence(idea, max_chars=80)
+    if ":" in head:
+        name = head.split(":", 1)[0].strip(" \"'")
+        if 2 <= len(name.split()) <= 9:
+            return name
+    words = head.split()
+    if len(words) > max_words:
+        return " ".join(words[:max_words]).rstrip(",;:-") + "…"
+    return head
+
+
 def _detect_lens(idea):
     low = idea.lower()
     for lens, keywords in LENS_KEYWORDS:
@@ -107,12 +139,17 @@ def _baseline_ideas(diversity):
     ideas = (diversity or {}).get("ideas", []) or []
     out = []
     for idea in ideas:
-        title = _clean(extract_idea_title(idea)) or _first_sentence(idea)
+        clean = _clean(idea)
+        title = _short_title(idea, max_words=9)
         detail = _field(idea, "Description", "Short description")
         if not detail:
-            # strip a leading "Title" chunk and use the remainder
-            remainder = re.sub(r"^\s*Title\s*:\s*", "", _clean(idea), flags=re.IGNORECASE)
-            detail = remainder[len(title):].strip(" :-–") if remainder.startswith(title) else remainder
+            parts = _FIELD_SPLIT_RE.split(clean, maxsplit=1)
+            if len(parts) > 1:
+                detail = _clean(parts[1])
+            elif ":" in clean:
+                detail = clean.split(":", 1)[1].strip()
+            elif clean != title:
+                detail = clean
         out.append({"title": title, "detail": detail or ""})
     return out
 
@@ -124,8 +161,11 @@ def _c_directions(diversity, literature_metrics):
     out = []
     for i, idea in enumerate(ideas):
         lit_item = per_idea[i] if i < len(per_idea) else None
-        description = _field(idea, "Description", "Short description")
-        detail = description or _clean(idea)
+        clean = _clean(idea)
+        parts = _FIELD_SPLIT_RE.split(clean, maxsplit=1)
+        remainder = _clean(parts[1]) if len(parts) > 1 else ""
+        description = _field(idea, "Description", "Short description") or remainder
+        detail = description or clean
         breaks = _field(
             idea,
             "Challenges Dominant Assumption", "Challenges Assumption",
@@ -134,9 +174,9 @@ def _c_directions(diversity, literature_metrics):
         if "no specific assumption" in breaks.lower():
             breaks = ""
         out.append({
-            "title": _clean(extract_idea_title(idea)) or _first_sentence(idea),
+            "title": _short_title(idea),
             "lens": _detect_lens(idea),
-            "oneline": _first_sentence(description or idea),
+            "oneline": _first_sentence(description or clean),
             "detail": detail,
             "breaks": breaks,
             "evidence": _detect_evidence(idea, lit_item),

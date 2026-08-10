@@ -11,3 +11,14 @@
 # live reload while editing.
 [server]
 fileWatcherType = "none"
+
+# Match Streamlit's chrome (title, inputs, buttons) to the Divergence Studio
+# template's warm-paper palette so the native top of the page reads as one piece
+# with the embedded view instead of a dark box above a light one.
+[theme]
+base = "light"
+backgroundColor = "#f5f4f0"
+secondaryBackgroundColor = "#ffffff"
+textColor = "#1b2028"
+primaryColor = "#0f9488"
+font = "sans serif"
