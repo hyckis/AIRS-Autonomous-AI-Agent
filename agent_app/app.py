@@ -24,6 +24,15 @@ from assumption_bank import generate_assumption_bank
 from ui.run_builder import build_run
 from ui.render_airs import render as render_airs
 
+st.set_page_config(page_title="AIRS — Divergence Studio", layout="wide")
+# Use the full page width and trim Streamlit's default side/top padding so the
+# embedded Divergence Studio view isn't squeezed into a narrow centre column.
+st.markdown(
+    "<style>.block-container{padding-top:1.5rem;padding-left:2rem;"
+    "padding-right:2rem;max-width:100%;}</style>",
+    unsafe_allow_html=True,
+)
+
 st.title("Cognitive Diversity Research Agent")
 
 st.write(
@@ -246,7 +255,15 @@ if "baseline" in st.session_state:
     # The pipeline outputs are shaped into a single run dict and rendered by the
     # standalone HTML view. The view computes nothing; see agent_app/ui/.
     run = build_run(st.session_state, topic)
-    components.html(render_airs(run), height=1500, scrolling=True)
+
+    # Size the embed to the (wide, 2-column) layout so there's a single natural
+    # page scroll instead of a scrollbar trapped inside the iframe. Estimated
+    # from the number of Arm C cards and baseline ideas.
+    _dirs = run["arms"]["C"]["directions"]
+    _rows_c = (len(_dirs) + 1) // 2
+    _rows_ab = max(len(run["arms"]["A"]["ideas"]), len(run["arms"]["B"]["ideas"]), 1)
+    studio_height = 920 + _rows_c * 165 + _rows_ab * 46
+    components.html(render_airs(run), height=studio_height, scrolling=True)
 
     st.divider()
     show_legacy = st.checkbox(
