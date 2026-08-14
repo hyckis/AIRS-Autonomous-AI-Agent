@@ -284,6 +284,7 @@ def evaluate_output(
             assumption_bank=assumption_bank,
             backend=backend,
             model=model,
+            top_k=3,
         )
 
     # Pairwise tournament - usefulness
@@ -339,7 +340,7 @@ def evaluate_output(
 
     return {
         "llm_scores": llm_scores,
-        "simple_metrics": simple_metrics
+        "simple_metrics": simple_metrics,
     }
 
 
