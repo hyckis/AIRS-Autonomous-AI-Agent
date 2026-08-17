@@ -77,6 +77,37 @@ def _first_sentence(text, max_chars=150):
     return first
 
 
+def _sentence_split(text):
+    """Split prose into (first_sentence, rest) so a card's one-liner and its
+    expand body don't repeat the same opening sentence."""
+    text = _clean(text)
+    if not text:
+        return "", ""
+    parts = re.split(r"(?<=[.!?])\s+", text)
+    first = parts[0].strip()
+    rest = " ".join(p.strip() for p in parts[1:]).strip()
+    return first, rest
+
+
+def _split_question(text):
+    """Split a human-in-the-loop prompt into (question, rationale). Keeps the
+    question itself terse; everything after it becomes optional rationale."""
+    text = _clean(text)
+    if not text:
+        return "", ""
+    idx = text.find("?")
+    if idx == -1:
+        return _sentence_split(text)  # no question mark: first sentence is the ask
+    question = text[:idx + 1].strip()
+    rationale = text[idx + 1:].strip()
+    # Drop a short leading preamble like "A strategic question: <the ask>?"
+    if ":" in question:
+        pre, after = question.split(":", 1)
+        if "?" in after and len(pre.split()) <= 8:
+            question = after.strip()
+    return question, rationale
+
+
 # Splits an idea at the first structured field label, so the text before it can
 # be recovered as a title. gemma3 often runs the Title / Description / Challenges
 # / Preserves sections together in one block with no explicit "Title:" prefix.
@@ -97,7 +128,9 @@ def _short_title(idea, max_words=12):
     title when the model doesn't use a clean "Title:" prefix.
     """
     head = _FIELD_SPLIT_RE.split(_clean(idea), maxsplit=1)[0]
-    head = re.sub(r"^\s*\d+[\).\s]+", "", head).strip(" -–—:*\"'")
+    head = re.sub(r"^\s*\d+[\).\s]+", "", head)          # leading "1." / "2)"
+    head = re.sub(r"^\s*Title\s*[:\-–—]\s*", "", head, flags=re.IGNORECASE)  # leading "Title:"
+    head = head.strip(" -–—:*\"'")
     if not head:
         return _first_sentence(idea, max_chars=80)
     if ":" in head:
@@ -164,8 +197,10 @@ def _c_directions(diversity, literature_metrics):
         clean = _clean(idea)
         parts = _FIELD_SPLIT_RE.split(clean, maxsplit=1)
         remainder = _clean(parts[1]) if len(parts) > 1 else ""
-        description = _field(idea, "Description", "Short description") or remainder
-        detail = description or clean
+        description = _field(idea, "Description", "Short description") or remainder or clean
+        # one-liner = first sentence (always shown); detail = the rest (on expand),
+        # so the expand never repeats the sentence already visible above it.
+        oneline, detail = _sentence_split(description)
         breaks = _field(
             idea,
             "Challenges Dominant Assumption", "Challenges Assumption",
@@ -176,7 +211,7 @@ def _c_directions(diversity, literature_metrics):
         out.append({
             "title": _short_title(idea),
             "lens": _detect_lens(idea),
-            "oneline": _first_sentence(description or clean),
+            "oneline": oneline,
             "detail": detail,
             "breaks": breaks,
             "evidence": _detect_evidence(idea, lit_item),
@@ -214,10 +249,13 @@ def build_run(session_state, topic):
     assumption_bank = get("assumption_bank") or []
     expanded_lit = get("expanded_literature_metrics") or {}
 
+    discussion_question, discussion_rationale = _split_question(get("human_question") or "")
+
     run = {
         "topic": topic,
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "discussion_prompt": _clean(get("human_question") or ""),
+        "discussion_prompt": discussion_question,
+        "discussion_rationale": discussion_rationale,
         "arms": {
             "A": {
                 "label": "Naive baseline",

@@ -222,6 +222,13 @@ def render(run):
     vendi = metrics.get("vendi", {}) or {}
     human = run.get("human_eval", {}) or {}
 
+    rationale = run.get("discussion_rationale", "")
+    rationale_html = (
+        f'<details class="disc-why"><summary>Why this question</summary>'
+        f'<p class="why">{esc(rationale)}</p></details>'
+        if rationale else ""
+    )
+
     replacements = {
         "{{TOPIC}}": esc(run.get("topic", "")),
         "{{C_LABEL}}": esc(arm_c.get("label", "Divergent directions")),
@@ -229,6 +236,7 @@ def render(run):
         "{{C_META}}": f"<b>{len(directions)}</b>divergent directions",
         "{{FEATURE_CARDS}}": _feature_cards(directions),
         "{{DISCUSSION}}": esc(run.get("discussion_prompt", "")),
+        "{{DISCUSSION_RATIONALE}}": rationale_html,
         "{{ASSUMPTIONS}}": _assumptions(run.get("assumptions", []) or []),
         "{{A_LABEL}}": esc(arm_a.get("label", "Naive baseline")),
         "{{A_SUB}}": esc(arm_a.get("sublabel", "Arm A")),

@@ -94,7 +94,14 @@
     display:flex;align-items:flex-start;gap:11px}
   .discuss .q{font-size:11px;font-weight:800;color:#39548a;letter-spacing:.04em;text-transform:uppercase;flex:0 0 auto;
     background:#fff;padding:3px 9px;border-radius:20px;margin-top:1px}
-  .discuss p{margin:0;font-size:13.5px;color:#2f3f63;font-weight:500}
+  .discuss-body{flex:1}
+  .discuss p{margin:0;font-size:14.5px;color:#2f3f63;font-weight:600}
+  .disc-why{margin-top:9px}
+  .disc-why summary{cursor:pointer;font-size:11.5px;font-weight:700;color:#39548a;list-style:none;display:inline-flex;align-items:center;gap:5px}
+  .disc-why summary::-webkit-details-marker{display:none}
+  .disc-why summary::before{content:"\25B8";font-size:10px;transition:.2s}
+  .disc-why[open] summary::before{transform:rotate(90deg)}
+  .disc-why .why{margin:7px 0 0;font-size:12.5px;color:#42506e;font-weight:400}
 
   .baselines .bl-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px}
   .col{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
@@ -206,7 +213,10 @@
 
     <div id="discuss" class="discuss">
       <span class="q">Discuss</span>
-      <p>{{DISCUSSION}}</p>
+      <div class="discuss-body">
+        <p>{{DISCUSSION}}</p>
+        {{DISCUSSION_RATIONALE}}
+      </div>
     </div>
 
     <section id="assumptions" class="assumps">
