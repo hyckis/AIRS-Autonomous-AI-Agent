@@ -129,8 +129,6 @@ def apply_assumption_debate_to_scores(
     then replaces assumption_challenge with the debate score when available.
     """
     assumption_by_id = get_assumption_by_id(assumption_bank)
-    updated_scores = []
-
     prepared_scores = []
     debate_candidates = []
     unmatched_assumptions = []
@@ -147,6 +145,7 @@ def apply_assumption_debate_to_scores(
 
         item["idea_index"] = idea_index_int
         item["idea_text"] = idea_text
+
         llm_score = clamp_score(item.get("assumption_challenge", 0))
         item["assumption_challenge_llm"] = llm_score
         item["assumption_challenge_debate"] = None
@@ -159,24 +158,65 @@ def apply_assumption_debate_to_scores(
         )
         assumption_item = assumption_by_id.get(assumption_id)
 
-        # no matched assumption => keep and not penalize
-        if assumption_id is None or assumption_item is None:
-            item["assumption_mapping_status"] = "unmapped"
-            item["debate_decision"] = (
-                "No matched assumption id. Not penalized;  may represent a novel assumption."
-            )
-            item["assumption_challenge_final"] = llm_score
-            unmatched_assumptions.append(item)
-        else:
-            item["assumption_mapping_status"] = "matched"
-            debate_candidates.append({
-                "prepared_index": len(prepared_scores),
-                "llm_score": llm_score,
-                "assumption_item": assumption_item,
-                "idea_text": idea_text,
-            })
+        item["assumption_id_normalized"] = assumption_id
+        challenged_assumption = str(item.get("cahllenged_assumption", "")).strip()
 
+        if assumption_item is not None:
+            item["assumption_mapping_status"] = "matched"
+            item["assumption_source"] = "assumption_bank"
+            debate_assumption_item = assumption_item
+        elif (
+            challenged_assumption 
+            and "no specific assumption" not in challenged_assumption.lower()
+            and challenged_assumption.lower() not in {"none", "n/a", "null"}):
+            item["assumption_mapping_status"] = "unmapped"
+            item["assumption_source"] = "idea_identified"
+            debate_assumption_item = {
+                "id": None,
+                "assumption": challenged_assumption,
+                "challenge_criteria": (
+                    "Evaluate whether this idea meaningfully challenges the identified assumption"
+                ),
+            }
+            unmatched_assumptions.append(item)
+
+        else:
+            item["assumption_mapping_status"] = "no_assumption_identified"
+            item["assumption_source"] = None
+            debate_assumption_item = (
+                "No usable challenged assumption identified; not eligible for debate."
+            )
+            prepared_scores.append(item)
+            continue
+
+        debate_candidates.append({
+            "prepared_index": len(prepared_scores),
+            "llm_score": llm_score,
+            "assumption_item": assumption_item,
+            "idea_text": idea_text,
+        })
+        
         prepared_scores.append(item)
+        
+        
+        # no matched assumption => keep and not penalize
+        # if assumption_id is None or assumption_item is None:
+        #     item["assumption_mapping_status"] = "unmapped"
+        #     item["debate_decision"] = (
+        #         "No matched assumption id. Not penalized;  may represent a novel assumption."
+        #     )
+        #     item["assumption_challenge_final"] = llm_score
+        #     unmatched_assumptions.append(item)
+        # else:
+        #     item["assumption_mapping_status"] = "matched"
+        #     debate_candidates.append({
+        #         "prepared_index": len(prepared_scores),
+        #         "llm_score": llm_score,
+        #         "assumption_item": assumption_item,
+        #         "idea_text": idea_text,
+        #     })
+
+        # prepared_scores.append(item)
 
         # 2: select top-k candidates before debate
         debate_candidates = sorted(
@@ -185,16 +225,18 @@ def apply_assumption_debate_to_scores(
             reverse=True,
         )
         selected_candidates = debate_candidates[:top_k]
-        selected_indices = {
-            candidate["prepared_index"] for candidate in selected_candidates
-        }
+        # selected_indices = {
+        #     candidate["prepared_index"] for candidate in selected_candidates
+        # }
         for candidate in debate_candidates[:top_k]:
             idx = candidate["prepared_index"]
-            item = prepared_scores[idx]
-            item["debate_decision"] = (f"Not selected for Top{top_k} debate.")
-            item["assumption_challenge_final"] = (item["assumption_challenge_llm"])
+            prepared_scores[idx]["debate_decision"] = (f"Not selected for top-{top_k} debate.")
+            # item = prepared_scores[idx]
+            # item["debate_decision"] = (f"Not selected for Top{top_k} debate.")
+            # item["assumption_challenge_final"] = (item["assumption_challenge_llm"])
 
         # 3: debate only top k
+        debated_items = []
         for candidate in selected_candidates:
             idx = candidate["prepared_index"]
             item = prepared_scores[idx]
@@ -213,12 +255,15 @@ def apply_assumption_debate_to_scores(
             else: 
                 item["assumption_challenge_final"] = item["assumption_challenge_llm"]
 
+            debated_items.append(item)
+
         # 4: re rank the debated top k
-        top_debated = [
-            prepared_scores[idx] for idx in selected_indices
-        ]
+        # top_debated = [
+        #     prepared_scores[idx] for idx in selected_indices
+        # ]
         top_debated = sorted(
-            top_debated,
+            debated_items,
+            #top_debated,
             key=lambda x: x.get("assumption_challenge_final", 0),
             reverse=True,
         )

@@ -457,37 +457,67 @@ if "baseline" in st.session_state:
     )
     selected_pairwise_eval = pairwise_eval_map[selected_pairwise_arm]
     selected_llm_scores = selected_pairwise_eval["llm_scores"]
-    idea_scores = selected_llm_scores.get("idea_scores", [])
-    comparisons = selected_llm_scores.get("usefulness_pairwise_comparisons", [])
-
-    idea_df = pd.DataFrame(idea_scores)
-    if idea_df.empty: st.warning("No per-idea usefulness scores available.")
-    else: 
-        usefulness_cols = [
+    top3_useful = selected_llm_scores.get("usefulness_pairwise_top3", [])
+    if not top3_useful: st.warning("No pairwise usefulness ranking available")
+    else:
+        st.markdown("Top 3 Most Useful Ideas")
+        top3_df = pd.DataFrame(top3_useful)
+        display_cols = [
+            "usefulness_rank",
             "idea_index",
             "idea_title",
-            "usefulness_llm",
-            "usefulness_pairwise",
             "usefulness_win_rate",
-            "usefulness",
+            "pairwise_wins",
+            "pairwise_ties",
+            "pairwise_losses",
         ]
         available_cols = [
-            col for col in usefulness_cols
-            if col in idea_df.columns
+            col for col in display_cols if col in top3_df.columns
         ]
-        st.markdown("Per-idea usefulness scores")
         st.dataframe(
-            idea_df[available_cols],
-            width="stretch",
+            top3_df[available_cols],
+            use_container_width=True,
         )
-    comparison_df = pd.DataFrame(comparisons)
-    if comparison_df.empty: st.info("No pairwise comparisons available")
-    else:
-        st.markdown("Pairwise comparisons available")
-        st.dataframe(
-            comparison_df,
-            width="stretch",
-        )
+        for item in top3_useful:
+            rank = item.get("usefulness_rank", "")
+            idea_index = item.get("idea_index", "")
+            idea_title = item.get("idea_title", "")
+            win_rate = item.get("usefulness_win_rate", None)
+            with st.expander(f"#{rank} - Idea {idea_index}: {idea_title}"):
+                st.write(item.get("idea_text", ""))
+                if win_rate is not None: st.metric("Pairwise Win Rate", f"{win_rate * 100:.1f}%")
+
+    # idea_scores = selected_llm_scores.get("idea_scores", [])
+    # comparisons = selected_llm_scores.get("usefulness_pairwise_comparisons", [])
+
+    # idea_df = pd.DataFrame(idea_scores)
+    # if idea_df.empty: st.warning("No per-idea usefulness scores available.")
+    # else: 
+    #     usefulness_cols = [
+    #         "idea_index",
+    #         "idea_title",
+    #         "usefulness_llm",
+    #         "usefulness_pairwise",
+    #         "usefulness_win_rate",
+    #         "usefulness",
+    #     ]
+    #     available_cols = [
+    #         col for col in usefulness_cols
+    #         if col in idea_df.columns
+    #     ]
+    #     st.markdown("Per-idea usefulness scores")
+    #     st.dataframe(
+    #         idea_df[available_cols],
+    #         width="stretch",
+    #     )
+    # comparison_df = pd.DataFrame(comparisons)
+    # if comparison_df.empty: st.info("No pairwise comparisons available")
+    # else:
+    #     st.markdown("Pairwise comparisons available")
+    #     st.dataframe(
+    #         comparison_df,
+    #         width="stretch",
+    #     )
 
     st.subheader("Evaluator Sanity Check")
     eval_dfs = {
@@ -557,9 +587,9 @@ if "baseline" in st.session_state:
             row = debate_df.loc[selected_idx]
             st.markdown("Scores")
             st.write({
-                "LLM judge score: ": row.get("asssumption_challenge_llm"),
+                "LLM judge score: ": row.get("assumption_challenge_llm"),
                 "Debate score: ": row.get("assumption_challenge_debate"),
-                "Final score: ": row.get("assumption_cuallenge"),
+                "Final score: ": row.get("assumption_challenge"),
                 "Confidence: ": row.get("confidence"),
             })
             with st.expander("Advocate argument"): st.write(row.get("advocate_argument", ""))

@@ -277,7 +277,7 @@ def evaluate_output(
 
     # multi agent debate for assumption challenge
     if run_debate: 
-        llm_scores["idea_scores"] = apply_assumption_debate_to_scores(
+        debate_result = apply_assumption_debate_to_scores(
             topic=topic,
             idea_scores=llm_scores.get("idea_scores", []),
             ideas=ideas,
@@ -286,34 +286,81 @@ def evaluate_output(
             model=model,
             top_k=3,
         )
+        llm_scores["idea_scores"] = debate_result.get(
+            "idea_scores",
+            llm_scores.get("idea_scores", []),
+        )
+        llm_scores["unmatched_assumptions"] = debate_result.get(
+            "unmatched_assumptions", [],
+        )
+    else:
+        llm_scores["assumption_debate_top3"] = []
+        llm_scores["unmatched_assumptions"] = []
 
     # Pairwise tournament - usefulness
-    pairwise_usefulness = run_usefulness_pairwise(
+    pairwise_result = run_usefulness_pairwise(
         topic=topic,
         ideas=ideas,
         backend=backend,
         model=model,
     )
+    pairwise_scores = pairwise_result.get(
+        "idea_scores", [],
+    )
+    ranked_pairwise = pairwise_result.get(
+        "ranked_idea_scores", None,
+    )
+    if ranked_pairwise is None:
+        ranked_pairwise = sorted(
+            pairwise_scores,
+            key=lambda x: (
+                x.get("usefulness_win_rate", 0),
+                x.get("pairwise_wins", 0),
+                -x.get("pairwise_losses", 0),
+            ),
+            reverse=True,
+        )
+        for rank, item in enumerate(ranked_pairwise, start=1): item["usefulness_rank"] = rank
+
+    title_by_index = {
+        item.get("idea_index"): item.get("idea_title", "")
+        for item in llm_scores.get("idea_scores", [])
+    }
+    for item in ranked_pairwise:
+        idx = item.get("idea_index")
+        item["idea_title"] = title_by_index.get(idx, "")
+        if (isinstance(idx, int) and 1 <= idx <= len(ideas)): item["idea_text"] = ideas[idx-1]
+        else: item["idea_text"] = ""
 
     pairwise_by_index = {
         item["idea_index"]: item
-        for item in pairwise_usefulness["idea_scores"]
+        for item in ranked_pairwise #pairwise_scores["idea_scores"]
     }
 
     for item in llm_scores.get("idea_scores", []):
         idx = item.get("idea_index")
         pairwise_item = pairwise_by_index.get(idx)
+        if not pairwise_item: continue
 
-        if pairwise_item:
-            # keep original llm absolute usefulness score
-            item["usefulness_llm"] = item.get("usefulness", 0)
-            # add pairwise fields
-            item["usefulness_pairwise"] = pairwise_item["usefulness_pairwise"]
-            item["usefulness_win_rate"] = pairwise_item["usefulness_win_rate"]
-            # replace original usefulness score with pairwise score
-            item["usefulness"] = pairwise_item["usefulness_pairwise"]
+        item["usefulness_pairwise"] = pairwise_item.get("usefulness_pairwise", None)
+        item["usefulness_win_rate"] = pairwise_item.get("usefulness_win_rate", None)
+        item["usefulness_rank"] = pairwise_item.get("usefulness_rank", None)
+        item["pairwise_wins"] = pairwise_item.get("pairwise_wins", None)
+        item["pairwise_losses"] = pairwise_item.get("pairwise_losses", None)
+        item["pairwise_ties"] = pairwise_item.get("pairwise_ties", None)
 
-    llm_scores["usefulness_pairwise_comparisons"] = pairwise_usefulness.get(
+        # if pairwise_item:
+        #     # keep original llm absolute usefulness score
+        #     item["usefulness_llm"] = item.get("usefulness", 0)
+        #     # add pairwise fields
+        #     item["usefulness_pairwise"] = pairwise_item["usefulness_pairwise"]
+        #     item["usefulness_win_rate"] = pairwise_item["usefulness_win_rate"]
+        #     # replace original usefulness score with pairwise score
+        #     item["usefulness"] = pairwise_item["usefulness_pairwise"]
+
+    llm_scores["usefulness_pairwise_top3"] = ranked_pairwise[:3]
+    llm_scores["usefulness_pairwise_ranked"] = ranked_pairwise
+    llm_scores["usefulness_pairwise_comparisons"] = pairwise_result.get(
         "comparisons", [],
     )
 
@@ -328,7 +375,7 @@ def evaluate_output(
             try: values.append(float(value))
             #try: values.append(float(item.get(metric, 0)))
             except Exception: pass
-        llm_scores[metric] = round(sum(values) / len(values), 3) if values else 0
+        llm_scores[metric] = round(sum(values) / len(values), 3) if values else None
 
     # simple non llm diagnostics
     simple_metrics = compute_simple_metrics(response_text)
