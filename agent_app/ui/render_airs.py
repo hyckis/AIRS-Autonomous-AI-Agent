@@ -73,15 +73,26 @@ def _feature_cards(directions):
         oneline = d.get("oneline", "")
         oneline_html = f'<div class="oneline">{esc(oneline)}</div>' if oneline else ""
 
+        # Only make the card expandable when the detail adds something beyond the
+        # always-visible one-liner; otherwise drop the chevron and expand body.
+        detail = d.get("detail", "")
+        expandable = bool(detail.strip()) and detail.strip() != oneline.strip()
+        card_cls = "lcard" if expandable else "lcard static"
+        chev_html = f'<span class="chev">{CHEV}</span>' if expandable else ""
+        body_html = (
+            f'<div class="body"><div class="inner">{esc(detail)}</div></div>'
+            if expandable else ""
+        )
+
         out.append(
-            f'''        <div class="lcard">
+            f'''        <div class="{card_cls}">
           <div class="lctop">
             <h4>{esc(d.get("title"))}</h4>
-            <span class="chev">{CHEV}</span>
+            {chev_html}
           </div>
           {lens_html}
           {oneline_html}
-          <div class="body"><div class="inner">{esc(d.get("detail", ""))}</div></div>
+          {body_html}
           {breaks_html}
           <div class="cite">{cite}</div>
         </div>'''
@@ -93,13 +104,23 @@ def _baseline_cards(ideas):
     """Arm A / Arm B ideas -> flat title + detail cards."""
     out = []
     for it in ideas:
+        title = it.get("title", "")
+        detail = it.get("detail", "")
+        # Expandable only when the detail says more than the title already does.
+        expandable = bool(detail.strip()) and detail.strip() != title.strip()
+        card_cls = "scard" if expandable else "scard static"
+        chev_html = f'<span class="chev">{CHEV}</span>' if expandable else ""
+        body_html = (
+            f'<div class="body"><div class="inner">{esc(detail)}</div></div>'
+            if expandable else ""
+        )
         out.append(
-            f'''            <div class="scard">
+            f'''            <div class="{card_cls}">
               <div class="st">
-                <h4>{esc(it.get("title"))}</h4>
-                <span class="chev">{CHEV}</span>
+                <h4>{esc(title)}</h4>
+                {chev_html}
               </div>
-              <div class="body"><div class="inner">{esc(it.get("detail", ""))}</div></div>
+              {body_html}
             </div>'''
         )
     return "\n".join(out)

@@ -25,25 +25,22 @@ from ui.run_builder import build_run
 from ui.render_airs import render as render_airs
 
 st.set_page_config(page_title="AIRS — Divergence Studio", layout="wide")
-# Use the full page width and trim Streamlit's default side/top padding so the
-# embedded Divergence Studio view isn't squeezed into a narrow centre column.
+# Match the page to the embedded Divergence Studio template: same 1400px width,
+# and hide Streamlit's default title/blurb and top toolbar, so the native input
+# row and the embed read as one cohesive page instead of app chrome stacked above
+# a separate view.
 st.markdown(
-    "<style>.block-container{padding-top:1.5rem;padding-left:2rem;"
-    "padding-right:2rem;max-width:100%;}</style>",
+    """
+    <style>
+      [data-testid="stHeader"]{display:none;}
+      .block-container{max-width:1400px;padding-top:1.1rem;
+        padding-left:22px;padding-right:22px;}
+    </style>
+    """,
     unsafe_allow_html=True,
 )
 
-st.title("Cognitive Diversity Research Agent")
-
-st.write(
-    "This prototype compares a traditional LLM research assistant with a "
-    "cognitive-diversity-preserving research agent."
-)
-
-topic = st.text_area(
-    "Enter a research topic:",
-    "AI agents in education"
-)
+topic = st.text_input("Research topic", "AI agents in education")
 
 # arXiv usage 
 use_llm_queries = st.checkbox(
