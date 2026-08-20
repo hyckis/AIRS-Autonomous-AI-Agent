@@ -159,7 +159,7 @@ def apply_assumption_debate_to_scores(
         assumption_item = assumption_by_id.get(assumption_id)
 
         item["assumption_id_normalized"] = assumption_id
-        challenged_assumption = str(item.get("cahllenged_assumption", "")).strip()
+        challenged_assumption = str(item.get("challenged_assumption", "")).strip()
 
         if assumption_item is not None:
             item["assumption_mapping_status"] = "matched"
@@ -168,7 +168,8 @@ def apply_assumption_debate_to_scores(
         elif (
             challenged_assumption 
             and "no specific assumption" not in challenged_assumption.lower()
-            and challenged_assumption.lower() not in {"none", "n/a", "null"}):
+            and challenged_assumption.lower() not in {"none", "n/a", "null"}
+        ):
             item["assumption_mapping_status"] = "unmapped"
             item["assumption_source"] = "idea_identified"
             debate_assumption_item = {
@@ -183,16 +184,14 @@ def apply_assumption_debate_to_scores(
         else:
             item["assumption_mapping_status"] = "no_assumption_identified"
             item["assumption_source"] = None
-            debate_assumption_item = (
-                "No usable challenged assumption identified; not eligible for debate."
-            )
+            debate_assumption_item = "No usable challenged assumption identified; not eligible for debate."
             prepared_scores.append(item)
             continue
 
         debate_candidates.append({
             "prepared_index": len(prepared_scores),
             "llm_score": llm_score,
-            "assumption_item": assumption_item,
+            "assumption_item": debate_assumption_item,
             "idea_text": idea_text,
         })
         
@@ -218,61 +217,64 @@ def apply_assumption_debate_to_scores(
 
         # prepared_scores.append(item)
 
-        # 2: select top-k candidates before debate
-        debate_candidates = sorted(
-            debate_candidates,
-            key=lambda x: x["llm_score"],
-            reverse=True,
-        )
-        selected_candidates = debate_candidates[:top_k]
+    # 2: select top-k candidates before debate
+    print("DEBUG debate candidates: ", len(debate_candidates))
+    debate_candidates = sorted(
+        debate_candidates,
+        key=lambda x: x["llm_score"],
+        reverse=True,
+    )
+    selected_candidates = debate_candidates[:top_k]
         # selected_indices = {
         #     candidate["prepared_index"] for candidate in selected_candidates
         # }
-        for candidate in debate_candidates[:top_k]:
-            idx = candidate["prepared_index"]
-            prepared_scores[idx]["debate_decision"] = (f"Not selected for top-{top_k} debate.")
+    for candidate in debate_candidates[:top_k]:
+        idx = candidate["prepared_index"]
+        prepared_scores[idx]["debate_decision"] = (f"Not selected for top-{top_k} debate.")
             # item = prepared_scores[idx]
             # item["debate_decision"] = (f"Not selected for Top{top_k} debate.")
             # item["assumption_challenge_final"] = (item["assumption_challenge_llm"])
 
-        # 3: debate only top k
-        debated_items = []
-        for candidate in selected_candidates:
-            idx = candidate["prepared_index"]
-            item = prepared_scores[idx]
-            item["debate_selected"] = True
-            debate_result = assumption_challenge_debate(
-                topic=topic,
-                idea_text=candidate["idea_text"],
-                assumption_item=candidate["assumption_item"],
-                backend=backend,
-                model=model,
-            )
-            item.update(debate_result)
-            debate_score = debate_result.get("assumption_challenge_debaate")
-            if (debate_score is not None and not debate_result.get("debate_parse_failed", False)):
-                item["assumption_challenge_final"] = debate_score
-            else: 
-                item["assumption_challenge_final"] = item["assumption_challenge_llm"]
+    # 3: debate only top k
+    debated_items = []
+    print("DEBUG debate candidates: ", len(debate_candidates))
+    for candidate in selected_candidates:
+        idx = candidate["prepared_index"]
+        item = prepared_scores[idx]
+        item["debate_selected"] = True
+        debate_result = assumption_challenge_debate(
+            topic=topic,
+            idea_text=candidate["idea_text"],
+            assumption_item=candidate["assumption_item"],
+            backend=backend,
+            model=model,
+        )
+        item.update(debate_result)
+        debate_score = debate_result.get("assumption_challenge_debate")
+        if (debate_score is not None and not debate_result.get("debate_parse_failed", False)):
+            item["assumption_challenge_final"] = debate_score
+        else: 
+            item["assumption_challenge_final"] = item["assumption_challenge_llm"]
 
-            debated_items.append(item)
+        debated_items.append(item)
 
-        # 4: re rank the debated top k
+    # 4: re rank the debated top k
         # top_debated = [
         #     prepared_scores[idx] for idx in selected_indices
         # ]
-        top_debated = sorted(
-            debated_items,
-            #top_debated,
-            key=lambda x: x.get("assumption_challenge_final", 0),
-            reverse=True,
-        )
-        for rank, item in enumerate(top_debated, start=1): item["assumption_challenge_rank"] = rank
-        return {
-            "idea_scores": prepared_scores,
-            "top_3_debate": top_debated,
-            "unmatched_assumptions": unmatched_assumptions,
-        }
+    top_debated = sorted(
+        debated_items,
+        #top_debated,
+        key=lambda x: x.get("assumption_challenge_final", 0),
+        reverse=True,
+    )
+    for rank, item in enumerate(top_debated, start=1): item["assumption_challenge_rank"] = rank
+
+    return {
+        "idea_scores": prepared_scores,
+        "top_3_debate": top_debated,
+        "unmatched_assumptions": unmatched_assumptions,
+    }
 
     # old debate - give scores
     #     item["assumption_challenge_llm"] = item.get("assumption_challenge", 0)
