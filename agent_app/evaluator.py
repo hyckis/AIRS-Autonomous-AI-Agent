@@ -1,7 +1,7 @@
 import re
 import json
 import numpy as np
-from util import extract_json
+from util import extract_json, split_ideas, extract_idea_title, short_title
 from llm_backend import call_llm
 from prompts_evaluator import (
     evaluate_with_llm_prompt,
@@ -10,7 +10,7 @@ from prompts_evaluator import (
 )
 from assumption_bank import (
     format_assumption_bank_for_prompt,
-    extract_idea_title,
+    # extract_idea_title,
     normalize_idea_scores,
 )
 from pairwise_tournament import run_usefulness_pairwise

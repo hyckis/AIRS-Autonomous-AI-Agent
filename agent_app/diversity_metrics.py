@@ -3,6 +3,7 @@ import numpy as np
 import sacrebleu
 from sentence_transformers import SentenceTransformer
 from vendi_score import vendi
+from util import split_ideas, extract_core_concept, extract_idea_title
 
 _embedding_model = None
 
@@ -12,7 +13,8 @@ def get_embedding_model():
         _embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
     return _embedding_model
 
-def split_ideas(text):
+# old idea parser
+def split_ideas_old(text):
     """
     Extract idea-like items from model output.
     Works with numbered lists, bullet lists, or paragraphs.
