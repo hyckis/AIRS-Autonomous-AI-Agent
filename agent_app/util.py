@@ -59,15 +59,19 @@ def normalize_text(text):
     text = re.sub(r"\n{3,}", "\n\n", text)
     return text.strip()
 
-def clean_markdown(text, max_len=None):
+def clean_markdown(text, max_len=None):    
     text = normalize_text(text)
 
     # remove markdown wrappers
+    text = re.sub(r"^\s*\d+\s*[\.\)]\s*", "", text)
     text = re.sub(r"^\s*[-*]\s+", "", text) 
     text = text.replace("**", "") 
     text = text.replace("__", "") 
     text = text.replace("*", "") 
     text = text.replace("`", "") 
+    # remove leading field label after numbering cleanup
+    text = re.sub(r"^\s*Title\s*:\s*", "", text, flags=re.IGNORECASE)
+    text = re.sub(r"\s+", " ", text).strip(" -:;|\n\t")
     # Remove dangling field labels 
     text = re.sub(rf"\b(?:{FIELD_RE})\s*:\s*$", "", text, flags=re.IGNORECASE) 
     # Normalize spaces 

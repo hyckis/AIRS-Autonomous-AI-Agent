@@ -432,7 +432,7 @@ if "baseline" in st.session_state:
             key="llm_detail_arm",
         )
 
-        if selected_arm == "A: Naive LLM":
+        if selected_arm == "A: Naive LLM": 
             idea_scores = baseline_eval["llm_scores"].get("idea_scores", [])
         elif selected_arm == "B: Strong Prompt":
             idea_scores = strong_eval["llm_scores"].get("idea_scores", [])
