@@ -20,6 +20,7 @@ from evaluator import (
 from diversity_metrics import evaluate_idea_set_diversity
 from literature_metrics import compute_literature_grounded_metrics
 from assumption_bank import generate_assumption_bank
+from util import split_ideas, parse_idea_block, extract_core_concept
 
 st.title("Cognitive Diversity Research Agent")
 
@@ -156,22 +157,48 @@ if st.button("Run Agent Comparison"):
     with st.spinner("Generating researcher-in-the-loop question..."):
         human_question = generate_human_question(topic, baseline, critique)
 
+    # single source of truth for all downstream idea parsing
+    arm_outputs = {
+        "A: Naive LLM": baseline,
+        "B: Strong Prompt": strong_baseline,
+        "C: Lens Agent": expanded,
+    }
+    ideas_by_arm = {
+        arm: split_ideas(output) for arm, output in arm_outputs.items()
+    }
+    parsed_by_arm = {
+        arm: [parse_idea_block(idea) for idea in ideas]
+        for arm, ideas in ideas_by_arm.items()
+    }
+    core_concepts_by_arm = {
+        arm: [extract_core_concept(idea) for idea in ideas]
+        for arm, ideas in ideas_by_arm.items()
+    }
+
     with st.spinner("Computing non-LLM diversity metrics..."):
         baseline_diversity = evaluate_idea_set_diversity(baseline)
         strong_diversity = evaluate_idea_set_diversity(strong_baseline)
         expanded_diversity = evaluate_idea_set_diversity(expanded)
 
+    # Override display/debug idea lists with the unified parser output 
+    baseline_diversity["ideas"] = ideas_by_arm["A: Naive LLM"] 
+    strong_diversity["ideas"] = ideas_by_arm["B: Strong Prompt"] 
+    expanded_diversity["ideas"] = ideas_by_arm["C: Lens Agent"] 
+    baseline_diversity["core_concepts"] = core_concepts_by_arm["A: Naive LLM"] 
+    strong_diversity["core_concepts"] = core_concepts_by_arm["B: Strong Prompt"] 
+    expanded_diversity["core_concepts"] = core_concepts_by_arm["C: Lens Agent"]
+
     with st.spinner("Computing literature-grounded novelty and evidence-support metrics..."):
         baseline_literature_metrics = compute_literature_grounded_metrics(
-            baseline_diversity["ideas"],
+            ideas_by_arm["A: Naive LLM"],
             literature["papers"],
         )
         strong_literature_metrics = compute_literature_grounded_metrics(
-            strong_diversity["ideas"],
+            ideas_by_arm["B: Strong Prompt"],
             literature["papers"],
         )
         expanded_literature_metrics = compute_literature_grounded_metrics(
-            expanded_diversity["ideas"],
+            ideas_by_arm["C: Lens Agent"],
             literature["papers"],
         )
 
@@ -179,7 +206,7 @@ if st.button("Run Agent Comparison"):
         baseline_eval = evaluate_output(
             topic=topic,
             response_text=baseline,
-            ideas=baseline_diversity["ideas"],
+            ideas=ideas_by_arm["A: Naive LLM"],
             assumption_bank=assumption_bank,
             backend="local_ollama",
             model=None,
@@ -188,7 +215,7 @@ if st.button("Run Agent Comparison"):
         strong_eval = evaluate_output(
             topic=topic,
             response_text=strong_baseline,
-            ideas=strong_diversity["ideas"],
+            ideas=ideas_by_arm["B: Strong Prompt"],
             assumption_bank=assumption_bank,
             backend="local_ollama",
             model=None,
@@ -197,7 +224,7 @@ if st.button("Run Agent Comparison"):
         expanded_eval = evaluate_output(
             topic=topic,
             response_text=expanded,
-            ideas=expanded_diversity["ideas"],
+            ideas=ideas_by_arm["C: Lens Agent"],
             assumption_bank=assumption_bank,
             backend="local_ollama",
             model=None,
@@ -220,6 +247,9 @@ if st.button("Run Agent Comparison"):
     st.session_state["baseline_diversity"] = baseline_diversity
     st.session_state["strong_diversity"] = strong_diversity
     st.session_state["expanded_diversity"] = expanded_diversity
+    st.session_state["ideas_by_arm"] = ideas_by_arm
+    st.session_state["parsed_by_arm"] = parsed_by_arm
+    st.session_state["core_concepts_by_arm"] = core_concepts_by_arm
 
 if "baseline" in st.session_state:
     baseline = st.session_state["baseline"]
@@ -238,6 +268,19 @@ if "baseline" in st.session_state:
     baseline_diversity = st.session_state["baseline_diversity"]
     strong_diversity = st.session_state["strong_diversity"]
     expanded_diversity = st.session_state["expanded_diversity"]
+    ideas_by_arm = st.session_state.get("ideas_by_arm", {
+        "A: Naive LLM": baseline_diversity.get("ideas", []),
+        "B: Strong Prompt": strong_diversity.get("ideas", []),
+        "C: Lens Agent": expanded_diversity.get("ideas", []),
+    })
+    parsed_by_arm = st.session_state.get("parsed_by_arm", {
+        arm: [parse_idea_block(idea) for idea in ideas]
+        for arm, ideas in ideas_by_arm.items()
+    })
+    core_concepts_by_arm = st.session_state.get("core_concepts_by_arm", {
+        arm: [extract_core_concept(idea) for idea in ideas]
+        for arm, ideas in ideas_by_arm.items()
+    })
 
     st.subheader("1. Three-Arm Idea Generation Comparison")
     col_a, col_b, col_c = st.columns(3)
@@ -289,7 +332,7 @@ if "baseline" in st.session_state:
     st.info(human_question)
 
     with st.expander("Assumption Bank (shared across all arms)"):
-        print(f"assumption_bank {assumption_bank[0]["id"]}:", assumption_bank)
+        if assumption_bank: print(f"assumption_bank {assumption_bank[0]["id"]}:", assumption_bank)
         if not assumption_bank: st.markdown("No assumption bank generated or parsing failed.")
         for item in assumption_bank:
             st.markdown(f"**{item['assumption']}**")
@@ -328,22 +371,15 @@ if "baseline" in st.session_state:
 
     with st.expander("Extracted Core Concepts"):
         selected_core_arm = st.selectbox(
-        "Select arm for core concepts",
-        ["A: Naive LLM", "B: Strong Prompt", "C: Lens Agent"],
-        key="core_concept_arm",
-    )
-
-        if selected_core_arm == "A: Naive LLM":
-            core_concepts = baseline_diversity.get("core_concepts", [])
-        elif selected_core_arm == "B: Strong Prompt":
-            core_concepts = strong_diversity.get("core_concepts", [])
-        else:
-            core_concepts = expanded_diversity.get("core_concepts", [])
-
+            "Select arm for core concepts",
+            ["A: Naive LLM", "B: Strong Prompt", "C: Lens Agent"],
+            key="core_concept_arm",
+        )
+        core_concepts = core_concepts_by_arm.get(selected_core_arm, [])
+        st.caption(f"{len(core_concepts)} core concepts extracted.")
         for i, concept in enumerate(core_concepts, start=1):
             st.markdown(f"**Core concept {i}**")
             st.write(concept)
-
 
     st.subheader("Literature-Grounded Metrics")
     literature_metric_df = pd.DataFrame([
@@ -526,9 +562,9 @@ if "baseline" in st.session_state:
         "C: Lens Agent": pd.DataFrame(expanded_eval["llm_scores"].get("idea_scores", [])),
     }
     expected_counts = {
-        "A: Naive LLM": len(baseline_diversity.get("ideas", [])),
-        "B: Strong Prompt": len(strong_diversity.get("ideas", [])),
-        "C: Lens Agent": len(expanded_diversity.get("ideas", [])),
+        "A: Naive LLM": len(ideas_by_arm.get("A: Naive LLM", [])),
+        "B: Strong Prompt": len(ideas_by_arm.get("B: Strong Prompt", [])),
+        "C: Lens Agent": len(ideas_by_arm.get("C: Lens Agent", [])),
     }
     for arm_name, eval_df in eval_dfs.items():
         warnings = audit_evaluation_results(
