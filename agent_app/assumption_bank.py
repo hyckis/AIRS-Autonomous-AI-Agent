@@ -179,6 +179,25 @@ def normalize_idea_scores(llm_scores, ideas, assumption_bank):
     """
     Add idea_title and normalize assumption_id / challenged_assumption.
     """
+    if llm_scores.get("parse_failed"):
+        llm_scores["idea_scores"] = [
+            {
+                "idea_index": i,
+                "idea_title": extract_idea_title(idea),
+                "assumption_id": None,
+                "challenged_assumption": "Evaluation parsing failed",
+                "rationale": llm_scores.get("summary", ""),
+                "novelty": None,
+                "diversity": None,
+                "usefulness": None,
+                "assumption_challenge": None,
+                "parse_failed": True,
+            }
+            for i, idea in enumerate(ideas, start=1)
+        ]
+        llm_scores["raw_idea_score_count"] = 0
+        llm_scores["normalized_idea_score_count"] = len(ideas)
+        return llm_scores
 
     if ideas is None: ideas = []
     if assumption_bank is None: assumption_bank = []

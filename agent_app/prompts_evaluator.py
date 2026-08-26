@@ -151,6 +151,96 @@ Return exactly this JSON structure:
 }}
         """
 
+def evaluate_single_idea_prompt(topic, bank_text, idea_payload, all_idea_titles):
+   return f"""
+You are a strict JSON-only evaluation engine.
+
+Evaluate ONE research idea using the provided topic-level assumption bank.
+
+Return ONLY one valid JSON object.
+Do not include markdown.
+Do not wrap the JSON in ```json.
+Do not include explanations outside the JSON.
+
+Topic:
+{topic}
+
+Pre-identified dominant assumptions:
+Use these assumptions as the primary reference for assumption_challenge scoring.
+The challenge_criteria under each assumption are LLM-generated task-specific evaluation criteria.
+Use them directly when assigning assumption_challenge scores.
+Only use assumption_id = null if none of the listed assumptions clearly apply.
+
+{bank_text}
+
+All idea titles in this set, for diversity comparison:
+{json.dumps(all_idea_titles, ensure_ascii=False, indent=2)}
+
+Idea to evaluate:
+{json.dumps(idea_payload, ensure_ascii=False, indent=2)}
+
+Use a 1-5 scale.
+
+Metric definitions:
+
+1. novelty:
+How original, non-obvious, or unexpected is this idea relative to mainstream research directions?
+1 = very conventional
+2 = minor variation on common ideas
+3 = moderately original extension
+4 = clearly underexplored or unconventional
+5 = highly original and surprising
+
+2. diversity:
+How conceptually distinct is this idea from the other ideas in the same set?
+1 = highly overlapping with other ideas
+2 = minor variation
+3 = moderately distinct
+4 = substantially distinct
+5 = explores a very different perspective, stakeholder, method, or framing
+
+3. usefulness:
+How useful, researchable, and valuable is this idea for research planning?
+1 = vague or unrealistic
+2 = limited research value
+3 = moderately useful
+4 = clear and actionable
+5 = highly valuable, feasible, and researchable
+
+4. assumption_challenge:
+First, identify which assumption from the assumption bank the idea challenges.
+Then judge how strongly the idea challenges that assumption according to the assumption's challenge_criteria.
+
+1 = conformist; accepts the dominant assumption
+2 = surface variation; changes implementation but the dominant assumption still holds
+3 = partial challenge; challenges a secondary aspect of the assumption
+4 = strong challenge; challenges a core aspect of the assumption
+5 = core premise reversal; the assumption would no longer hold if this idea were adopted
+
+Rules:
+- assumption_id must be one of the IDs from the assumption bank.
+- If no listed assumption is clearly challenged, set assumption_id to null.
+- If assumption_id is null, challenged_assumption must be "No specific assumption directly addressed".
+- If assumption_id is null, assumption_challenge must be 1 or 2.
+- Do not assign assumption_challenge >= 3 unless the idea clearly challenges one listed assumption.
+- Do not assign assumption_challenge >= 4 unless the idea directly reverses, undermines, or reframes a core part of one listed assumption.
+- idea_title must copy the provided idea_title exactly.
+
+Return exactly this JSON structure:
+
+{{
+  "idea_index": 1,
+  "idea_title": "copy the provided idea_title exactly",
+  "assumption_id": 1,
+  "challenged_assumption": "copy the matched assumption text, or 'No specific assumption directly addressed'",
+  "novelty": 1,
+  "diversity": 1,
+  "usefulness": 1,
+  "assumption_challenge": 1,
+  "rationale": "One short explanation referencing the matched assumption and challenge_criteria."
+}}
+"""
+
 
 def evaluate_cognitive_diversity_prompt(topic, response_text):
     return f"""

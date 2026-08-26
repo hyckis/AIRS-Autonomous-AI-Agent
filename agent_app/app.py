@@ -20,6 +20,7 @@ from evaluator import (
 from diversity_metrics import evaluate_idea_set_diversity
 from literature_metrics import compute_literature_grounded_metrics
 from assumption_bank import generate_assumption_bank
+from util import split_ideas, parse_idea_block, extract_core_concept
 
 st.title("Cognitive Diversity Research Agent")
 
@@ -156,22 +157,48 @@ if st.button("Run Agent Comparison"):
     with st.spinner("Generating researcher-in-the-loop question..."):
         human_question = generate_human_question(topic, baseline, critique)
 
+    # single source of truth for all downstream idea parsing
+    arm_outputs = {
+        "A: Naive LLM": baseline,
+        "B: Strong Prompt": strong_baseline,
+        "C: Lens Agent": expanded,
+    }
+    ideas_by_arm = {
+        arm: split_ideas(output) for arm, output in arm_outputs.items()
+    }
+    parsed_by_arm = {
+        arm: [parse_idea_block(idea) for idea in ideas]
+        for arm, ideas in ideas_by_arm.items()
+    }
+    core_concepts_by_arm = {
+        arm: [extract_core_concept(idea) for idea in ideas]
+        for arm, ideas in ideas_by_arm.items()
+    }
+
     with st.spinner("Computing non-LLM diversity metrics..."):
         baseline_diversity = evaluate_idea_set_diversity(baseline)
         strong_diversity = evaluate_idea_set_diversity(strong_baseline)
         expanded_diversity = evaluate_idea_set_diversity(expanded)
 
+    # Override display/debug idea lists with the unified parser output 
+    baseline_diversity["ideas"] = ideas_by_arm["A: Naive LLM"] 
+    strong_diversity["ideas"] = ideas_by_arm["B: Strong Prompt"] 
+    expanded_diversity["ideas"] = ideas_by_arm["C: Lens Agent"] 
+    baseline_diversity["core_concepts"] = core_concepts_by_arm["A: Naive LLM"] 
+    strong_diversity["core_concepts"] = core_concepts_by_arm["B: Strong Prompt"] 
+    expanded_diversity["core_concepts"] = core_concepts_by_arm["C: Lens Agent"]
+
     with st.spinner("Computing literature-grounded novelty and evidence-support metrics..."):
         baseline_literature_metrics = compute_literature_grounded_metrics(
-            baseline_diversity["ideas"],
+            ideas_by_arm["A: Naive LLM"],
             literature["papers"],
         )
         strong_literature_metrics = compute_literature_grounded_metrics(
-            strong_diversity["ideas"],
+            ideas_by_arm["B: Strong Prompt"],
             literature["papers"],
         )
         expanded_literature_metrics = compute_literature_grounded_metrics(
-            expanded_diversity["ideas"],
+            ideas_by_arm["C: Lens Agent"],
             literature["papers"],
         )
 
@@ -179,7 +206,7 @@ if st.button("Run Agent Comparison"):
         baseline_eval = evaluate_output(
             topic=topic,
             response_text=baseline,
-            ideas=baseline_diversity["ideas"],
+            ideas=ideas_by_arm["A: Naive LLM"],
             assumption_bank=assumption_bank,
             backend="local_ollama",
             model=None,
@@ -188,7 +215,7 @@ if st.button("Run Agent Comparison"):
         strong_eval = evaluate_output(
             topic=topic,
             response_text=strong_baseline,
-            ideas=strong_diversity["ideas"],
+            ideas=ideas_by_arm["B: Strong Prompt"],
             assumption_bank=assumption_bank,
             backend="local_ollama",
             model=None,
@@ -197,7 +224,7 @@ if st.button("Run Agent Comparison"):
         expanded_eval = evaluate_output(
             topic=topic,
             response_text=expanded,
-            ideas=expanded_diversity["ideas"],
+            ideas=ideas_by_arm["C: Lens Agent"],
             assumption_bank=assumption_bank,
             backend="local_ollama",
             model=None,
@@ -220,6 +247,9 @@ if st.button("Run Agent Comparison"):
     st.session_state["baseline_diversity"] = baseline_diversity
     st.session_state["strong_diversity"] = strong_diversity
     st.session_state["expanded_diversity"] = expanded_diversity
+    st.session_state["ideas_by_arm"] = ideas_by_arm
+    st.session_state["parsed_by_arm"] = parsed_by_arm
+    st.session_state["core_concepts_by_arm"] = core_concepts_by_arm
 
 if "baseline" in st.session_state:
     baseline = st.session_state["baseline"]
@@ -238,6 +268,19 @@ if "baseline" in st.session_state:
     baseline_diversity = st.session_state["baseline_diversity"]
     strong_diversity = st.session_state["strong_diversity"]
     expanded_diversity = st.session_state["expanded_diversity"]
+    ideas_by_arm = st.session_state.get("ideas_by_arm", {
+        "A: Naive LLM": baseline_diversity.get("ideas", []),
+        "B: Strong Prompt": strong_diversity.get("ideas", []),
+        "C: Lens Agent": expanded_diversity.get("ideas", []),
+    })
+    parsed_by_arm = st.session_state.get("parsed_by_arm", {
+        arm: [parse_idea_block(idea) for idea in ideas]
+        for arm, ideas in ideas_by_arm.items()
+    })
+    core_concepts_by_arm = st.session_state.get("core_concepts_by_arm", {
+        arm: [extract_core_concept(idea) for idea in ideas]
+        for arm, ideas in ideas_by_arm.items()
+    })
 
     st.subheader("1. Three-Arm Idea Generation Comparison")
     col_a, col_b, col_c = st.columns(3)
@@ -289,7 +332,7 @@ if "baseline" in st.session_state:
     st.info(human_question)
 
     with st.expander("Assumption Bank (shared across all arms)"):
-        print(f"assumption_bank {assumption_bank[0]["id"]}:", assumption_bank)
+        if assumption_bank: print(f"assumption_bank {assumption_bank[0]["id"]}:", assumption_bank)
         if not assumption_bank: st.markdown("No assumption bank generated or parsing failed.")
         for item in assumption_bank:
             st.markdown(f"**{item['assumption']}**")
@@ -328,22 +371,15 @@ if "baseline" in st.session_state:
 
     with st.expander("Extracted Core Concepts"):
         selected_core_arm = st.selectbox(
-        "Select arm for core concepts",
-        ["A: Naive LLM", "B: Strong Prompt", "C: Lens Agent"],
-        key="core_concept_arm",
-    )
-
-        if selected_core_arm == "A: Naive LLM":
-            core_concepts = baseline_diversity.get("core_concepts", [])
-        elif selected_core_arm == "B: Strong Prompt":
-            core_concepts = strong_diversity.get("core_concepts", [])
-        else:
-            core_concepts = expanded_diversity.get("core_concepts", [])
-
+            "Select arm for core concepts",
+            ["A: Naive LLM", "B: Strong Prompt", "C: Lens Agent"],
+            key="core_concept_arm",
+        )
+        core_concepts = core_concepts_by_arm.get(selected_core_arm, [])
+        st.caption(f"{len(core_concepts)} core concepts extracted.")
         for i, concept in enumerate(core_concepts, start=1):
             st.markdown(f"**Core concept {i}**")
             st.write(concept)
-
 
     st.subheader("Literature-Grounded Metrics")
     literature_metric_df = pd.DataFrame([
@@ -432,7 +468,7 @@ if "baseline" in st.session_state:
             key="llm_detail_arm",
         )
 
-        if selected_arm == "A: Naive LLM":
+        if selected_arm == "A: Naive LLM": 
             idea_scores = baseline_eval["llm_scores"].get("idea_scores", [])
         elif selected_arm == "B: Strong Prompt":
             idea_scores = strong_eval["llm_scores"].get("idea_scores", [])
@@ -444,6 +480,81 @@ if "baseline" in st.session_state:
         else:
             st.warning("No per-idea LLM judge details available.")
 
+    st.subheader("Pairwise Usefulness Tournament")
+    pairwise_eval_map = {
+        "A: Naive LLM": baseline_eval,
+        "B: Strong Prompt": strong_eval,
+        "C: Lens Agent": expanded_eval,
+    }
+    selected_pairwise_arm = st.selectbox(
+        "Select arm for pairwise usefulness details",
+        list(pairwise_eval_map.keys()),
+        key="pairwise_arm_select",
+    )
+    selected_pairwise_eval = pairwise_eval_map[selected_pairwise_arm]
+    selected_llm_scores = selected_pairwise_eval["llm_scores"]
+    top3_useful = selected_llm_scores.get("usefulness_pairwise_top3", [])
+    if not top3_useful: st.warning("No pairwise usefulness ranking available")
+    else:
+        st.markdown("Top 3 Most Useful Ideas")
+        top3_df = pd.DataFrame(top3_useful)
+        display_cols = [
+            "usefulness_rank",
+            "idea_index",
+            "idea_title",
+            "usefulness_win_rate",
+            "pairwise_wins",
+            "pairwise_ties",
+            "pairwise_losses",
+        ]
+        available_cols = [
+            col for col in display_cols if col in top3_df.columns
+        ]
+        st.dataframe(
+            top3_df[available_cols],
+            use_container_width=True,
+        )
+        for item in top3_useful:
+            rank = item.get("usefulness_rank", "")
+            idea_index = item.get("idea_index", "")
+            idea_title = item.get("idea_title", "")
+            win_rate = item.get("usefulness_win_rate", None)
+            with st.expander(f"#{rank} - Idea {idea_index}: {idea_title}"):
+                st.write(item.get("idea_text", ""))
+                if win_rate is not None: st.metric("Pairwise Win Rate", f"{win_rate * 100:.1f}%")
+
+    # idea_scores = selected_llm_scores.get("idea_scores", [])
+    # comparisons = selected_llm_scores.get("usefulness_pairwise_comparisons", [])
+
+    # idea_df = pd.DataFrame(idea_scores)
+    # if idea_df.empty: st.warning("No per-idea usefulness scores available.")
+    # else: 
+    #     usefulness_cols = [
+    #         "idea_index",
+    #         "idea_title",
+    #         "usefulness_llm",
+    #         "usefulness_pairwise",
+    #         "usefulness_win_rate",
+    #         "usefulness",
+    #     ]
+    #     available_cols = [
+    #         col for col in usefulness_cols
+    #         if col in idea_df.columns
+    #     ]
+    #     st.markdown("Per-idea usefulness scores")
+    #     st.dataframe(
+    #         idea_df[available_cols],
+    #         width="stretch",
+    #     )
+    # comparison_df = pd.DataFrame(comparisons)
+    # if comparison_df.empty: st.info("No pairwise comparisons available")
+    # else:
+    #     st.markdown("Pairwise comparisons available")
+    #     st.dataframe(
+    #         comparison_df,
+    #         width="stretch",
+    #     )
+
     st.subheader("Evaluator Sanity Check")
     eval_dfs = {
         "A: Naive LLM": pd.DataFrame(baseline_eval["llm_scores"].get("idea_scores", [])),
@@ -451,9 +562,9 @@ if "baseline" in st.session_state:
         "C: Lens Agent": pd.DataFrame(expanded_eval["llm_scores"].get("idea_scores", [])),
     }
     expected_counts = {
-        "A: Naive LLM": len(baseline_diversity.get("ideas", [])),
-        "B: Strong Prompt": len(strong_diversity.get("ideas", [])),
-        "C: Lens Agent": len(expanded_diversity.get("ideas", [])),
+        "A: Naive LLM": len(ideas_by_arm.get("A: Naive LLM", [])),
+        "B: Strong Prompt": len(ideas_by_arm.get("B: Strong Prompt", [])),
+        "C: Lens Agent": len(ideas_by_arm.get("C: Lens Agent", [])),
     }
     for arm_name, eval_df in eval_dfs.items():
         warnings = audit_evaluation_results(
@@ -512,9 +623,9 @@ if "baseline" in st.session_state:
             row = debate_df.loc[selected_idx]
             st.markdown("Scores")
             st.write({
-                "LLM judge score: ": row.get("asssumption_challenge_llm"),
+                "LLM judge score: ": row.get("assumption_challenge_llm"),
                 "Debate score: ": row.get("assumption_challenge_debate"),
-                "Final score: ": row.get("assumption_cuallenge"),
+                "Final score: ": row.get("assumption_challenge"),
                 "Confidence: ": row.get("confidence"),
             })
             with st.expander("Advocate argument"): st.write(row.get("advocate_argument", ""))
