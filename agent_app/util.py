@@ -1,6 +1,7 @@
 # used as a parser for json and output text
 import json
 import re
+import html
 
 # sometimes json output contains “”; ‘’ rather than "" that makes parsing failed
 def normalize_quotes(text):
@@ -50,7 +51,7 @@ CHALLENGE_FIELDS = [ "Challenges Dominant Assumption", "Challenges Assumption", 
 DIVERSITY_FIELDS = [ "Preserves Cognitive Diversity", "Cognitive Diversity Preservation", "Cognitive Diversity", ] 
 SUPPORT_FIELDS = [ "Supporting Papers", "Supporting Paper", "Closest Paper", "Closet Paper",  ] # keep typo for backward compatibility 
 SPECULATIVE_FIELDS = [ "Speculative Extension", ] 
-META_FIELDS = [ "Differentiation", "Metrics", "Key Metrics", "Potential Homogenization Concern", "Potential Homogenization Risk", "Evidence Count", "Evidence Ratio", "Pairwise Win Rate", "Novelty", ] 
+META_FIELDS = [ "Differentiation", "Metrics", "Key Metrics", "Key Focus", "Potential Homogenization Concern", "Potential Homogenization Risk", "Evidence Count", "Evidence Ratio", "Pairwise Win Rate", "Novelty", ] 
 ALL_FIELDS = ( TITLE_FIELDS + DESCRIPTION_FIELDS + CHALLENGE_FIELDS + DIVERSITY_FIELDS + SUPPORT_FIELDS + SPECULATIVE_FIELDS + META_FIELDS ) 
 # Important: longer fields first. 
 # # Example: "Supporting Papers" should be matched before "Supporting Paper". 
@@ -61,6 +62,7 @@ FIELD_RE = "|".join(re.escape(x) for x in ALL_FIELDS)
 def normalize_text(text):
     if text is None: return ""
     text = str(text)
+    text = html.unescape(text)
 
     # normalize common markdown/unicode artifacts
     text = text.replace("\u00a0", " ") 
@@ -98,7 +100,7 @@ def clean_core_concept_text(text, max_len=None):
     # Remove quote wrappers. 
     text = text.strip("“”\"' ") 
     # Remove metadata that should not enter embedding. 
-    text = re.sub( r"\s*Key metrics\s*:\s*.*$", "", text, flags=re.IGNORECASE | re.DOTALL, ) 
+    text = re.sub( r"\s*Key\s+(?:Focus|Metrics)\s*:\s*.*$", "", text, flags=re.IGNORECASE | re.DOTALL, ) 
     text = re.sub( r"\s*\(Focus\s*:\s*.*?\)\s*$", "", text, flags=re.IGNORECASE | re.DOTALL, ) 
     text = re.sub( r"\s*\((?:Technical Researcher Focus|Policy/Ethics focus)\)\s*$", "", text, flags=re.IGNORECASE | re.DOTALL, ) 
     # Remove dangling field labels. 
@@ -116,7 +118,7 @@ def remove_meta_notes(text):
     meta_patterns = [ 
         r"\s*Potential Homogenization Concern\s*:\s*.*$", 
         r"\s*Potential Homogenization Risk\s*:\s*.*$", 
-        r"\s*Key metrics\s*:\s*.*$", 
+        r"\s*Key\s+(?:Focus|Metrics)\s*:\s*.*$", 
         r"\s*\(Likely LLM Focus\s*:\s*.*?\)", 
         r"\s*\(Potential homogenization\s*:\s*.*?\)", 
         r"\s*\(Potential assumption\s*:\s*.*?\)", 
