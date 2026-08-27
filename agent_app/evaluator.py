@@ -159,6 +159,7 @@ def evaluate_with_llm_idea_batch(topic, response_text, ideas=None, assumption_ba
                 "usefulness": None,
                 "assumption_challenge": None,
                 "parse_failed": True,
+                "raw_judge_output": single_result.get("raw_output", ""),
             })
             continue
 
@@ -201,7 +202,7 @@ def evaluate_with_llm_idea_batch(topic, response_text, ideas=None, assumption_ba
 
     averaged["summary"] = (
         f"Batch judge failed; used per-idea fallback. "
-        f"Parse failures: {parse_failed_count}/{len(per_idea_scores)}."
+        f"Parse faliures: {parse_failed_count}/{len(per_idea_scores)}."
     )
     averaged["idea_scores"] = per_idea_scores
     averaged["parse_failed"] = parse_failed_count == len(per_idea_scores)

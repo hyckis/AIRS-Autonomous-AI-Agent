@@ -190,15 +190,15 @@ if st.button("Run Agent Comparison"):
 
     with st.spinner("Computing literature-grounded novelty and evidence-support metrics..."):
         baseline_literature_metrics = compute_literature_grounded_metrics(
-            ideas_by_arm["A: Naive LLM"],
+            core_concepts_by_arm["A: Naive LLM"],
             literature["papers"],
         )
         strong_literature_metrics = compute_literature_grounded_metrics(
-            ideas_by_arm["B: Strong Prompt"],
+            core_concepts_by_arm["B: Strong Prompt"],
             literature["papers"],
         )
         expanded_literature_metrics = compute_literature_grounded_metrics(
-            ideas_by_arm["C: Lens Agent"],
+            core_concepts_by_arm["C: Lens Agent"],
             literature["papers"],
         )
 
@@ -625,7 +625,7 @@ if "baseline" in st.session_state:
             st.write({
                 "LLM judge score: ": row.get("assumption_challenge_llm"),
                 "Debate score: ": row.get("assumption_challenge_debate"),
-                "Final score: ": row.get("assumption_challenge"),
+                "Score used in main table: ": row.get("assumption_challenge"),
                 "Confidence: ": row.get("confidence"),
             })
             with st.expander("Advocate argument"): st.write(row.get("advocate_argument", ""))

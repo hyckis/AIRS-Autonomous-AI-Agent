@@ -12,6 +12,13 @@ Generate 8 plausible research directions that a standard LLM research assistant 
 
 Keep them useful and clear.
 Return as a numbered list.
+
+Output rules:
+- Do not include an introduction.
+- Do not include a conclusion.
+- Do not include notes to the researcher.
+- Do not include follow-up questions.
+- End immediately after the 8th research direction.
     """
 
 def diversity_expander_prompt(topic, baseline_response, critique, literature_context):
@@ -52,6 +59,13 @@ For each direction, include:
     Supporting papers (cite title and URL from the retrieved literature above), or label as "speculative extension" if not directly supported by a retrieved paper
 
 Only cite papers from the retrieved literature list. Do not invent citations.
+
+Output rules:
+- Do not include an introduction.
+- Do not include a conclusion.
+- Do not include notes to the researcher.
+- Do not include follow-up questions.
+- End immediately after the 8th research direction.
     """
 
 
@@ -81,6 +95,13 @@ For each direction, include:
 - title
 - one-sentence description
 - why it is different from the others
+
+Output rules:
+- Do not include an introduction.
+- Do not include a conclusion.
+- Do not include notes to the researcher.
+- Do not include follow-up questions.
+- End immediately after the 8th research direction.
 """
 
 def detect_homogeneity_prompt(topic, baseline_response):
@@ -100,6 +121,14 @@ Analyze:
     4. What perspectives are missing?
 
 Return a concise critique with bullet points.
+
+Output rules:
+- Return only the critique.
+- Do not include an introduction.
+- Do not include a conclusion.
+- Do not include notes to the researcher.
+- Do not include follow-up questions.
+- End immediately after the 8th research direction.
     """
 
 def human_question_prompt(topic, baseline_response, critique):
@@ -118,6 +147,14 @@ Homogeneity critique:
 Ask ONE high-value question that would help the researcher choose what kind of originality they want to pursue.
 
 The question should not be generic. It should reveal a meaningful strategic choice.
+
+Output rules:
+- Return only the research question.
+- Do not include an introduction.
+- Do not include a conclusion.
+- Do not include notes to the researcher.
+- Do not include follow-up questions.
+- End immediately after the 8th research direction.
     """
 
 def arxiv_prompt(topic, min_year):
