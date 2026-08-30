@@ -100,11 +100,17 @@ def _split_question(text):
         return _sentence_split(text)  # no question mark: first sentence is the ask
     question = text[:idx + 1].strip()
     rationale = text[idx + 1:].strip()
-    # Drop a short leading preamble like "A strategic question: <the ask>?"
+    # Drop a leading preamble that ends in a colon and reads like a lead-in, e.g.
+    # "Given the identified homogenization..., I'd like to ask: <the ask>?"
     if ":" in question:
-        pre, after = question.split(":", 1)
-        if "?" in after and len(pre.split()) <= 8:
-            question = after.strip()
+        before, _, after = question.rpartition(":")
+        after = after.strip()
+        cues = ("ask", "question", "following", "pose", "wonder", "consider",
+                "propose", "raise", "like to", "want to", "here is", "here's",
+                "i'd", "i would", "let me", "given", "my ")
+        if (after.endswith("?") and len(after.split()) >= 3
+                and any(c in before.lower() for c in cues)):
+            question = after
     return question, rationale
 
 
