@@ -89,7 +89,25 @@ def run_usefulness_pairwise(
 
         results.append(rec)
 
+    ranked_results = sorted(
+        results,
+        key=lambda x: (
+            x["usefulness_win_rate"],
+            x["pairwise_wins"],
+            -x["pairwise_losses"],
+        ),
+        reverse=True,
+    )
+    for rank, rec in enumerate(ranked_results, start=1):
+        rec["usefulness_rank"] = rank
+        idea_idx = rec["idea_index"]
+        rec["idea_text"] = ideas[idea_idx - 1]
+
+    top_3 = ranked_results[:3]
+
     return {
         "idea_scores": results,
+        "ranked_idea_scores": ranked_results,
+        "top_3": top_3,
         "comparisons": comparisons,
     }
