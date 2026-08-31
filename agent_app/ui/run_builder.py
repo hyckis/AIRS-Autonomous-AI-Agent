@@ -436,7 +436,7 @@ def build_run(session_state, topic):
                 "ideas": _baseline_ideas(baseline_div),
             },
             "B": {
-                "label": "Strong ChatGPT baseline",
+                "label": "Strong baseline",
                 "sublabel": "Arm B",
                 "ideas": _baseline_ideas(strong_div),
             },

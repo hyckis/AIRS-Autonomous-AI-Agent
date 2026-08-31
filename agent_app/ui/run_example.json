@@ -17,7 +17,7 @@
       ]
     },
     "B": {
-      "label": "Strong ChatGPT baseline",
+      "label": "Strong baseline",
       "sublabel": "Arm B",
       "ideas": [
         { "title": "Dynamic pricing near closing time", "detail": "Discount perishables in the last hour. Borrowed from grocery retail." },
