@@ -1,7 +1,8 @@
 {
   "topic": "How might we reduce food waste in university dining halls?",
   "generated_at": "2026-07-13T14:00:00Z",
-  "discussion_prompt": "Arm C reframed the question from “how do we waste less?” to “who decides what counts as waste?” Which reframing changes what you'd actually build?",
+  "discussion_prompt": "Two of Arm C's strongest directions — surplus-as-access and the student-run rescue guild — assume dining services will hand over budget and keys. Which of those assumptions can you actually test on your campus before the next iteration, and which should the agent drop?",
+  "discussion_rationale": "The agent surfaces where its most divergent ideas depend on institutional buy-in it can't verify, so a researcher can prune or greenlight them before more compute is spent.",
 
   "arms": {
     "A": {
@@ -36,7 +37,13 @@
           "oneline": "Treat extra food as planned hospitality, not error.",
           "detail": "Route a dignified surplus to a pickup fridge instead of squeezing waste to zero.",
           "breaks": "that waste is always something to minimize.",
-          "evidence": { "type": "paper", "citation": "Edwards & Mercer, 2019 - surplus redistribution", "url": "https://arxiv.org/abs/0000.00000" }
+          "evidence": { "type": "paper", "citation": "Edwards & Mercer, 2019 - surplus redistribution", "url": "https://arxiv.org/abs/0000.00000" },
+          "eval": {
+            "judge": { "novelty": 4.6, "diversity": 4.4, "usefulness": 4.2, "assumption_challenge": 4.8, "rationale": "Inverts the core scarcity frame; concrete surplus-as-access mechanism keeps it actionable rather than purely provocative." },
+            "literature": { "novelty": 0.71, "evidence_count": 2, "evidence_ratio": 0.40, "closest_paper": { "title": "Edwards & Mercer, 2019 - surplus redistribution", "url": "https://arxiv.org/abs/0000.00000", "similarity": 0.62 }, "supporting_sources": [ { "title": "Edwards & Mercer, 2019 - surplus redistribution", "url": "https://arxiv.org/abs/0000.00000", "similarity": 0.62 }, { "title": "Papargyropoulou, 2014 - food waste hierarchy", "url": "https://arxiv.org/abs/0000.00001", "similarity": 0.48 } ] },
+            "debated": true,
+            "usefulness_rank": 3
+          }
         },
         {
           "title": "Center dining staff & food-insecure students",
@@ -44,7 +51,13 @@
           "oneline": "Surplus becomes quiet access, co-designed by the people closest to it.",
           "detail": "A waste-to-access pipeline built with the people who plate the food and the students who skip meals.",
           "breaks": "that the diner is the only user worth designing for.",
-          "evidence": { "type": "paper", "citation": "El Bilali, 2021 - campus food justice", "url": "https://arxiv.org/abs/0000.00000" }
+          "evidence": { "type": "paper", "citation": "El Bilali, 2021 - campus food justice", "url": "https://arxiv.org/abs/0000.00000" },
+          "eval": {
+            "judge": { "novelty": 4.1, "diversity": 4.3, "usefulness": 4.7, "assumption_challenge": 4.4, "rationale": "Reframes the user; strongest practical leverage because staff and food-insecure students already hold the access levers." },
+            "literature": { "novelty": 0.64, "evidence_count": 3, "evidence_ratio": 0.60, "closest_paper": { "title": "El Bilali, 2021 - campus food justice", "url": "https://arxiv.org/abs/0000.00000", "similarity": 0.69 }, "supporting_sources": [ { "title": "El Bilali, 2021 - campus food justice", "url": "https://arxiv.org/abs/0000.00000", "similarity": 0.69 }, { "title": "Nazmi, 2019 - campus food insecurity", "url": "https://arxiv.org/abs/0000.00002", "similarity": 0.55 } ] },
+            "debated": false,
+            "usefulness_rank": 1
+          }
         },
         {
           "title": "What if tracking creates a shaming culture?",
@@ -52,7 +65,13 @@
           "oneline": "Design the counter-move before the tracking app exists.",
           "detail": "Aggregate-only data, no per-person scores, so low-income eaters aren't surveilled for taking extra.",
           "breaks": "that more measurement is automatically better.",
-          "evidence": { "type": "speculative" }
+          "evidence": { "type": "speculative" },
+          "eval": {
+            "judge": { "novelty": 4.3, "diversity": 4.0, "usefulness": 3.6, "assumption_challenge": 4.6, "rationale": "Names a real failure mode of the popular tracking idea; slightly lower usefulness because the counter-move is defensive rather than generative." },
+            "literature": { "novelty": 0.83, "evidence_count": 0, "evidence_ratio": 0.0, "closest_paper": null, "supporting_sources": [] },
+            "debated": true,
+            "usefulness_rank": null
+          }
         },
         {
           "title": "Family-style communal serving tables",
@@ -60,7 +79,13 @@
           "oneline": "Shift portioning from the tray to the table.",
           "detail": "Shared platters (thali, izakaya, mensa) cut per-plate waste where individual trays are the Western default.",
           "breaks": "that individual portioning is the natural baseline.",
-          "evidence": { "type": "paper", "citation": "Rozin, 2011 - cultural framing of portions", "url": "https://arxiv.org/abs/0000.00000" }
+          "evidence": { "type": "paper", "citation": "Rozin, 2011 - cultural framing of portions", "url": "https://arxiv.org/abs/0000.00000" },
+          "eval": {
+            "judge": { "novelty": 3.8, "diversity": 4.1, "usefulness": 4.0, "assumption_challenge": 3.9, "rationale": "Draws on cross-cultural precedent; solid but a more incremental reframe than the top directions." },
+            "literature": { "novelty": 0.58, "evidence_count": 2, "evidence_ratio": 0.40, "closest_paper": { "title": "Rozin, 2011 - cultural framing of portions", "url": "https://arxiv.org/abs/0000.00000", "similarity": 0.66 }, "supporting_sources": [ { "title": "Rozin, 2011 - cultural framing of portions", "url": "https://arxiv.org/abs/0000.00000", "similarity": 0.66 } ] },
+            "debated": false,
+            "usefulness_rank": null
+          }
         },
         {
           "title": "Forecasting AI hides structural over-buying",
@@ -68,7 +93,13 @@
           "oneline": "Good prediction can automate waste out of sight, not out of existence.",
           "detail": "Demand models optimize around procurement contracts that reward over-ordering.",
           "breaks": "that better prediction fixes the root cause.",
-          "evidence": { "type": "speculative" }
+          "evidence": { "type": "speculative" },
+          "eval": {
+            "judge": { "novelty": 4.4, "diversity": 4.2, "usefulness": 3.4, "assumption_challenge": 4.5, "rationale": "Sharp second-order critique of Arm B's forecasting idea; usefulness is lower because it warns rather than builds." },
+            "literature": { "novelty": 0.86, "evidence_count": 0, "evidence_ratio": 0.0, "closest_paper": null, "supporting_sources": [] },
+            "debated": true,
+            "usefulness_rank": null
+          }
         },
         {
           "title": "Student-run “food rescue guild”",
@@ -76,7 +107,13 @@
           "oneline": "Give a self-governing student crew real budget and keys.",
           "detail": "Distribute the problem instead of running it top-down through dining services.",
           "breaks": "that the institution must own the solution.",
-          "evidence": { "type": "paper", "citation": "Ostrom, 1990 - commons governance", "url": "https://arxiv.org/abs/0000.00000" }
+          "evidence": { "type": "paper", "citation": "Ostrom, 1990 - commons governance", "url": "https://arxiv.org/abs/0000.00000" },
+          "eval": {
+            "judge": { "novelty": 4.0, "diversity": 4.5, "usefulness": 4.5, "assumption_challenge": 4.2, "rationale": "Shifts ownership to a self-governing commons; high usefulness and diversity, grounded in governance literature." },
+            "literature": { "novelty": 0.61, "evidence_count": 2, "evidence_ratio": 0.40, "closest_paper": { "title": "Ostrom, 1990 - commons governance", "url": "https://arxiv.org/abs/0000.00000", "similarity": 0.58 }, "supporting_sources": [ { "title": "Ostrom, 1990 - commons governance", "url": "https://arxiv.org/abs/0000.00000", "similarity": 0.58 } ] },
+            "debated": false,
+            "usefulness_rank": 2
+          }
         }
       ]
     }
@@ -95,6 +132,75 @@
       { "name": "Distinct-2", "c": ".89", "b": ".71", "better": "higher" },
       { "name": "Self-BLEU", "c": ".12", "b": ".27", "better": "lower" }
     ]
+  },
+
+  "evaluation": {
+    "judge_summary": {
+      "A": { "novelty": 2.2, "diversity": 2.4, "usefulness": 3.1, "assumption_challenge": 1.8 },
+      "B": { "novelty": 3.3, "diversity": 3.2, "usefulness": 3.9, "assumption_challenge": 2.6 },
+      "C": { "novelty": 4.2, "diversity": 4.3, "usefulness": 4.1, "assumption_challenge": 4.4 }
+    },
+    "literature_summary": {
+      "A": { "avg_novelty": 0.41, "avg_evidence_count": 0.4, "avg_evidence_ratio": 0.12 },
+      "B": { "avg_novelty": 0.55, "avg_evidence_count": 0.8, "avg_evidence_ratio": 0.24 },
+      "C": { "avg_novelty": 0.71, "avg_evidence_count": 1.5, "avg_evidence_ratio": 0.37 }
+    },
+    "debate": {
+      "top": [
+        {
+          "idea_title": "Design for generous surplus, not scarcity",
+          "decision": "raise",
+          "llm_score": 4.5,
+          "final_score": 4.8,
+          "confidence": 0.82,
+          "advocate_argument": "This is the only direction that rejects the framing everyone else accepts — that waste must trend to zero. Reframing surplus as planned hospitality is a genuine assumption break, not a tactic.",
+          "skeptic_argument": "It risks rewarding over-production if 'planned surplus' becomes an excuse. The break is real but operationally fragile without a hard cap."
+        },
+        {
+          "idea_title": "What if tracking creates a shaming culture?",
+          "decision": "hold",
+          "llm_score": 4.6,
+          "final_score": 4.5,
+          "confidence": 0.74,
+          "advocate_argument": "Directly attacks the assumption that more measurement is better — and pre-empts a harm the popular tracking idea would cause.",
+          "skeptic_argument": "It's a critique of another idea more than a standalone direction; the assumption break is strong but the build is mostly a constraint."
+        },
+        {
+          "idea_title": "Forecasting AI hides structural over-buying",
+          "decision": "raise",
+          "llm_score": 4.3,
+          "final_score": 4.5,
+          "confidence": 0.79,
+          "advocate_argument": "Names a second-order failure the strong baseline can't see: prediction can optimize around the wrong incentive and make waste invisible.",
+          "skeptic_argument": "Insightful but diagnostic — it breaks the assumption cleanly yet stops short of proposing the structural fix."
+        }
+      ]
+    },
+    "pairwise": {
+      "top": [
+        { "idea_title": "Center dining staff & food-insecure students", "rank": 1, "score": 4.6, "win_rate": 0.90, "wins": 9, "losses": 1, "ties": 0 },
+        { "idea_title": "Student-run “food rescue guild”", "rank": 2, "score": 4.3, "win_rate": 0.80, "wins": 8, "losses": 2, "ties": 0 },
+        { "idea_title": "Design for generous surplus, not scarcity", "rank": 3, "score": 4.1, "win_rate": 0.70, "wins": 7, "losses": 3, "ties": 0 }
+      ],
+      "comparisons": [
+        { "a": "Center dining staff & food-insecure students", "b": "Student-run “food rescue guild”", "winner": "A", "reason": "Both distribute ownership, but centering staff and food-insecure students targets the access gap more directly." },
+        { "a": "Design for generous surplus, not scarcity", "b": "Family-style communal serving tables", "winner": "A", "reason": "Surplus-as-access reframes the whole brief; communal tables is a narrower portioning tweak." },
+        { "a": "Student-run “food rescue guild”", "b": "Forecasting AI hides structural over-buying", "winner": "A", "reason": "The guild is buildable and gives students agency; the forecasting critique is a warning, not a plan." }
+      ]
+    }
+  },
+
+  "generation_context": {
+    "backend": "local_ollama",
+    "model": "llama3.1:8b",
+    "params": { "paper_limit": 8, "use_llm_queries": true, "run_debate": true },
+    "arms": [
+      { "key": "A", "label": "Naive LLM", "temperature": 0.8 },
+      { "key": "B", "label": "Strong Prompt", "temperature": 0.8 },
+      { "key": "C", "label": "Lens Agent (assumption-critique + 8 lenses)", "temperature": 0.9 }
+    ],
+    "literature": { "query_source": "llm", "paper_count": 8, "queries": [ "campus dining food waste reduction", "surplus food redistribution university", "food insecurity college students access" ] },
+    "idea_counts": { "A": 5, "B": 5, "C": 6 }
   },
 
   "human_eval": {

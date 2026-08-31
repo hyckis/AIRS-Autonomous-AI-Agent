@@ -7,9 +7,10 @@ render_airs.render() turns into the Divergence Studio page.
 
 It computes nothing new: arms come from the *_diversity["ideas"] the pipeline
 already parsed, Vendi/crosschecks from *_diversity["metrics"], assumptions from
-the shared assumption_bank, evidence from the literature-grounded metrics. The
-only work here is *shaping* — pulling title/oneline/detail/lens/breaks/evidence
-out of the free-text ideas the agents produced, with safe fallbacks so a messy
+the shared assumption_bank, evidence from the literature-grounded metrics, and
+the evaluation summary / per-idea judge, debate and pairwise details straight
+out of the *_eval objects. The only work here is *shaping* — pulling fields out
+of the free-text ideas and eval dicts, with safe fallbacks so a messy or partial
 LLM response degrades gracefully instead of raising.
 """
 import os
@@ -173,6 +174,163 @@ def _detect_evidence(idea, lit_item):
     return {"type": "speculative"}
 
 
+# ---------------------------------------------------------------- eval shaping
+
+def _num_or_none(value):
+    if value is None:
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _idea_scores_by_index(eval_obj):
+    """{idea_index: idea_score dict} from an *_eval object's llm_scores."""
+    ls = (eval_obj or {}).get("llm_scores", {}) or {}
+    out = {}
+    for it in ls.get("idea_scores", []) or []:
+        if isinstance(it, dict) and it.get("idea_index") is not None:
+            out[it.get("idea_index")] = it
+    return out
+
+
+def _judge_summary_for(eval_obj):
+    """Arm-level averaged judge scores (1-5) already computed in llm_scores."""
+    ls = (eval_obj or {}).get("llm_scores", {}) or {}
+    return {m: _num_or_none(ls.get(m)) for m in
+            ("novelty", "diversity", "usefulness", "assumption_challenge")}
+
+
+def _lit_summary_for(lit_obj):
+    """Arm-level averaged literature-grounding numbers."""
+    lit = lit_obj or {}
+    return {
+        "avg_novelty": _num_or_none(lit.get("average_novelty")),
+        "avg_evidence_count": _num_or_none(lit.get("average_evidence_count")),
+        "avg_evidence_ratio": _num_or_none(lit.get("average_evidence_ratio")),
+    }
+
+
+def _direction_eval(score, lit_item):
+    """Per-idea eval block attached to one Arm C direction."""
+    if not score and not lit_item:
+        return None
+    ev = {}
+    if score:
+        ev["judge"] = {
+            "novelty": _num_or_none(score.get("novelty")),
+            "diversity": _num_or_none(score.get("diversity")),
+            "usefulness": _num_or_none(score.get("usefulness")),
+            # debate-adjusted score when the idea was debated, else the raw judge score
+            "assumption_challenge": _num_or_none(
+                score.get("assumption_challenge_final",
+                          score.get("assumption_challenge"))),
+            "rationale": _clean(score.get("rationale", "")),
+        }
+        ev["debated"] = bool(score.get("debate_selected"))
+        rank = score.get("usefulness_rank")
+        ev["usefulness_rank"] = rank if isinstance(rank, int) else None
+    if lit_item:
+        ev["literature"] = {
+            "novelty": _num_or_none(lit_item.get("novelty")),
+            "evidence_count": lit_item.get("evidence_count", 0),
+            "evidence_ratio": _num_or_none(lit_item.get("evidence_ratio")),
+            "closest_paper": lit_item.get("closest_paper"),
+            "supporting_sources": lit_item.get("supporting_sources", []) or [],
+        }
+    return ev
+
+
+def _debate_top(eval_obj):
+    """The debated (top-k) ideas -> transcript rows, ranked by debate outcome."""
+    ls = (eval_obj or {}).get("llm_scores", {}) or {}
+    debated = [it for it in ls.get("idea_scores", []) or []
+               if isinstance(it, dict) and it.get("debate_selected")]
+    debated.sort(key=lambda x: x.get("assumption_challenge_rank") or 999)
+    out = []
+    for it in debated:
+        out.append({
+            "idea_title": it.get("idea_title") or _short_title(it.get("idea_text", "")),
+            "decision": _clean(it.get("debate_decision", "")),
+            "llm_score": _num_or_none(it.get("assumption_challenge_llm")),
+            "final_score": _num_or_none(it.get("assumption_challenge_final")),
+            "confidence": _num_or_none(it.get("confidence")),
+            "advocate_argument": _clean(it.get("advocate_argument", "")),
+            "skeptic_argument": _clean(it.get("skeptic_argument", "")),
+        })
+    return out
+
+
+def _pairwise(eval_obj, max_comparisons=6):
+    """Pairwise usefulness tournament -> top-3 ranking + sample comparisons."""
+    ls = (eval_obj or {}).get("llm_scores", {}) or {}
+    top = []
+    for it in ls.get("usefulness_pairwise_top3", []) or []:
+        top.append({
+            "idea_title": it.get("idea_title") or _short_title(it.get("idea_text", "")),
+            "rank": it.get("usefulness_rank"),
+            "score": _num_or_none(it.get("usefulness_pairwise")),
+            "win_rate": _num_or_none(it.get("usefulness_win_rate")),
+            "wins": it.get("pairwise_wins", 0),
+            "losses": it.get("pairwise_losses", 0),
+            "ties": it.get("pairwise_ties", 0),
+        })
+
+    title_by_index = {it.get("idea_index"): (it.get("idea_title") or "")
+                      for it in ls.get("idea_scores", []) or []}
+    comps = []
+    for c in (ls.get("usefulness_pairwise_comparisons", []) or []):
+        if len(comps) >= max_comparisons:
+            break
+        winner = c.get("winner")
+        at = title_by_index.get(c.get("idea_a_index"), "")
+        bt = title_by_index.get(c.get("idea_b_index"), "")
+        if winner == "A":
+            a, b = at, bt
+        elif winner == "B":
+            a, b = bt, at
+        else:
+            continue  # skip ties in the sample list
+        if not a or not b:
+            continue
+        comps.append({"a": a, "b": b, "reason": _clean(c.get("reason", ""))})
+    return {"top": top, "comparisons": comps}
+
+
+def _generation_context(get):
+    """Run-level metadata for the bottom panel, from run_params + literature +
+    the parsed idea sets. Everything degrades to a safe default if absent."""
+    literature = get("literature") or {}
+    ideas_by_arm = get("ideas_by_arm") or {}
+    params = get("run_params") or {}
+    papers = literature.get("papers", []) or []
+    return {
+        "backend": params.get("backend", "local_ollama"),
+        "model": params.get("model"),
+        "params": {
+            "paper_limit": params.get("paper_limit"),
+            "use_llm_queries": params.get("use_llm_queries"),
+            "run_debate": params.get("run_debate"),
+        },
+        "arms": [
+            {"key": "A", "label": "Naive LLM", "temperature": 0.8},
+            {"key": "B", "label": "Strong Prompt", "temperature": 0.8},
+            {"key": "C", "label": "Lens Agent (assumption-critique + 8 lenses)", "temperature": 0.8},
+        ],
+        "literature": {
+            "query_source": literature.get("query_source", ""),
+            "paper_count": len(papers),
+            "queries": literature.get("queries", []) or [],
+        },
+        "idea_counts": {
+            "A": len(ideas_by_arm.get("A: Naive LLM", []) or []),
+            "B": len(ideas_by_arm.get("B: Strong Prompt", []) or []),
+            "C": len(ideas_by_arm.get("C: Lens Agent", []) or []),
+        },
+    }
+
+
 def _baseline_ideas(diversity):
     """Arm A / Arm B: flat {title, detail}."""
     ideas = (diversity or {}).get("ideas", []) or []
@@ -193,10 +351,11 @@ def _baseline_ideas(diversity):
     return out
 
 
-def _c_directions(diversity, literature_metrics):
-    """Arm C: structured {title, lens, oneline, detail, breaks, evidence}."""
+def _c_directions(diversity, literature_metrics, eval_obj=None):
+    """Arm C: structured {title, lens, oneline, detail, breaks, evidence, eval}."""
     ideas = (diversity or {}).get("ideas", []) or []
     per_idea = (literature_metrics or {}).get("per_idea", []) or []
+    scores_by_idx = _idea_scores_by_index(eval_obj)
     out = []
     for i, idea in enumerate(ideas):
         lit_item = per_idea[i] if i < len(per_idea) else None
@@ -214,6 +373,8 @@ def _c_directions(diversity, literature_metrics):
         ) or _clean(extract_challenged_assumption_from_idea(idea) or "")
         if "no specific assumption" in breaks.lower():
             breaks = ""
+        # idea_index in the eval output is 1-based and aligned to this same list.
+        score = scores_by_idx.get(i + 1)
         out.append({
             "title": _short_title(idea),
             "lens": _detect_lens(idea),
@@ -221,6 +382,7 @@ def _c_directions(diversity, literature_metrics):
             "detail": detail,
             "breaks": breaks,
             "evidence": _detect_evidence(idea, lit_item),
+            "eval": _direction_eval(score, lit_item),
         })
     return out
 
@@ -253,7 +415,12 @@ def build_run(session_state, topic):
     strong_div = get("strong_diversity") or {}
     expanded_div = get("expanded_diversity") or {}
     assumption_bank = get("assumption_bank") or []
+    baseline_lit = get("baseline_literature_metrics") or {}
+    strong_lit = get("strong_literature_metrics") or {}
     expanded_lit = get("expanded_literature_metrics") or {}
+    baseline_eval = get("baseline_eval") or {}
+    strong_eval = get("strong_eval") or {}
+    expanded_eval = get("expanded_eval") or {}
 
     discussion_question, discussion_rationale = _split_question(get("human_question") or "")
 
@@ -276,7 +443,7 @@ def build_run(session_state, topic):
             "C": {
                 "label": "Divergent directions",
                 "sublabel": "Assumption-critique + 8 cognitive lenses - Arm C",
-                "directions": _c_directions(expanded_div, expanded_lit),
+                "directions": _c_directions(expanded_div, expanded_lit, expanded_eval),
             },
         },
         "assumptions": [
@@ -315,6 +482,21 @@ def build_run(session_state, topic):
                 },
             ],
         },
+        "evaluation": {
+            "judge_summary": {
+                "A": _judge_summary_for(baseline_eval),
+                "B": _judge_summary_for(strong_eval),
+                "C": _judge_summary_for(expanded_eval),
+            },
+            "literature_summary": {
+                "A": _lit_summary_for(baseline_lit),
+                "B": _lit_summary_for(strong_lit),
+                "C": _lit_summary_for(expanded_lit),
+            },
+            "debate": {"top": _debate_top(expanded_eval)},
+            "pairwise": _pairwise(expanded_eval),
+        },
+        "generation_context": _generation_context(get),
         "human_eval": {
             "ratings": {
                 "A": get("human_baseline_diversity") or 0,

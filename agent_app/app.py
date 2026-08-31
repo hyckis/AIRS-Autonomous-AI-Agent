@@ -259,6 +259,13 @@ if st.button("Run Agent Comparison"):
     st.session_state["ideas_by_arm"] = ideas_by_arm
     st.session_state["parsed_by_arm"] = parsed_by_arm
     st.session_state["core_concepts_by_arm"] = core_concepts_by_arm
+    st.session_state["run_params"] = {
+        "paper_limit": paper_limit,
+        "use_llm_queries": use_llm_queries,
+        "run_debate": run_debate,
+        "backend": "local_ollama",
+        "model": None,
+    }
 
 if "baseline" in st.session_state:
     baseline = st.session_state["baseline"]
