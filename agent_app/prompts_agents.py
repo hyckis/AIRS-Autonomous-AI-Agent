@@ -59,6 +59,8 @@ For each direction, include:
     Supporting papers (cite title and URL from the retrieved literature above), or label as "speculative extension" if not directly supported by a retrieved paper
 
 Only cite papers from the retrieved literature list. Do not invent citations.
+The Standard LLM response and Homogeneity critique are NOT citation sources. Never cite, number, or refer to them as papers.
+Copy the exact paper title and URL from the retrieved literature. 
 
 Output rules:
 - Do not include an introduction.
