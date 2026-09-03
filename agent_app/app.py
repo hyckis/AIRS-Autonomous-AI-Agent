@@ -1,6 +1,7 @@
 import os
 from datetime import datetime
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd
 # import matplotlib.pyplot as plt
 from agents import (
@@ -20,19 +21,27 @@ from evaluator import (
 from diversity_metrics import evaluate_idea_set_diversity
 from literature_metrics import compute_literature_grounded_metrics
 from assumption_bank import generate_assumption_bank
+from ui.run_builder import build_run
+from ui.render_airs import render as render_airs
 from util import split_ideas, parse_idea_block, extract_core_concept
 
-st.title("Cognitive Diversity Research Agent")
-
-st.write(
-    "This prototype compares a traditional LLM research assistant with a "
-    "cognitive-diversity-preserving research agent."
+st.set_page_config(page_title="AIRS — Divergence Studio", layout="wide")
+# Match the page to the embedded Divergence Studio template: same 1400px width,
+# and hide Streamlit's default title/blurb and top toolbar, so the native input
+# row and the embed read as one cohesive page instead of app chrome stacked above
+# a separate view.
+st.markdown(
+    """
+    <style>
+      [data-testid="stHeader"]{display:none;}
+      .block-container{max-width:1400px;padding-top:1.1rem;
+        padding-left:22px;padding-right:22px;}
+    </style>
+    """,
+    unsafe_allow_html=True,
 )
 
-topic = st.text_area(
-    "Enter a research topic:",
-    "AI agents in education"
-)
+topic = st.text_input("Research topic", "AI agents in education")
 
 # arXiv usage 
 use_llm_queries = st.checkbox(
@@ -250,6 +259,13 @@ if st.button("Run Agent Comparison"):
     st.session_state["ideas_by_arm"] = ideas_by_arm
     st.session_state["parsed_by_arm"] = parsed_by_arm
     st.session_state["core_concepts_by_arm"] = core_concepts_by_arm
+    st.session_state["run_params"] = {
+        "paper_limit": paper_limit,
+        "use_llm_queries": use_llm_queries,
+        "run_debate": run_debate,
+        "backend": "local_ollama",
+        "model": None,
+    }
 
 if "baseline" in st.session_state:
     baseline = st.session_state["baseline"]
@@ -281,6 +297,30 @@ if "baseline" in st.session_state:
         arm: [extract_core_concept(idea) for idea in ideas]
         for arm, ideas in ideas_by_arm.items()
     })
+
+    # ---- New UI: AIRS Divergence Studio -------------------------------------
+    # The pipeline outputs are shaped into a single run dict and rendered by the
+    # standalone HTML view. The view computes nothing; see agent_app/ui/.
+    run = build_run(st.session_state, topic)
+
+    # Size the embed to the (wide, 2-column) layout so there's a single natural
+    # page scroll instead of a scrollbar trapped inside the iframe. Estimated
+    # from the number of Arm C cards and baseline ideas.
+    _dirs = run["arms"]["C"]["directions"]
+    _rows_c = (len(_dirs) + 1) // 2
+    _rows_ab = max(len(run["arms"]["A"]["ideas"]), len(run["arms"]["B"]["ideas"]), 1)
+    studio_height = 920 + _rows_c * 165 + _rows_ab * 46
+    components.html(render_airs(run), height=studio_height, scrolling=True)
+
+    st.divider()
+    show_legacy = st.checkbox(
+        "Show detailed tables, charts & scoring (legacy view)",
+        value=False,
+        help="The full per-idea tables, LLM-judge details, sanity checks, and "
+             "human-evaluation sliders. Turn on for debugging or deep dives.",
+    )
+    if not show_legacy:
+        st.stop()
 
     st.subheader("1. Three-Arm Idea Generation Comparison")
     col_a, col_b, col_c = st.columns(3)
@@ -332,7 +372,6 @@ if "baseline" in st.session_state:
     st.info(human_question)
 
     with st.expander("Assumption Bank (shared across all arms)"):
-        if assumption_bank: print(f"assumption_bank {assumption_bank[0]["id"]}:", assumption_bank)
         if not assumption_bank: st.markdown("No assumption bank generated or parsing failed.")
         for item in assumption_bank:
             st.markdown(f"**{item['assumption']}**")

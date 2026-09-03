@@ -1,0 +1,24 @@
+# Disable Streamlit's source file watcher.
+#
+# The watcher walks every imported module on startup to enable hot-reload. When
+# it introspects `transformers`, its optional *_fast vision image-processors try
+# to `import torchvision` (which we don't install) and each one logs a noisy
+# ModuleNotFoundError traceback. These are harmless, but they flood the terminal
+# and slow startup. Turning the watcher off removes the noise entirely.
+#
+# Trade-off: the app no longer auto-reloads when you edit a .py file — press "R"
+# in the browser (or restart) to pick up changes. Set back to "auto" if you want
+# live reload while editing.
+[server]
+fileWatcherType = "none"
+
+# Match Streamlit's chrome (title, inputs, buttons) to the Divergence Studio
+# template's warm-paper palette so the native top of the page reads as one piece
+# with the embedded view instead of a dark box above a light one.
+[theme]
+base = "light"
+backgroundColor = "#f5f4f0"
+secondaryBackgroundColor = "#ffffff"
+textColor = "#1b2028"
+primaryColor = "#0f9488"
+font = "sans serif"

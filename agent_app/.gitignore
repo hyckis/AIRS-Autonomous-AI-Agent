@@ -5,3 +5,6 @@ __pycache__/
 # Python virtual environments
 venv/
 .venv/
+# Generated UI preview artifact (from ui/render_airs.py)
+ui/rendered_preview.html
+ui/preview_app.py

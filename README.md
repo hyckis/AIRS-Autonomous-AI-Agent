@@ -71,6 +71,14 @@ Output:
 ## TO RUN ON LAB COMPUTER
 git pull  
 cd /agent_app  
+git config --system core.longpaths true
 python3 -m venv venv  
 source venv/bin/activate  
 pip install -r requirements.txt  
+
+## TO RUN ON POWERSHELL
+git pull  
+cd /agent_app  
+python3 -m venv venv  
+.\venv\Scripts\Activate.ps1  
+pip install -r requirements.txt
