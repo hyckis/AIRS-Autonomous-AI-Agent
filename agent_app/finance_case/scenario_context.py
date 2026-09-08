@@ -1,11 +1,49 @@
 from pathlib import Path
 import json
-from .finance_corpus import load_bank_profile
+from finance_corpus import load_bank_profile
 
 # paths
 BASE_DIR = Path(__file__).resolve().parent
-SCENARIO_DIR = BASE_DIR / "finance_corpus" / "processed" / "fed_scenarios"
+SCENARIO_DIR = BASE_DIR / "corpus" / "processed" / "fed_scenarios"
 EXPECTED_YEARS = list(range(2015, 2024))
+
+SCENARIO_FIELDS = [
+    "unemployment_peak_pct",
+    "real_gdp_trough_pct",
+    "treasury_3m_start_pct",
+    "treasury_3m_end_pct",
+    "treasury_10y_start_pct",
+    "treasury_10y_end_pct",
+    "equity_drawdown_pct",
+    "house_price_drawdown_pct",
+    "commercial_real_estate_drawdown_pct",
+    "investment_grade_corporate_spread_peak_pct",
+]
+def _get_scenario_values(scenario):
+    # Compatible with slightly different JSON structures.
+    if isinstance(scenario.get("summary"), dict): return scenario["summary"]
+    if isinstance(scenario.get("key_variables"), dict): return scenario["key_variables"]
+    return scenario
+
+def build_scenario_comparison_table(scenarios):
+    header = ["year"] + SCENARIO_FIELDS
+    lines = [
+        " | ".join(header),
+        " | ".join(["---"] * len(header)),
+    ]
+    for scenario in sorted(
+        scenarios,
+        key=lambda x: int(x["year"])
+    ):
+        values = _get_scenario_values(scenario)
+        row = [str(scenario["year"])]
+        for field in SCENARIO_FIELDS:
+            value = values.get(field, "NA")
+            row.append(str(value))
+        lines.append(" | ".join(row))
+
+    return "\n".join(lines)
+
 
 # scenario loading
 def load_scenario(year):
@@ -130,30 +168,31 @@ def format_scenarios(scenarios):
 
 # Build fixed context
 def build_fixed_context(bank_id, years=None):
-    bank_id = bank_id.upper()
-    if bank_id not in {"A", "B"}: raise ValueError("bank_id must be 'A' or 'B'")
     profile = load_bank_profile(bank_id)
-    scenarios = load_fed_scenarios(years=years)
+    scenarios = load_fed_scenarios(years)
+
     bank_text = format_bank_profile(profile)
     scenario_text = format_scenarios(scenarios)
+    comparison_table = build_scenario_comparison_table(scenarios)
 
-    fixed_context = f"""
-==================================================
-BANK PROFILE
-==================================================
-
+    return f"""
+TARGET BANK PROFILE
+===================
 {bank_text}
 
-
-==================================================
-FEDERAL RESERVE SUPERVISORY STRESS SCENARIOS
-2015-2023 SEVERELY ADVERSE SCENARIOS
-==================================================
-
+FED SEVERELY ADVERSE SCENARIOS
+==============================
 {scenario_text}
-""".strip()
 
-    return fixed_context
+STRUCTURED CROSS-YEAR VARIABLE TABLE
+====================================
+The table below is generated deterministically from the scenario JSON.
+Use this table, rather than reconstructing numerical values from memory,
+when comparing scenario years.
+
+{comparison_table}
+"""
+
 
 
 # structured version for auditing

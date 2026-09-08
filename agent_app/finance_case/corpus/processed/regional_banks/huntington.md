@@ -235,23 +235,3 @@ Huntington also maintains access to other liquidity sources, including
 FHLB advances, wholesale funding, securitizations, and a portfolio of
 marketable securities.
 
----
-
-## 6. Corpus Tags
-
-bank_type: diversified_regional_bank
-
-topics:
-- bank_balance_sheet
-- loan_portfolio
-- commercial_real_estate
-- investment_securities
-- available_for_sale
-- held_to_maturity
-- unrealized_losses
-- deposits
-- uninsured_deposits
-- liquidity
-- interest_rate_risk
-- net_interest_income
-- economic_value_of_equity

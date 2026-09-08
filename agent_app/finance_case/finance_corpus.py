@@ -6,7 +6,7 @@ from sentence_transformers import SentenceTransformer
 
 # paths
 BASE_DIR = Path(__file__).resolve().parent
-CORPUS_DIR = BASE_DIR / "finance_corpus"
+CORPUS_DIR = BASE_DIR / "corpus"
 PROCESSED_DIR = CORPUS_DIR / "processed"
 PROFILE_DIR = PROCESSED_DIR / "bank_profiles"
 MANIFEST_PATH = CORPUS_DIR / "manifest.json"
@@ -172,6 +172,9 @@ def _split_long_text(text, max_chars=1800, overlap_chars=200,):
     if current: chunks.append(current)
     return chunks
 
+SKIP_SECTIONS = {
+    "Corpus Tags", "Tags", "Metadata",
+}
 def chunk_documents(documents, max_chars=1800, overlap_chars=200):
     chunks = []
     for document in documents:
@@ -179,6 +182,7 @@ def chunk_documents(documents, max_chars=1800, overlap_chars=200):
         chunk_number = 0
 
         for section in sections:
+            if section["section"].strip() in SKIP_SECTIONS: continue
             section_chunks = _split_long_text(
                 section["text"],
                 max_chars=max_chars,
@@ -274,24 +278,46 @@ def retrieve_finance(query, top_k=5):
     return results
 
 # formatting for prompts
+def get_evidence_role(chunk):
+    document_type = chunk.get("document_type", "")
+    source = chunk.get("source", "")
+
+    if document_type == "regional_bank_10k":
+        return "COMPARATOR_BANK"
+
+    if document_type in {
+        "quarterly_banking_profile",
+        "financial_stability_report",
+    }:
+        return "INDUSTRY_CONTEXT"
+
+    if document_type == "fomc_statement":
+        return "MACRO_CONTEXT"
+
+    return "GENERAL_CONTEXT"
+
 def format_retrieved_context(results):
     blocks = []
+
     for i, result in enumerate(results, start=1):
+
+        evidence_role = get_evidence_role(result)
+
         block = (
-            f"[Evidence {i}]\n"
-            f"Source: "
-            f"{result.get('source')}\n"
-            f"Date: "
-            f"{result.get('publication_date')}\n"
-            f"Section: "
-            f"{result.get('section')}\n"
-            f"Retrieval score: "
-            f"{result.get('score', 0):.4f}\n\n"
+            f"[Retrieved Evidence {i}]\n"
+            f"CHUNK_ID: {result['chunk_id']}\n"
+            f"EVIDENCE_ROLE: {evidence_role}\n"
+            f"SOURCE: {result.get('source')}\n"
+            f"DATE: {result.get('publication_date')}\n"
+            f"SECTION: {result.get('section')}\n"
+            f"RETRIEVAL_SCORE: {result.get('score', 0):.4f}\n\n"
             f"{result['text']}"
         )
+
         blocks.append(block)
 
     return "\n\n---\n\n".join(blocks)
+
 
 # Manual test
 if __name__ == "__main__":

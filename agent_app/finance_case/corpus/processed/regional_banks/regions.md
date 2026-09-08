@@ -324,27 +324,3 @@ Persistently high interest rates and reductions in Federal Reserve
 balance-sheet liquidity could also affect market liquidity and the
 bank's financial condition.
 
----
-
-## 8. Corpus Tags
-
-bank_type: diversified_regional_bank
-
-topics:
-- bank_balance_sheet
-- loan_portfolio
-- commercial_real_estate
-- investor_real_estate
-- investment_securities
-- available_for_sale
-- held_to_maturity
-- unrealized_losses
-- deposits
-- uninsured_deposits
-- deposit_mix
-- liquidity
-- deposit_outflows
-- interest_rate_risk
-- net_interest_income
-- asset_liability_management
-- interest_rate_hedging

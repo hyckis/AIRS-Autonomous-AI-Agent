@@ -1,10 +1,10 @@
-from llm_backend import call_llm
+from finance_llm_backend import call_llm
 
-from .finance_prompts import (
-    build_naive_prompt,
-    build_strong_prompt,
-    build_homogeneity_prompt,
-    build_lens_prompt,
+from finance_prompts import (
+    prompt_arm_a,
+    prompt_arm_b,
+    prompt_arm_c,
+    prompt_homogeneity,
 )
 
 
@@ -18,7 +18,7 @@ def finance_naive_agent(
     backend="local_ollama",
     model=None,
 ):
-    prompt = build_naive_prompt(
+    prompt = prompt_arm_a(
         bank_label=bank_label,
         fixed_context=fixed_context,
     )
@@ -42,7 +42,7 @@ def finance_strong_agent(
     backend="local_ollama",
     model=None,
 ):
-    prompt = build_strong_prompt(
+    prompt = prompt_arm_b(
         bank_label=bank_label,
         fixed_context=fixed_context,
         retrieved_context=retrieved_context,
@@ -62,13 +62,17 @@ def finance_strong_agent(
 
 def finance_detect_homogeneity(
     bank_label,
+    fixed_context,
+    retrieved_context,
     baseline_response,
     strong_response,
     backend="local_ollama",
     model=None,
 ):
-    prompt = build_homogeneity_prompt(
+    prompt = prompt_homogeneity(
         bank_label=bank_label,
+        fixed_context=fixed_context,
+        retrieved_context=retrieved_context,
         baseline_response=baseline_response,
         strong_response=strong_response,
     )
@@ -95,7 +99,7 @@ def finance_lens_agent(
     backend="local_ollama",
     model=None,
 ):
-    prompt = build_lens_prompt(
+    prompt = prompt_arm_c(
         bank_label=bank_label,
         fixed_context=fixed_context,
         retrieved_context=retrieved_context,

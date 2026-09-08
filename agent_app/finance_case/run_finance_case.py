@@ -1,20 +1,20 @@
 import json
 from pathlib import Path
-from agents import detect_homogeneity
-from agent_app.finance_case.finance_agents import (
+from finance_agents import (
     finance_naive_agent,
     finance_strong_agent,
     finance_lens_agent,
+    finance_detect_homogeneity,
 )
-from evaluator import evaluate_output
-from agent_app.finance_case.scenario_context import build_fixed_context
-from agent_app.finance_case.finance_prompts import (
+#from evaluator import evaluate_output
+from scenario_context import build_fixed_context
+from finance_prompts import (
     prompt_arm_a,
     prompt_arm_b,
     prompt_arm_c,
     build_retrieval,
 )
-from agent_app.finance_case.finance_corpus import (
+from finance_corpus import (
     load_bank_profile,
     retrieve_finance,
     format_retrieved_context,
@@ -32,77 +32,108 @@ def save_result(result, bank_id, run_id=1):
         json.dump(result, f, ensure_ascii=False, indent=2)
     return path
 
-def run_finance_case(bank_id="A", run_id=1, top_k=5, save=True):
-    bank_id = bank_id.upper()
-    if bank_id not in {"A", "B"}: raise ValueError("bank id must be either A or B")
+def parse_json_response(text):
+    cleaned = text.strip()
+    if cleaned.startswith("```json"):
+        cleaned = cleaned[7:]
+    if cleaned.startswith("```"):
+        cleaned = cleaned[3:]
+    if cleaned.endswith("```"):
+        cleaned = cleaned[:-3]
+    return json.loads(cleaned.strip())
 
+
+def run_finance_case(bank_id="A", run_id=1, top_k=5, backend="local_ollama", model=None):
     bank_label = f"Bank {bank_id}"
-    print(f"\nRunning finance case: {bank_label}")
 
-    # fixed context
+    # Fixed context
     fixed_context = build_fixed_context(bank_id)
+
     bank_profile = load_bank_profile(bank_id)
 
-    # arm a
-    print("\n[1/5] Running Arm A...")
-    a_prompt = prompt_arm_a(bank_label=bank_label, fixed_context=fixed_context)
-    baseline_output = finance_naive_agent(a_prompt)
+    # -----------------------------
+    # Arm A
+    # -----------------------------
+    baseline_output = finance_naive_agent(
+        bank_label=bank_label,
+        fixed_context=fixed_context,
+        backend=backend,
+        model=model,
+    )
 
-    # retrieval: retrieved once and passed to B/C
-    print("\n[2/5] Retrieving evidence...")
-    retrieval_query = build_retrieval(bank_profile)
-    retrieved_chunks = retrieve_finance(retrieval_query, top_k=top_k)
-    evidence = format_retrieved_context(retrieved_chunks)
+    # -----------------------------
+    # Shared retrieval for B + C
+    # -----------------------------
+    retrieval_query = build_retrieval(
+        bank_profile
+    )
 
-    # arm b
-    print("\n[3/5] Running Arm B...")
-    b_prompt = prompt_arm_b(bank_label=bank_label, fixed_context=fixed_context, retrieved_context=evidence)
-    strong_output = finance_strong_agent(b_prompt)
+    retrieved_chunks = retrieve_finance(
+        retrieval_query,
+        top_k=top_k,
+    )
+    print("\n========== RETRIEVED CHUNKS ==========") 
+    for chunk in retrieved_chunks: 
+        print( f"\n{chunk['chunk_id']} \nsource={chunk['source']} \nsection={chunk['section']} \nscore={chunk['score']:.4f}" ) 
 
-    # critique
-    print("\n[4/5] Detecting convergence...")
-    combined_initial_outputs = f"""
-ARM A OUTPUT
-============
-{baseline_output}
+    evidence = format_retrieved_context(
+        retrieved_chunks
+    )
 
+    # -----------------------------
+    # Arm B
+    # -----------------------------
+    strong_output = finance_strong_agent(
+        bank_label=bank_label,
+        fixed_context=fixed_context,
+        retrieved_context=evidence,
+        backend=backend,
+        model=model,
+    )
 
-ARM B OUTPUT
-============
-{strong_output}
-""".strip()
-    
-    critique = detect_homogeneity(combined_initial_outputs)
-    
-    # arm c
-    print("\n[5/5] Running Arm C...")
-    c_prompt = prompt_arm_c(bank_label=bank_label, fixed_context=fixed_context, retrieved_context=evidence, convergence_analysis=critique)
-    lens_output = finance_lens_agent(c_prompt)
+    # -----------------------------
+    # Convergence detection
+    # -----------------------------
+    critique = finance_detect_homogeneity(
+        bank_label=bank_label,
+        fixed_context=fixed_context,
+        retrieved_context=evidence,
+        baseline_response=baseline_output,
+        strong_response=strong_output,
+        backend=backend,
+        model=model,
+    )
 
-    # result
-    result = {
+    # -----------------------------
+    # Arm C
+    # -----------------------------
+
+    lens_output = finance_lens_agent(
+        bank_label=bank_label,
+        fixed_context=fixed_context,
+        retrieved_context=evidence,
+        baseline_response=baseline_output,
+        strong_response=strong_output,
+        critique=critique,
+        backend=backend,
+        model=model,
+    )
+
+    return {
         "bank_id": bank_id,
-        "bank_label": bank_label,
         "run_id": run_id,
         "retrieval": {
             "query": retrieval_query,
-            "top_k": top_k,
-            "chunk_ids": [item["chunk_id"] for item in retrieved_chunks],
-            "chunks": retrieved_chunks,
+            "chunk_ids": [
+                chunk["chunk_id"]
+                for chunk in retrieved_chunks
+            ],
         },
-        "outputs": {
-            "baseline": baseline_output,
-            "strong": strong_output,
-            "lens": lens_output,
-        },
-        "convergence_analysis": critique,
+        "baseline": baseline_output,
+        "strong": strong_output,
+        "critique": critique,
+        "lens": lens_output,
     }
-
-    if save:
-        result_path = save_result(result, bank_id=bank_id, run_id=run_id)
-        print(f"\nResult saved to: {result_path}")
-
-    return result
 
 if __name__ == "__main__":
     results = run_finance_case(bank_id="A", run_id=1, top_k=5)
@@ -114,10 +145,13 @@ if __name__ == "__main__":
     )
 
     print("\nArm A:")
-    print(results["outputs"]["baseline"])
+    print(results["baseline"])
 
     print("\nArm B:")
-    print(results["outputs"]["strong"])
+    print(results["strong"])
+
+    print("\nCritique:")
+    print(results["critique"])
 
     print("\nArm C:")
-    print(results["outputs"]["lens"])
+    print(results["lens"])
