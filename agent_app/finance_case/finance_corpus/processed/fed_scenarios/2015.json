@@ -1,0 +1,40 @@
+{
+  "year": 2015,
+  "scenario_type": "severely_adverse",
+  "scenario_period": {
+    "start": "2014-Q4",
+    "end": "2017-Q4"
+  },
+
+  "narrative": "<FULL severely adverse scenario narrative, including the international component and Additional Key Features, but excluding Global Market Shock and Counterparty Default components>",
+
+  "summary": {
+    "unemployment_peak_pct": 10.1,
+
+    "real_gdp_trough_pct": -4.5,
+    "real_gdp_trough_reference": "Relative to 2014-Q3 real GDP level",
+
+    "treasury_3m_start_pct": 0.1,
+    "treasury_3m_end_pct": 0.1,
+
+    "treasury_10y_start_pct": 0.9,
+    "treasury_10y_end_pct": 2.3,
+
+    "equity_drawdown_pct": -60.0,
+    "house_price_drawdown_pct": -25.0
+  },
+
+  "additional_context": {
+    "commercial_real_estate_drawdown_pct": "more than 30",
+    "corporate_bond_spread_peak_bps": 500,
+    "oil_price_peak_usd_per_barrel": 110
+  },
+
+  "source": {
+    "organization": "Board of Governors of the Federal Reserve System",
+    "title": "2015 Supervisory Scenarios for Annual Stress Tests Required under the Dodd-Frank Act Stress Testing Rules and the Capital Plan Rule",
+    "publication_date": "2014-10-23",
+    "scenario": "Severely Adverse",
+    "source_format": "PDF"
+  }
+}

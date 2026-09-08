@@ -1,0 +1,11 @@
+Total assets: $182.906 billion
+Total loans and leases: $119.523 billion
+AFS securities: $23.423 billion
+HTM securities: $17.052 billion net carrying value
+CRE loans: $16.634 billion
+Core deposits: $142.141 billion
+Consumer core deposits: $78.034 billion
+Commercial core deposits: $64.107 billion
+Uninsured deposits: $47.283 billion
+Foreign deposits not covered by U.S. deposit insurance: $13.9 billion
+Implied insured/other covered portion: ~68%

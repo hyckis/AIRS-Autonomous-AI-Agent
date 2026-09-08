@@ -1,0 +1,41 @@
+{
+  "year": 2022,
+  "scenario_type": "severely_adverse",
+  "scenario_period": {
+    "start": "2022-Q1",
+    "end": "2025-Q1"
+  },
+
+  "narrative": "<FULL 2022 severely adverse scenario narrative + Additional Key Features, excluding Global Market Shock and Counterparty Default sections>",
+
+  "summary": {
+    "unemployment_peak_pct": 10.0,
+
+    "real_gdp_trough_pct": -3.5,
+    "real_gdp_trough_reference": "More than 3.5 percent below the 2021-Q4 real GDP level",
+
+    "treasury_3m_start_pct": 0.1,
+    "treasury_3m_end_pct": 0.1,
+
+    "treasury_10y_start_pct": 0.7,
+    "treasury_10y_end_pct": 1.5,
+
+    "equity_drawdown_pct": -55.0,
+    "house_price_drawdown_pct": -28.5
+  },
+
+  "additional_context": {
+    "commercial_real_estate_drawdown_pct": -40.0,
+    "investment_grade_corporate_spread_peak_pct": 5.75,
+    "short_term_rate_description": "The 3-month Treasury rate remains near zero throughout the scenario",
+    "long_term_rate_description": "The 10-year Treasury yield falls to approximately 0.75 percent early in the scenario and then gradually rises to approximately 1.5 percent by the end of the scenario",
+    "commercial_real_estate_stress_context": "The scenario assumes prolonged remote work amplifies commercial real estate price declines and spillovers to the corporate sector"
+  },
+
+  "source": {
+    "organization": "Board of Governors of the Federal Reserve System",
+    "title": "2022 Supervisory Scenarios for Annual Stress Tests",
+    "scenario": "Severely Adverse",
+    "source_format": "PDF"
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "year": 2017,
+  "scenario_type": "severely_adverse",
+  "scenario_period": {
+    "start": "2017-Q1",
+    "end": "2020-Q1"
+  },
+
+  "narrative": "<FULL 2017 severely adverse scenario narrative + Additional Key Features, excluding Global Market Shock>",
+
+  "summary": {
+    "unemployment_peak_pct": 10.0,
+
+    "real_gdp_trough_pct": -6.5,
+    "real_gdp_trough_reference": "Relative to the pre-recession peak",
+
+    "treasury_3m_start_pct": 0.1,
+    "treasury_3m_end_pct": 0.1,
+
+    "treasury_10y_start_pct": 0.8,
+    "treasury_10y_end_pct": 1.8,
+
+    "equity_drawdown_pct": -50.0,
+    "house_price_drawdown_pct": -25.0
+  },
+
+  "additional_context": {
+    "commercial_real_estate_drawdown_pct": -35.0,
+    "investment_grade_corporate_spread_peak_pct": 5.5,
+    "short_term_rate_description": "Falls and remains near zero through the end of the scenario"
+  },
+
+  "source": {
+    "organization": "Board of Governors of the Federal Reserve System",
+    "title": "2017 Supervisory Scenarios for Annual Stress Tests",
+    "scenario": "Severely Adverse",
+    "source_format": "PDF"
+  }
+}

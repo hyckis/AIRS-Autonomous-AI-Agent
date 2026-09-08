@@ -1,0 +1,40 @@
+{
+  "year": 2018,
+  "scenario_type": "severely_adverse",
+  "scenario_period": {
+    "start": "2018-Q1",
+    "end": "2021-Q1"
+  },
+
+  "narrative": "<FULL 2018 severely adverse scenario narrative + Additional Key Features, excluding Global Market Shock, Counterparty Default, and Market Risk Components>",
+
+  "summary": {
+    "unemployment_peak_pct": 10.0,
+
+    "real_gdp_trough_pct": -7.5,
+    "real_gdp_trough_reference": "Relative to the pre-recession peak",
+
+    "treasury_3m_start_pct": 0.1,
+    "treasury_3m_end_pct": 0.1,
+
+    "treasury_10y_start_pct": 2.4,
+    "treasury_10y_end_pct": 2.4,
+
+    "equity_drawdown_pct": -65.0,
+    "house_price_drawdown_pct": -30.0
+  },
+
+  "additional_context": {
+    "commercial_real_estate_drawdown_pct": -40.0,
+    "investment_grade_corporate_spread_peak_pct": 5.75,
+    "short_term_rate_description": "Falls and remains near zero through the end of the scenario",
+    "long_term_rate_description": "10-year Treasury yield remains unchanged through the scenario period"
+  },
+
+  "source": {
+    "organization": "Board of Governors of the Federal Reserve System",
+    "title": "2018 Supervisory Scenarios for Annual Stress Tests",
+    "scenario": "Severely Adverse",
+    "source_format": "PDF"
+  }
+}

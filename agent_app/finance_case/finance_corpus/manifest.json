@@ -1,0 +1,47 @@
+[
+  {
+    "doc_id": "fomc_2022_03_16",
+    "source": "Federal Reserve",
+    "document_type": "fomc_statement",
+    "publication_date": "2022-03-16",
+    "path": "processed/fomc/2022-03-16_statement.md",
+    "retrievable": true,
+    "cutoff_valid": true
+  },
+  {
+    "doc_id": "fdic_qbp_2022_q4",
+    "source": "FDIC",
+    "document_type": "quarterly_banking_profile",
+    "publication_date": "2023-02-28",
+    "path": "processed/fdic/qbp_2022_q4_excerpt.md",
+    "retrievable": true,
+    "cutoff_valid": true
+  },
+  {
+    "doc_id": "fed_fsr_2022_11",
+    "source": "Federal Reserve",
+    "document_type": "financial_stability_report",
+    "publication_date": "2022-11-04",
+    "path": "processed/fed_fsr/fsr_2022_11_excerpt.md",
+    "retrievable": true,
+    "cutoff_valid": true
+  },
+  {
+    "doc_id": "huntington_2022_10k",
+    "source": "Huntington Bancshares",
+    "document_type": "regional_bank_10k",
+    "publication_date": "2023-02-17",
+    "path": "processed/regional_banks/huntington_2022_10k_excerpt.md",
+    "retrievable": true,
+    "cutoff_valid": true
+  },
+  {
+    "doc_id": "regions_2022_10k",
+    "source": "Regions Financial Corporation",
+    "document_type": "regional_bank_10k",
+    "publication_date": "2023-02-24",
+    "path": "processed/regional_banks/regions_2022_10k_excerpt.md",
+    "retrievable": true,
+    "cutoff_valid": true
+  }
+]

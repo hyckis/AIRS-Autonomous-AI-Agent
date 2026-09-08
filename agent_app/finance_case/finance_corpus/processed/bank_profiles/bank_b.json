@@ -1,0 +1,28 @@
+{
+  "bank_id": "Bank B",
+  "as_of_date": "2022-12-31",
+  "balance_sheet": {
+    "total_assets_billion": 200.730,
+    "total_loans_and_leases_billion": 132.074,
+    "commercial_real_estate_loans_billion": 45.444,
+    "total_investment_securities_billion": 25.211,
+    "total_equity_billion": 25.318
+  },
+  "securities": {
+    "available_for_sale": {
+      "amortized_cost_billion": 11.193,
+      "estimated_fair_value_billion": 10.749,
+      "gross_unrealized_losses_billion": 0.445
+    },
+    "held_to_maturity": {
+      "amortized_cost_billion": 13.530,
+      "estimated_fair_value_billion": 12.375,
+      "gross_unrealized_losses_billion": 1.165
+    }
+  },
+  "deposits": {
+    "total_deposits_billion": 163.515,
+    "estimated_uninsured_deposits_billion": 74.2,
+    "estimated_uninsured_deposits_pct": 45.4
+  }
+}

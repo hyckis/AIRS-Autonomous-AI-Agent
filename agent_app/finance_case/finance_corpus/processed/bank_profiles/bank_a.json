@@ -1,0 +1,31 @@
+{
+  "bank_id": "Bank A",
+  "as_of_date": "2022-12-31",
+  "balance_sheet": {
+    "total_assets_billion": 211.8,
+    "total_loans_billion": 74.3,
+    "total_investment_securities_billion": 120.1,
+    "total_equity_billion": 16.0
+  },
+  "securities": {
+    "available_for_sale": {
+      "carrying_value_billion": 26.069,
+      "gross_unrealized_losses_billion": 2.533
+    },
+    "held_to_maturity": {
+      "amortized_cost_billion": 91.327,
+      "estimated_fair_value_billion": 76.169,
+      "gross_unrealized_losses_billion": 15.160
+    }
+  },
+  "deposits": {
+    "total_deposits_billion": 173.109,
+    "estimated_uninsured_us_deposits_billion": 151.5,
+    "estimated_uninsured_deposits_pct": 87.5,
+    "customer_concentration": [
+      "technology",
+      "life science and healthcare",
+      "private equity and venture capital"
+    ]
+  }
+}

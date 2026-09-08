@@ -1,0 +1,15 @@
+Corpus composition:
+- Fixed context:
+    - Provided consistently across runs.
+    - Scenario context: 
+        - 2015-2023 Fed severely adverse scenarios
+    - Bank profile:
+        - Bank A: anonymized SVB 2022 profile
+        - Bank B candidates: one of Huntington / Regions Financial / M&T
+        - One bank B profile will be selected for the profile swap experiment
+- Retrieved context:
+    - Indexed as a small closed corpus and retrieved by relevance during Lens Agent generation
+    - FOMC statements: Mar 2022 - Feb 2023
+    - FDIC: Q4 2022 Quarterly Banking Profile
+    - Fed reserve financial stability report, Nov 2022
+    - 2-3 reginal bank 2022 10-Ks: two of Huntington / Regions Financial / M&T
