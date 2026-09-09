@@ -37,6 +37,20 @@ For each proposed scenario, provide:
 - Key quantitative magnitudes, if supported
 - Supporting evidence from the provided context
 
+SCENARIO ADMISSION RULE
+-----------------------
+Before outputting a scenario, verify that it has sufficient grounding.
+
+If your reasoning would require phrases such as:
+- "the context does not specify..."
+- "it is reasonable to assume..."
+- "such exposures are plausible..."
+- "Bank A may have..."
+- "potentially..."
+to establish a required Bank A exposure, DISCARD the scenario.
+Do not output it.
+A diversity lens does not override the evidence requirement.
+
 QUANTITATIVE DISCIPLINE
 -----------------------
 Do not invent CET1 impacts, loss amounts, deposit outflows, asset-sale
@@ -165,7 +179,7 @@ DIVERSITY_LENSES = """
 8. Long-term systemic risk
 """
 
-def prompt_arm_c(bank_label, fixed_context, retrieved_context, baseline_response, strong_response, convergence_analysis):
+def prompt_arm_c(bank_label, fixed_context, retrieved_context, baseline_response, strong_response, supported_directions):
     return f"""
 {SHARED_TASK.format(bank_name=bank_label)}
 
@@ -185,9 +199,9 @@ ARM B OUTPUT
 -------------
 {strong_response}
 
-CONVERGENCE ANALYSIS
+SUPPORTED DIRECTIONS
 -------------
-{convergence_analysis}
+{supported_directions}
 
 DIVERSITY LENSES
 -------------
@@ -335,29 +349,46 @@ UNSUPPORTED POSSIBILITIES and do NOT recommend it to the Lens Agent.
 
 OUTPUT FORMAT
 -------------
-SHARED ASSUMPTIONS:
-- ...
+{{
+  "shared_assumptions": [
+    {{
+      "assumption": "...",
+      "assessment": "..."
+    }}
+  ],
 
-FACTUAL OR LOGICAL ISSUES:
-- ...
+  "factual_issues": [
+    {{
+      "strategy": "naive or strong",
+      "issue": "...",
+      "reason": "..."
+    }}
+  ],
 
-OVERLAPPING MECHANISMS:
-- ...
+  "overlapping_mechanisms": [
+    "..."
+  ],
 
-DOMINANT FRAMING:
-- ...
+  "dominant_framing": [
+    "..."
+  ],
 
-EVIDENCE-SUPPORTED UNDEREXPLORED CHANNELS:
-- ...
+  "supported_directions": [
+    {{
+      "direction": "...",
+      "target_bank_support": "...",
+      "external_chunk_ids": ["..."],
+      "why_underexplored": "..."
+    }}
+  ],
 
-UNSUPPORTED POSSIBILITIES:
-- ...
-
-CONCEPTUAL REDUNDANCIES:
-- ...
-
-DIVERSITY GAPS:
-- ...
+  "unsupported_possibilities": [
+    {{
+      "direction": "...",
+      "reason": "..."
+    }}
+  ]
+}}
 """
 
 

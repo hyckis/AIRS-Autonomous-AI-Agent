@@ -321,16 +321,7 @@
     "document_type": "regional_bank_10k",
     "publication_date": "2023-02-17",
     "section": "5. Interest-Rate and Liquidity Considerations",
-    "text": "Changes in interest rates can affect both Huntington's earnings and\nthe market value of its financial assets and liabilities.\n\nIn a rising-rate environment, interest-bearing liabilities may reprice\nmore rapidly than interest-earning assets, potentially reducing net\ninterest income.\n\nRising interest rates also reduce the market value of fixed-rate\nsecurities. Unrealized changes in the value of AFS securities affect\nother comprehensive income and shareholders' equity, while realized\nlosses on securities can affect earnings and regulatory capital.\n\nMortgage-backed securities are particularly sensitive to interest-rate\nchanges because changing rates affect both their market values and\nexpected prepayment behavior.\n\nHuntington's primary liquidity source is its deposit base. The\navailability and cost of deposits can be affected by:\n\n- changes in market interest rates\n- rates offered by competitors\n- the financial condition of Huntington or the banking industry\n- changes in depositor perceptions of safety or economic value\n\nHuntington also maintains access to other liquidity sources, including\nFHLB advances, wholesale funding, securitizations, and a portfolio of\nmarketable securities.\n\n---"
-  },
-  {
-    "chunk_id": "huntington_2022_10k_014",
-    "doc_id": "huntington_2022_10k",
-    "source": "Huntington Bancshares",
-    "document_type": "regional_bank_10k",
-    "publication_date": "2023-02-17",
-    "section": "6. Corpus Tags",
-    "text": "bank_type: diversified_regional_bank\n\ntopics:\n- bank_balance_sheet\n- loan_portfolio\n- commercial_real_estate\n- investment_securities\n- available_for_sale\n- held_to_maturity\n- unrealized_losses\n- deposits\n- uninsured_deposits\n- liquidity\n- interest_rate_risk\n- net_interest_income\n- economic_value_of_equity"
+    "text": "Changes in interest rates can affect both Huntington's earnings and\nthe market value of its financial assets and liabilities.\n\nIn a rising-rate environment, interest-bearing liabilities may reprice\nmore rapidly than interest-earning assets, potentially reducing net\ninterest income.\n\nRising interest rates also reduce the market value of fixed-rate\nsecurities. Unrealized changes in the value of AFS securities affect\nother comprehensive income and shareholders' equity, while realized\nlosses on securities can affect earnings and regulatory capital.\n\nMortgage-backed securities are particularly sensitive to interest-rate\nchanges because changing rates affect both their market values and\nexpected prepayment behavior.\n\nHuntington's primary liquidity source is its deposit base. The\navailability and cost of deposits can be affected by:\n\n- changes in market interest rates\n- rates offered by competitors\n- the financial condition of Huntington or the banking industry\n- changes in depositor perceptions of safety or economic value\n\nHuntington also maintains access to other liquidity sources, including\nFHLB advances, wholesale funding, securitizations, and a portfolio of\nmarketable securities."
   },
   {
     "chunk_id": "regions_2022_10k_000",
@@ -483,15 +474,6 @@
     "document_type": "regional_bank_10k",
     "publication_date": "2023-02-24",
     "section": "7. Relevant Risk Disclosures",
-    "text": "Regions identified several mechanisms through which changing\ninterest rates could affect the bank:\n\n- changes in the yield on loans and securities\n- changes in deposit and wholesale funding costs\n- changes in fixed-rate asset values\n- changes in unrealized gains and losses on securities\n- changes in borrower debt-service capacity\n- deposit migration toward higher-yielding products\n- deposit outflows\n- changes in mortgage-related asset prepayments\n\nRegions noted that increasing rates could support net interest income,\nbut could also increase borrower debt-service requirements and lead\nto higher delinquencies or credit losses.\n\nPersistently high interest rates and reductions in Federal Reserve\nbalance-sheet liquidity could also affect market liquidity and the\nbank's financial condition.\n\n---"
-  },
-  {
-    "chunk_id": "regions_2022_10k_017",
-    "doc_id": "regions_2022_10k",
-    "source": "Regions Financial Corporation",
-    "document_type": "regional_bank_10k",
-    "publication_date": "2023-02-24",
-    "section": "8. Corpus Tags",
-    "text": "bank_type: diversified_regional_bank\n\ntopics:\n- bank_balance_sheet\n- loan_portfolio\n- commercial_real_estate\n- investor_real_estate\n- investment_securities\n- available_for_sale\n- held_to_maturity\n- unrealized_losses\n- deposits\n- uninsured_deposits\n- deposit_mix\n- liquidity\n- deposit_outflows\n- interest_rate_risk\n- net_interest_income\n- asset_liability_management\n- interest_rate_hedging"
+    "text": "Regions identified several mechanisms through which changing\ninterest rates could affect the bank:\n\n- changes in the yield on loans and securities\n- changes in deposit and wholesale funding costs\n- changes in fixed-rate asset values\n- changes in unrealized gains and losses on securities\n- changes in borrower debt-service capacity\n- deposit migration toward higher-yielding products\n- deposit outflows\n- changes in mortgage-related asset prepayments\n\nRegions noted that increasing rates could support net interest income,\nbut could also increase borrower debt-service requirements and lead\nto higher delinquencies or credit losses.\n\nPersistently high interest rates and reductions in Federal Reserve\nbalance-sheet liquidity could also affect market liquidity and the\nbank's financial condition."
   }
 ]

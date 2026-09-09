@@ -95,7 +95,7 @@ def finance_lens_agent(
     retrieved_context,
     baseline_response,
     strong_response,
-    critique,
+    supported_directions,
     backend="local_ollama",
     model=None,
 ):
@@ -105,7 +105,7 @@ def finance_lens_agent(
         retrieved_context=retrieved_context,
         baseline_response=baseline_response,
         strong_response=strong_response,
-        convergence_analysis=critique,
+        supported_directions=supported_directions,
     )
 
     return call_llm(

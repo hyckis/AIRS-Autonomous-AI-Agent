@@ -33,14 +33,31 @@ def save_result(result, bank_id, run_id=1):
     return path
 
 def parse_json_response(text):
+    if text is None: raise ValueError("LLM returned None instead of JSON.")
     cleaned = text.strip()
-    if cleaned.startswith("```json"):
-        cleaned = cleaned[7:]
-    if cleaned.startswith("```"):
-        cleaned = cleaned[3:]
-    if cleaned.endswith("```"):
-        cleaned = cleaned[:-3]
-    return json.loads(cleaned.strip())
+    if not cleaned: raise ValueError("LLM returned None instead of JSON.")
+    if cleaned.startswith("```json"): cleaned = cleaned[len("```json"):].strip()
+    if cleaned.startswith("```"): cleaned = cleaned[len("```"):].strip()
+    if cleaned.endswith("```"): cleaned = cleaned[:-3].strip()
+
+    start = cleaned.find("{")
+    end = cleaned.rfind("}")
+
+    if start == -1 or end == -1 or end <= start:
+        raise ValueError(
+            "No valid JSON object found in LLM response.\n"
+            f"Raw response:\n{text}"
+        )
+
+    json_text = cleaned[start:end + 1]
+    try: return json.loads(json_text)
+    except json.JSONDecodeError as e:
+        print("\n========== JSON PARSE FAILED ==========")
+        print(json_text)
+        print("=======================================\n")
+        raise ValueError(
+            f"LLM returned malformed JSON: {e}"
+        ) from e
 
 
 def run_finance_case(bank_id="A", run_id=1, top_k=5, backend="local_ollama", model=None):
@@ -48,7 +65,6 @@ def run_finance_case(bank_id="A", run_id=1, top_k=5, backend="local_ollama", mod
 
     # Fixed context
     fixed_context = build_fixed_context(bank_id)
-
     bank_profile = load_bank_profile(bank_id)
 
     # -----------------------------
@@ -94,7 +110,8 @@ def run_finance_case(bank_id="A", run_id=1, top_k=5, backend="local_ollama", mod
     # -----------------------------
     # Convergence detection
     # -----------------------------
-    critique = finance_detect_homogeneity(
+    
+    critique_raw = finance_detect_homogeneity(
         bank_label=bank_label,
         fixed_context=fixed_context,
         retrieved_context=evidence,
@@ -103,7 +120,9 @@ def run_finance_case(bank_id="A", run_id=1, top_k=5, backend="local_ollama", mod
         backend=backend,
         model=model,
     )
-
+    critique = parse_json_response(critique_raw)
+    supported_directions = critique.get("supported_directions", [])
+    supported_directions_text = json.dumps(supported_directions, indent=2)
     # -----------------------------
     # Arm C
     # -----------------------------
@@ -114,7 +133,7 @@ def run_finance_case(bank_id="A", run_id=1, top_k=5, backend="local_ollama", mod
         retrieved_context=evidence,
         baseline_response=baseline_output,
         strong_response=strong_output,
-        critique=critique,
+        supported_directions=supported_directions_text,
         backend=backend,
         model=model,
     )
