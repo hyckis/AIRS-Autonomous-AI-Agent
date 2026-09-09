@@ -1,0 +1,593 @@
+{
+  "bank_id": "A",
+  "run_id": 2,
+  "source_file": "agent_app/finance_case/results/bank_a_run_02.txt",
+  "source_format": "legacy_txt",
+  "judge_backend": "local_ollama",
+  "judge_model": "gemma3:12b",
+  "strict_same_run_retrieval_provenance_available": false,
+  "direction_provenance_audit": {
+    "strict_same_run_retrieval_provenance_available": false,
+    "num_candidates": 2,
+    "num_admitted": 2,
+    "num_with_invalid_chunk_id": 0,
+    "directions": [
+      {
+        "candidate_index": 1,
+        "direction": "Venture Capital Portfolio Distress Scenario",
+        "direction_id": "D1",
+        "required_exposure_keys": [
+          "customer_concentration"
+        ],
+        "exposure_explicitly_supported": true,
+        "external_chunk_ids": [
+          "fdic_qbp_2022_q4_overview_000"
+        ],
+        "valid_exact_chunk_ids": [
+          "fdic_qbp_2022_q4_overview_000"
+        ],
+        "invalid_exact_chunk_ids": [],
+        "unsupported_assumptions_required": [],
+        "admitted_to_lens": true,
+        "possible_provenance_rejection": false
+      },
+      {
+        "candidate_index": 2,
+        "direction": "HTM Securities Realization Due to Deposit Outflows",
+        "direction_id": "D2",
+        "required_exposure_keys": [
+          "htm_securities",
+          "uninsured_deposits"
+        ],
+        "exposure_explicitly_supported": true,
+        "external_chunk_ids": [
+          "fdic_qbp_2022_q4_securities_liquidity_000",
+          "fed_fsr_2022_11_bank_capital_securities_000"
+        ],
+        "valid_exact_chunk_ids": [
+          "fdic_qbp_2022_q4_securities_liquidity_000",
+          "fed_fsr_2022_11_bank_capital_securities_000"
+        ],
+        "invalid_exact_chunk_ids": [],
+        "unsupported_assumptions_required": [],
+        "admitted_to_lens": true,
+        "possible_provenance_rejection": false
+      }
+    ]
+  },
+  "arms": {
+    "baseline": {
+      "num_scenarios": 3,
+      "abstained": false,
+      "scenarios": [
+        {
+          "scenario_id": "S1",
+          "scenario_text": "**Scenario 1: Rapid Uninsured Deposit Flight Driven by Technology Sector Contagion**\n\n*   **Trigger:** A significant failure of a major technology company *not* already accounted for in existing scenarios.\n*   **Transmission Channel:** Bank A's heavy concentration in the technology sector leads to immediate and substantial withdrawals ofuninsured deposits.  The narrative spreads quickly through social media and banking apps, triggering broader panic among tech-focuseddepositors at other institutions.\n*   **Supporting Evidence:** Bank A’s profile highlights significant customer concentration in the technology sector (87.5% uninsureddeposits). The sensitivity of uninsured depositors to negative news regarding specific industries is well documented.  The speed of digital withdrawals exacerbates the impact.\n*   **Quantitative Magnitude:** Assume a 30% flight of uninsured deposits, impacting equity by approximately 200-250 basis points (given high concentration and dependence on retail funding). This would likely necessitate asset sales to meet liquidity needs.",
+          "citation_audit": {
+            "cited_chunk_ids": [],
+            "valid_exact_chunk_ids": [],
+            "invalid_exact_chunk_ids": [],
+            "all_cited_chunk_ids_exist": true,
+            "strict_same_run_retrieval_check": "unavailable_for_legacy_txt"
+          },
+          "temporal_audit": {
+            "explicit_temporal_leakage": false,
+            "explicit_leakage_flags": [],
+            "hindsight_risk": false,
+            "hindsight_risk_flags": []
+          },
+          "semantic": {
+            "target_exposure_support": 2,
+            "trigger_support": 1,
+            "transmission_support": 1,
+            "quantitative_support": 1,
+            "bank_specificity": 2,
+            "unsupported_exposures": [],
+            "unsupported_trigger_details": [
+              "specific technology company failure",
+              "social media and banking apps narrative spread"
+            ],
+            "unsupported_transmission_details": [
+              "broader panic among tech-focused depositors at other institutions"
+            ],
+            "unsupported_quantitative_details": [
+              "30% flight of uninsured deposits",
+              "impact on equity by approximately 200-250 basis points"
+            ],
+            "mechanism_families": [
+              "deposit_liquidity_run",
+              "sector_credit"
+            ],
+            "mechanism_summary": "A technology company failure triggers a rapid flight of uninsured deposits, leading to liquidity stress and potential asset sales.",
+            "mechanism_coverage": {
+              "interest_rate_stress": 0,
+              "securities_unrealized_losses": 0,
+              "uninsured_deposit_vulnerability": 2,
+              "deposit_outflow_liquidity_stress": 2,
+              "forced_securities_sale": 1,
+              "loss_realization_capital_impact": 1
+            },
+            "grounding_rationale": "The scenario is grounded in Bank A's significant customer concentration in the technology sector and its high proportion of uninsured deposits. However, the specific trigger event (failure of a major tech company) lacks explicit support, as does the mechanism by which this triggers broader panic among depositors at other institutions. The quantitative details are also unsupported; while a deposit flight is plausible given the exposures, the magnitude is assumed rather than derived from the provided data.",
+            "evidence_grounding_score": 1.333,
+            "parse_failed": false
+          }
+        },
+        {
+          "scenario_id": "S2",
+          "scenario_text": "**Scenario 2: Commercial Real Estate Loan Defaults Triggered by Remote Work Shift & Rapid Interest Rate Increases**\n\n*   **Trigger:**  A sudden and unexpected acceleration in the shift towards permanent remote work, leading to a sharp decline in occupancy rates for office properties. Simultaneously, rate increases are faster than anticipated causing refinance issues.\n*   **Transmission Channel:** Bank A’s exposure to commercial real estate loans (not explicitly quantified but implied by its size relative to equity) experiences significantly higher default rates as tenants fail to meet obligations. This diminishes loan portfolio value and generates pressure on capital.\n*   **Supporting Evidence:** 2023 scenario already stresses CRE; an accelerated remote work trend would make this worse. The narrative reflects the scenario assumptions about prolonged remote work negatively impacting commercial real estate values. Higher interest rates reduce borrower ability to refinance.\n*   **Quantitative Magnitude:** A conservative estimate of a 15% default rate on commercial real estate loans, coupled with mark-to-market losses due to declining property values, could deplete CET1 capital by approximately 200 basis points and force asset sales to cover losses.",
+          "citation_audit": {
+            "cited_chunk_ids": [],
+            "valid_exact_chunk_ids": [],
+            "invalid_exact_chunk_ids": [],
+            "all_cited_chunk_ids_exist": true,
+            "strict_same_run_retrieval_check": "unavailable_for_legacy_txt"
+          },
+          "temporal_audit": {
+            "explicit_temporal_leakage": false,
+            "explicit_leakage_flags": [],
+            "hindsight_risk": false,
+            "hindsight_risk_flags": []
+          },
+          "semantic": {
+            "target_exposure_support": 0,
+            "trigger_support": 1,
+            "transmission_support": 1,
+            "quantitative_support": 0,
+            "bank_specificity": 0,
+            "unsupported_exposures": [
+              "commercial real estate loans"
+            ],
+            "unsupported_trigger_details": [
+              "sudden and unexpected acceleration in the shift towards permanent remote work",
+              "faster than anticipated rate increases"
+            ],
+            "unsupported_transmission_details": [
+              "tenant failure to meet obligations",
+              "loan portfolio value diminution",
+              "pressure on capital"
+            ],
+            "unsupported_quantitative_details": [
+              "15% default rate on commercial real estate loans",
+              "mark-to-market losses due to declining property values",
+              "200 basis points CET1 depletion",
+              "asset sales to cover losses"
+            ],
+            "mechanism_families": [
+              "cre_credit"
+            ],
+            "mechanism_summary": "CRE loan defaults triggered by remote work and rate increases.",
+            "mechanism_coverage": {
+              "interest_rate_stress": 0,
+              "securities_unrealized_losses": 0,
+              "uninsured_deposit_vulnerability": 0,
+              "deposit_outflow_liquidity_stress": 0,
+              "forced_securities_sale": 0,
+              "loss_realization_capital_impact": 1
+            },
+            "grounding_rationale": "The scenario asserts a trigger involving remote work and rate increases. The 2023 fixed Fed supervisory context mentions commercial real estate stress due to prolonged remote work, which lends some support to the event type. However, the specific acceleration of remote work is unsupported. The transmission channel describes loan defaults impacting capital, which aligns with general banking principles but lacks explicit grounding in Bank A's profile.  The quantitative details are entirely invented and not supported by any evidence.",
+            "evidence_grounding_score": 0.667,
+            "parse_failed": false
+          }
+        },
+        {
+          "scenario_id": "S3",
+          "scenario_text": "**Scenario 3: Life Science & Healthcare Sector Downturn Combined with Significant Securities Losses**\n\n*   **Trigger:** A major regulatory change or patent loss significantly reduces profitability across a significant portion of Bank A's life science and healthcare lending portfolio.\n*   **Transmission Channel:** Reduced cash flows from affected borrowers lead to increased loan losses, while simultaneously unrealized losses on the bank’s held-to-maturity securities (particularly those vulnerable to interest rate changes) become realized as they are sold to cover shortfalls.\n*   **Supporting Evidence:** Bank A has significant concentration in life science and healthcare. Significant securities mark down of~$15b could place a strain on capital and liquidity if forced to be liquidated.\n*   **Quantitative Magnitude:** Loan losses of 10% coupled with the sale of $10 billion in held-to-maturity securities at a 10% loss (impacting equity by approximately 100 basis points) would create a total impact of around 250-300 basis points on CET1.",
+          "citation_audit": {
+            "cited_chunk_ids": [],
+            "valid_exact_chunk_ids": [],
+            "invalid_exact_chunk_ids": [],
+            "all_cited_chunk_ids_exist": true,
+            "strict_same_run_retrieval_check": "unavailable_for_legacy_txt"
+          },
+          "temporal_audit": {
+            "explicit_temporal_leakage": false,
+            "explicit_leakage_flags": [],
+            "hindsight_risk": false,
+            "hindsight_risk_flags": []
+          },
+          "semantic": {
+            "target_exposure_support": 1,
+            "trigger_support": 0,
+            "transmission_support": 1,
+            "quantitative_support": 1,
+            "bank_specificity": 2,
+            "unsupported_exposures": [],
+            "unsupported_trigger_details": [
+              "major regulatory change",
+              "patent loss"
+            ],
+            "unsupported_transmission_details": [
+              "simultaneous unrealized losses become realized as they are sold to cover shortfalls"
+            ],
+            "unsupported_quantitative_details": [
+              "10% loan losses",
+              "sale of $10 billion in held-to-maturity securities at a 10% loss",
+              "impact of around 250-300 basis points on CET1"
+            ],
+            "mechanism_families": [
+              "sector_credit",
+              "securities_interest_rate"
+            ],
+            "mechanism_summary": "A sector downturn in life science and healthcare leads to loan losses, which are exacerbated by the realization of securities losses due to sales.",
+            "mechanism_coverage": {
+              "interest_rate_stress": 1,
+              "securities_unrealized_losses": 2,
+              "uninsured_deposit_vulnerability": 0,
+              "deposit_outflow_liquidity_stress": 0,
+              "forced_securities_sale": 1,
+              "loss_realization_capital_impact": 1
+            },
+            "grounding_rationale": "The scenario correctly identifies Bank A's customer concentration in life science and healthcare (TARGET BANK PROFILE). It also acknowledges the existence of HTM securities. However, the trigger event is unsupported; while regulatory changes or patent losses are plausible, they aren't explicitly mentioned as triggers. The transmission channel implies a direct link between loan losses and forced sales of HTM securities to cover shortfalls, which isn’t directly supported by the profile (a separately supported liquidity need would be required).  The quantitative details are unsupported; while the scenario references potential magnitudes, these are not present in the TARGET BANK PROFILE or FIXED FED SUPERVISORY CONTEXT.",
+            "evidence_grounding_score": 0.667,
+            "parse_failed": false
+          }
+        }
+      ],
+      "aggregate": {
+        "num_scenarios": 3,
+        "avg_target_exposure_support": 1.0,
+        "avg_trigger_support": 0.667,
+        "avg_transmission_support": 1.0,
+        "avg_quantitative_support": 0.667,
+        "avg_bank_specificity": 1.333,
+        "avg_evidence_grounding_score": 0.889,
+        "fully_grounded_scenarios": 0,
+        "fully_grounded_rate": 0.0,
+        "mechanism_family_counts": {
+          "deposit_liquidity_run": 1,
+          "sector_credit": 2,
+          "cre_credit": 1,
+          "securities_interest_rate": 1
+        },
+        "num_distinct_mechanism_families": 4,
+        "temporal_audit": {
+          "explicit_temporal_leakage": false,
+          "explicit_leakage_flags": [],
+          "hindsight_risk": false,
+          "hindsight_risk_flags": []
+        },
+        "bank_a_realized_channel_coverage": {
+          "interest_rate_stress": 1,
+          "securities_unrealized_losses": 2,
+          "uninsured_deposit_vulnerability": 2,
+          "deposit_outflow_liquidity_stress": 2,
+          "forced_securities_sale": 1,
+          "loss_realization_capital_impact": 1
+        },
+        "bank_a_realized_coverage_total": 9,
+        "bank_a_realized_coverage_rate": 0.75,
+        "bank_a_full_channel_hits": 3,
+        "bank_a_partial_or_full_channel_hits": 6
+      }
+    },
+    "strong": {
+      "num_scenarios": 3,
+      "abstained": false,
+      "scenarios": [
+        {
+          "scenario_id": "S1",
+          "scenario_text": "**Scenario 1: Venture Capital Portfolio Distress**\n\n*   **Trigger:** Significant deterioration in performance across Bank A’s portfolio of venture capital-backed loans due to unforeseenregulatory changes impacting the biotech sector or a sharp downturn in technology valuations.\n*   **Transmission Channel:** Defaults on VC-backed loans leading to increased loan loss provisions and reduced profitability; potential for margin calls on collateralized lending activities; reputational damage from distressed borrowers.  The customer concentration provides significant exposure.\n*   **Supporting Evidence:** Bank A’s customer concentration in private equity & venture capital firms, combined with the FDIC’s identification of weakening borrower repayment capacity [Retrieved Evidence 2].\n*   **Quantitative Magnitude:** Requires quantitative calibration.",
+          "citation_audit": {
+            "cited_chunk_ids": [],
+            "valid_exact_chunk_ids": [],
+            "invalid_exact_chunk_ids": [],
+            "all_cited_chunk_ids_exist": true,
+            "strict_same_run_retrieval_check": "unavailable_for_legacy_txt"
+          },
+          "temporal_audit": {
+            "explicit_temporal_leakage": false,
+            "explicit_leakage_flags": [],
+            "hindsight_risk": false,
+            "hindsight_risk_flags": []
+          },
+          "semantic": {
+            "target_exposure_support": 1,
+            "trigger_support": 0,
+            "transmission_support": 1,
+            "quantitative_support": 2,
+            "bank_specificity": 2,
+            "unsupported_exposures": [],
+            "unsupported_trigger_details": [
+              "unspecified regulatory changes impacting the biotech sector",
+              "sharp downturn in technology valuations"
+            ],
+            "unsupported_transmission_details": [
+              "margin calls on collateralized lending activities"
+            ],
+            "unsupported_quantitative_details": [],
+            "mechanism_families": [
+              "sector_credit"
+            ],
+            "mechanism_summary": "Sector-specific credit risk stemming from venture capital portfolio distress.",
+            "mechanism_coverage": {
+              "interest_rate_stress": 0,
+              "securities_unrealized_losses": 0,
+              "uninsured_deposit_vulnerability": 0,
+              "deposit_outflow_liquidity_stress": 0,
+              "forced_securities_sale": 0,
+              "loss_realization_capital_impact": 0
+            },
+            "grounding_rationale": "The scenario asserts Bank A has exposure to private equity and venture capital firms (supported by TARGET BANK PROFILE). The trigger event is unsupported as it describes specific regulatory changes and a technology downturn without providing evidence. While the transmission channel of loan defaults and reputational damage is plausible, the mention of margin calls on collateralized lending activities lacks supporting evidence.  The quantitative magnitude is explicitly stated to require calibration.",
+            "evidence_grounding_score": 0.667,
+            "parse_failed": false
+          }
+        },
+        {
+          "scenario_id": "S2",
+          "scenario_text": "**Scenario 2: HTM Securities Realization Due to Deposit Outflows & Liquidity Needs**\n\n*   **Trigger:** Significant and rapid deposit outflows (particularly uninsured deposits) triggered by negative news regarding Bank A’s risk management practices or broader concerns about regional bank stability, leading to liquidity shortfalls despite ample Federal Reserve borrowing capacity [Retrieved Evidence 4].\n*   **Transmission Channel:** Bank is forced to liquidate held-to-maturity securities portfolio to meet deposit withdrawals and satisfy funding needs.  Unrealized losses on HTM securities are realized, directly reducing CET1 capital.\n*   **Supporting Evidence:**  Bank A’s high percentage of uninsured deposits (87.5%), leading to greater sensitivity to depositor confidence; The FDIC's acknowledgement that unrealized losses could become realized if banks need to sell securities [Retrieved Evidence 1]; the Fed’s observation that HTM portfolios have elevated unrealized losses [Retrieved Evidence 3].\n*   **Quantitative Magnitude:** Requires quantitative calibration.",
+          "citation_audit": {
+            "cited_chunk_ids": [],
+            "valid_exact_chunk_ids": [],
+            "invalid_exact_chunk_ids": [],
+            "all_cited_chunk_ids_exist": true,
+            "strict_same_run_retrieval_check": "unavailable_for_legacy_txt"
+          },
+          "temporal_audit": {
+            "explicit_temporal_leakage": false,
+            "explicit_leakage_flags": [],
+            "hindsight_risk": false,
+            "hindsight_risk_flags": []
+          },
+          "semantic": {
+            "target_exposure_support": 2,
+            "trigger_support": 1,
+            "transmission_support": 2,
+            "quantitative_support": 2,
+            "bank_specificity": 1,
+            "unsupported_exposures": [],
+            "unsupported_trigger_details": [
+              "negative news regarding Bank A’s risk management practices or broader concerns about regional bank stability"
+            ],
+            "unsupported_transmission_details": [],
+            "unsupported_quantitative_details": [],
+            "mechanism_families": [
+              "deposit_liquidity_run",
+              "securities_interest_rate"
+            ],
+            "mechanism_summary": "Deposit outflows force the realization of HTM losses, impacting capital.",
+            "mechanism_coverage": {
+              "interest_rate_stress": 2,
+              "securities_unrealized_losses": 2,
+              "uninsured_deposit_vulnerability": 2,
+              "deposit_outflow_liquidity_stress": 2,
+              "forced_securities_sale": 2,
+              "loss_realization_capital_impact": 2
+            },
+            "grounding_rationale": "The scenario correctly identifies Bank A's high percentage of uninsured deposits and the existence of HTM securities with unrealized losses as key exposures. The trigger is partially supported by the general possibility of negative news impacting depositor confidence, but lacks specific evidence linking it to Bank A or a particular event.  The transmission channel – forced sale of HTM securities due to liquidity needs – is well-supported by the exposures and the Fed's commentary on unrealized losses potentially becoming realized. The quantitative aspect is explicitly deferred to calibration.",
+            "evidence_grounding_score": 1.667,
+            "parse_failed": false
+          }
+        },
+        {
+          "scenario_id": "S3",
+          "scenario_text": "**Scenario 3: Commercial Real Estate Exposure and Remote Work Crystallization**\n\n*   **Trigger:** Acceleration of remote work trends, leading to a sharp decline in occupancy rates for Bank A's commercial real estate loan portfolio.\n*   **Transmission Channel:** Declining property values lead to defaults on CRE loans. The bank is forced to recognize losses throughincreased loan loss provisions and potential write-downs on the entire CRE portfolio reducing CET1 capital.\n*   **Supporting Evidence:**  The 2023 supervisory scenario’s emphasis on prolonged remote work amplifying declines in commercial real estate [2023 severely_adverse Scenario].\n*   **Quantitative Magnitude:** Requires quantitative calibration.",
+          "citation_audit": {
+            "cited_chunk_ids": [],
+            "valid_exact_chunk_ids": [],
+            "invalid_exact_chunk_ids": [],
+            "all_cited_chunk_ids_exist": true,
+            "strict_same_run_retrieval_check": "unavailable_for_legacy_txt"
+          },
+          "temporal_audit": {
+            "explicit_temporal_leakage": false,
+            "explicit_leakage_flags": [],
+            "hindsight_risk": false,
+            "hindsight_risk_flags": []
+          },
+          "semantic": {
+            "target_exposure_support": 0,
+            "trigger_support": 1,
+            "transmission_support": 2,
+            "quantitative_support": 2,
+            "bank_specificity": 0,
+            "unsupported_exposures": [],
+            "unsupported_trigger_details": [
+              "sharp decline in occupancy rates"
+            ],
+            "unsupported_transmission_details": [],
+            "unsupported_quantitative_details": [],
+            "mechanism_families": [
+              "cre_credit"
+            ],
+            "mechanism_summary": "Commercial Real Estate Credit Stress",
+            "mechanism_coverage": {
+              "interest_rate_stress": 0,
+              "securities_unrealized_losses": 0,
+              "uninsured_deposit_vulnerability": 0,
+              "deposit_outflow_liquidity_stress": 0,
+              "forced_securities_sale": 0,
+              "loss_realization_capital_impact": 0
+            },
+            "grounding_rationale": "The scenario asserts a CRE exposure for Bank A, which is supported by the TARGET BANK PROFILE. The trigger of accelerated remote work and subsequent decline in occupancy rates is partially supported by the 2023 supervisory scenario's context regarding commercial real estate stress due to prolonged remote work.  However, the magnitude of the 'sharp decline in occupancy rates' is not explicitly stated. The transmission channel describing defaults on CRE loans leading to losses and CET1 reduction is plausible given the exposure but lacks specific supporting details. Finally, the quantitative aspect requires calibration and therefore lacks support.",
+            "evidence_grounding_score": 1.0,
+            "parse_failed": false
+          }
+        }
+      ],
+      "aggregate": {
+        "num_scenarios": 3,
+        "avg_target_exposure_support": 1.0,
+        "avg_trigger_support": 0.667,
+        "avg_transmission_support": 1.667,
+        "avg_quantitative_support": 2.0,
+        "avg_bank_specificity": 1.0,
+        "avg_evidence_grounding_score": 1.111,
+        "fully_grounded_scenarios": 0,
+        "fully_grounded_rate": 0.0,
+        "mechanism_family_counts": {
+          "sector_credit": 1,
+          "deposit_liquidity_run": 1,
+          "securities_interest_rate": 1,
+          "cre_credit": 1
+        },
+        "num_distinct_mechanism_families": 4,
+        "temporal_audit": {
+          "explicit_temporal_leakage": false,
+          "explicit_leakage_flags": [],
+          "hindsight_risk": false,
+          "hindsight_risk_flags": []
+        },
+        "bank_a_realized_channel_coverage": {
+          "interest_rate_stress": 2,
+          "securities_unrealized_losses": 2,
+          "uninsured_deposit_vulnerability": 2,
+          "deposit_outflow_liquidity_stress": 2,
+          "forced_securities_sale": 2,
+          "loss_realization_capital_impact": 2
+        },
+        "bank_a_realized_coverage_total": 12,
+        "bank_a_realized_coverage_rate": 1.0,
+        "bank_a_full_channel_hits": 6,
+        "bank_a_partial_or_full_channel_hits": 6
+      }
+    },
+    "lens": {
+      "num_scenarios": 2,
+      "abstained": false,
+      "scenarios": [
+        {
+          "scenario_id": "D1",
+          "scenario_text": "**Scenario D1: Venture Capital Portfolio Distress Scenario**\n\n*   **Dominant assumption or mechanism challenged:** The narrative typically views venture capital investments as benefiting from long-term growth and innovation; this scenario challenges that assumption by considering a rapid contraction in the VC market.\n*   **Trigger:** A sudden shift in investor sentiment leads to a significant repricing of private equity valuations alongside rising interest rates, triggering margin calls and liquidity constraints for funds with exposure to Bank A's venture capital clients.\n*   **Transmission channel:** Venture capital-backed companies experience difficulty accessing follow-on funding. This cascades into loan defaults among firms concentrated in this sector, impacting Bank A’s customer concentration [TARGET BANK PROFILE].  Bank A faces increased credit losses and potential drawdowns on committed lines of credit to distressed private equity clients.\n*   **Supporting evidence:** [fdic_qbp_2022_q4_overview_000] highlights weakening borrower repayment capacity as an area of supervisory attention.\n*   **Why the scenario is distinct from prior analyses:** Prior scenarios primarily focus on broader economic downturns impacting diverse sectors, not a targeted collapse in private equity valuations coupled with sector-specific customer concentration risk at Bank A.\n*   **Quantitative magnitude:** Requires quantitative calibration.",
+          "citation_audit": {
+            "cited_chunk_ids": [
+              "fdic_qbp_2022_q4_overview_000"
+            ],
+            "valid_exact_chunk_ids": [
+              "fdic_qbp_2022_q4_overview_000"
+            ],
+            "invalid_exact_chunk_ids": [],
+            "all_cited_chunk_ids_exist": true,
+            "strict_same_run_retrieval_check": "unavailable_for_legacy_txt"
+          },
+          "temporal_audit": {
+            "explicit_temporal_leakage": false,
+            "explicit_leakage_flags": [],
+            "hindsight_risk": false,
+            "hindsight_risk_flags": []
+          },
+          "semantic": {
+            "target_exposure_support": 1,
+            "trigger_support": 1,
+            "transmission_support": 2,
+            "quantitative_support": 2,
+            "bank_specificity": 2,
+            "unsupported_exposures": [],
+            "unsupported_trigger_details": [
+              "shift in investor sentiment",
+              "repricing of private equity valuations",
+              "margin calls"
+            ],
+            "unsupported_transmission_details": [],
+            "unsupported_quantitative_details": [],
+            "mechanism_families": [
+              "sector_credit"
+            ],
+            "mechanism_summary": "Sector-specific credit losses stemming from distressed venture capital clients cascade into loan defaults and line of credit drawdowns.",
+            "mechanism_coverage": {
+              "interest_rate_stress": 0,
+              "securities_unrealized_losses": 0,
+              "uninsured_deposit_vulnerability": 0,
+              "deposit_outflow_liquidity_stress": 0,
+              "forced_securities_sale": 0,
+              "loss_realization_capital_impact": 0
+            },
+            "grounding_rationale": "The scenario is grounded in Bank A's customer concentration in private equity and venture capital (TARGET BANK PROFILE) and the FDIC report highlighting weakening borrower repayment capacity ([fdic_qbp_2022_q4_overview_000]). However, the trigger mechanism – a sudden shift in investor sentiment leading to repricing and margin calls – is not explicitly supported. The transmission channel of loan defaults and line-of-credit drawdowns is plausible given the exposure but lacks specific detail.",
+            "evidence_grounding_score": 1.333,
+            "parse_failed": false
+          }
+        },
+        {
+          "scenario_id": "D2",
+          "scenario_text": "**Scenario D2: HTM Securities Realization Due to Deposit Outflows**\n\n*   **Dominant assumption or mechanism challenged:** The assumption that HTM securities remain insulated from balance sheet stress because they are not marked-to-market is tested under conditions of severe deposit instability.\n*   **Trigger:** A sudden loss of confidence in Bank A, driven by rumors or a broader regional banking crisis, leads to a rapid outflow of uninsured deposits.\n*   **Transmission channel:** To meet these withdrawal demands, Bank A is forced to sell HTM securities, realizing the previously unrealized losses [fed_fsr_2022_11_bank_capital_securities_000].  This reduces capital and creates a negative feedback loop as further deposit outflows are triggered by concerns about solvency.\n*   **Supporting evidence:**  [fdic_qbp_2022_q4_securities_liquidity_000] notes that elevated unrealized losses could become realizedif banks need to sell securities to meet liquidity needs, and [TARGET BANK PROFILE] highlights Bank A’s high percentage of uninsured deposits.\n*   **Why the scenario is distinct from prior analyses:** This scenario focuses specifically on the realization of HTM losses driven by deposit instability, a mechanism not explicitly emphasized in previous scenarios that focus more broadly on interest rate risk impacting available-for-sale securities.\n*   **Quantitative magnitude:** Requires quantitative calibration.",
+          "citation_audit": {
+            "cited_chunk_ids": [
+              "fed_fsr_2022_11_bank_capital_securities_000",
+              "fdic_qbp_2022_q4_securities_liquidity_000"
+            ],
+            "valid_exact_chunk_ids": [
+              "fed_fsr_2022_11_bank_capital_securities_000",
+              "fdic_qbp_2022_q4_securities_liquidity_000"
+            ],
+            "invalid_exact_chunk_ids": [],
+            "all_cited_chunk_ids_exist": true,
+            "strict_same_run_retrieval_check": "unavailable_for_legacy_txt"
+          },
+          "temporal_audit": {
+            "explicit_temporal_leakage": false,
+            "explicit_leakage_flags": [],
+            "hindsight_risk": true,
+            "hindsight_risk_flags": [
+              "regional_banking_crisis"
+            ]
+          },
+          "semantic": {
+            "target_exposure_support": 2,
+            "trigger_support": 1,
+            "transmission_support": 1,
+            "quantitative_support": 2,
+            "bank_specificity": 0,
+            "unsupported_exposures": [],
+            "unsupported_trigger_details": [
+              "rumors or a broader regional banking crisis"
+            ],
+            "unsupported_transmission_details": [],
+            "unsupported_quantitative_details": [],
+            "mechanism_families": [
+              "deposit_liquidity_run",
+              "securities_interest_rate"
+            ],
+            "mechanism_summary": "A deposit liquidity run forces the realization of HTM securities losses, impacting capital.",
+            "mechanism_coverage": {
+              "interest_rate_stress": 2,
+              "securities_unrealized_losses": 2,
+              "uninsured_deposit_vulnerability": 2,
+              "deposit_outflow_liquidity_stress": 2,
+              "forced_securities_sale": 2,
+              "loss_realization_capital_impact": 2
+            },
+            "grounding_rationale": "The scenario is grounded in the TARGET BANK PROFILE's high percentage of uninsured deposits and Bank A’s HTM holdings. The FDIC QBP highlights the risk of realizing unrealized losses on securities due to liquidity needs. However, the trigger event (rumors/regional crisis) lacks explicit support within the provided evidence; it represents an invented detail.  The quantitative details are not supported as they require calibration.",
+            "evidence_grounding_score": 1.333,
+            "parse_failed": false
+          }
+        }
+      ],
+      "aggregate": {
+        "num_scenarios": 2,
+        "avg_target_exposure_support": 1.5,
+        "avg_trigger_support": 1.0,
+        "avg_transmission_support": 1.5,
+        "avg_quantitative_support": 2.0,
+        "avg_bank_specificity": 1.0,
+        "avg_evidence_grounding_score": 1.333,
+        "fully_grounded_scenarios": 0,
+        "fully_grounded_rate": 0.0,
+        "mechanism_family_counts": {
+          "sector_credit": 1,
+          "deposit_liquidity_run": 1,
+          "securities_interest_rate": 1
+        },
+        "num_distinct_mechanism_families": 3,
+        "temporal_audit": {
+          "explicit_temporal_leakage": false,
+          "explicit_leakage_flags": [],
+          "hindsight_risk": true,
+          "hindsight_risk_flags": [
+            "regional_banking_crisis"
+          ]
+        },
+        "bank_a_realized_channel_coverage": {
+          "interest_rate_stress": 2,
+          "securities_unrealized_losses": 2,
+          "uninsured_deposit_vulnerability": 2,
+          "deposit_outflow_liquidity_stress": 2,
+          "forced_securities_sale": 2,
+          "loss_realization_capital_impact": 2
+        },
+        "bank_a_realized_coverage_total": 12,
+        "bank_a_realized_coverage_rate": 1.0,
+        "bank_a_full_channel_hits": 6,
+        "bank_a_partial_or_full_channel_hits": 6
+      }
+    }
+  }
+}

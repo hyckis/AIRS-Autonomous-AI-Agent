@@ -1,0 +1,477 @@
+{
+  "bank_id": "B",
+  "run_id": 3,
+  "source_file": "agent_app/finance_case/results/bank_b_run_03.txt",
+  "source_format": "legacy_txt",
+  "judge_backend": "local_ollama",
+  "judge_model": "gemma3:12b",
+  "strict_same_run_retrieval_provenance_available": false,
+  "direction_provenance_audit": {
+    "strict_same_run_retrieval_provenance_available": false,
+    "num_candidates": 2,
+    "num_admitted": 2,
+    "num_with_invalid_chunk_id": 0,
+    "directions": [
+      {
+        "candidate_index": 1,
+        "direction": "Scenario 1: Regional Bank Contagion & Deposit Flight",
+        "direction_id": "D1",
+        "required_exposure_keys": [
+          "uninsured_deposits"
+        ],
+        "exposure_explicitly_supported": true,
+        "external_chunk_ids": [
+          "fdic_qbp_2022_q4_overview_000",
+          "huntington_2022_10k_000",
+          "regions_2022_10k_000"
+        ],
+        "valid_exact_chunk_ids": [
+          "fdic_qbp_2022_q4_overview_000",
+          "huntington_2022_10k_000",
+          "regions_2022_10k_000"
+        ],
+        "invalid_exact_chunk_ids": [],
+        "unsupported_assumptions_required": [],
+        "admitted_to_lens": true,
+        "possible_provenance_rejection": false
+      },
+      {
+        "candidate_index": 2,
+        "direction": "Scenario 2: Commercial Real Estate Valuation Shock & Debt Spiral",
+        "direction_id": "D2",
+        "required_exposure_keys": [
+          "cre_loans"
+        ],
+        "exposure_explicitly_supported": true,
+        "external_chunk_ids": [
+          "fdic_qbp_2022_q4_securities_liquidity_000"
+        ],
+        "valid_exact_chunk_ids": [
+          "fdic_qbp_2022_q4_securities_liquidity_000"
+        ],
+        "invalid_exact_chunk_ids": [],
+        "unsupported_assumptions_required": [],
+        "admitted_to_lens": true,
+        "possible_provenance_rejection": false
+      }
+    ]
+  },
+  "arms": {
+    "baseline": {
+      "num_scenarios": 3,
+      "abstained": false,
+      "scenarios": [
+        {
+          "scenario_id": "S1",
+          "scenario_text": "**Scenario 1: Regional Bank Contagion & Deposit Flight**\n*   **Trigger:** A sudden failure of a mid-sized regional bank due to liquidity issues and perceived mismanagement.  This isn't explicitly modeled in the regulatory scenarios but is a systemic risk factor.\n*   **Transmission Channel:** Loss of confidence in the banking sector, leading to uninsured depositors (45.4% of deposits at Bank B)withdrawing funds quickly. This also affects commercial real estate loans. The scenario stresses the impact of remote work on property values as well as its reduction in business travel.\n*   **Supporting Evidence:** Historical instances of bank runs and regulatory scrutiny highlighting potential vulnerabilities in regional banks. Commercial Real Estate is a key component to stress Bank B’s balance sheet.\n*   **Quantitative Magnitude:**  A 15% uninsured deposit outflow would reduce CET1 by approximately 350 bps, forcing asset sales (primarily held-to-maturity securities) to meet liquidity needs. Given total deposits of $163.5 billion, a 15% outflow equates to roughly $24.5 billion. The bank will be forced to liquidate assets valued at ~$25 billion.",
+          "citation_audit": {
+            "cited_chunk_ids": [],
+            "valid_exact_chunk_ids": [],
+            "invalid_exact_chunk_ids": [],
+            "all_cited_chunk_ids_exist": true,
+            "strict_same_run_retrieval_check": "unavailable_for_legacy_txt"
+          },
+          "temporal_audit": {
+            "explicit_temporal_leakage": false,
+            "explicit_leakage_flags": [],
+            "hindsight_risk": false,
+            "hindsight_risk_flags": []
+          },
+          "semantic": {
+            "target_exposure_support": 2,
+            "trigger_support": 0,
+            "transmission_support": 1,
+            "quantitative_support": 1,
+            "bank_specificity": 2,
+            "unsupported_exposures": [],
+            "unsupported_trigger_details": [
+              "sudden failure of a mid-sized regional bank due to liquidity issues and perceived mismanagement",
+              "systemic risk factor"
+            ],
+            "unsupported_transmission_details": [
+              "reduction in business travel"
+            ],
+            "unsupported_quantitative_details": [
+              "15% uninsured deposit outflow",
+              "350 bps CET1 reduction",
+              "$24.5 billion deposit outflow",
+              "$25 billion asset liquidation"
+            ],
+            "mechanism_families": [
+              "deposit_liquidity_run",
+              "cre_credit"
+            ],
+            "mechanism_summary": "The scenario posits a bank run triggered by the failure of another regional bank, leading to deposit outflows and forcing asset sales. The commercial real estate portfolio is also negatively impacted.",
+            "mechanism_coverage": {},
+            "grounding_rationale": "Target exposure support is high because the TARGET BANK PROFILE explicitly states Bank B's total deposits, uninsured deposit percentage, and CRE loan holdings. The trigger event (regional bank failure) lacks explicit support in the provided evidence; it’s plausible but not directly stated. Transmission is partially supported by the presence of uninsured deposits and CRE loans, but the rationale includes unsupported details like 'reduction in business travel'. Quantitative details are unsupported as they are invented magnitudes without calibration.",
+            "evidence_grounding_score": 1.0,
+            "parse_failed": false
+          }
+        },
+        {
+          "scenario_id": "S2",
+          "scenario_text": "**Scenario 2:  Commercial Real Estate Valuation Shock & Debt Spiral**\n*   **Trigger:** A sharp and rapid decline in commercial real estate values due to sustained remote work trends and a reduction in business travel, triggering defaults on CRE loans.\n*   **Transmission Channel:** Increased loan loss provisions significantly erode capital.  Further, forced sales of CRE-backed securities (both available-for-sale and held-to-maturity) are needed to cover losses.\n*   **Supporting Evidence:** Current market indicators suggesting a cooling in the commercial real estate sector due to changing workpatterns. Bank B's significant exposure to CRE loans ($45.44B).\n*   **Quantitative Magnitude:** A 20% decline in CRE loan values (equivalent to $9.1 billion) would decrease CET1 by approximately 300 basis points.  Losses would necessitate ~$10 billion asset sales.",
+          "citation_audit": {
+            "cited_chunk_ids": [],
+            "valid_exact_chunk_ids": [],
+            "invalid_exact_chunk_ids": [],
+            "all_cited_chunk_ids_exist": true,
+            "strict_same_run_retrieval_check": "unavailable_for_legacy_txt"
+          },
+          "temporal_audit": {
+            "explicit_temporal_leakage": false,
+            "explicit_leakage_flags": [],
+            "hindsight_risk": false,
+            "hindsight_risk_flags": []
+          },
+          "semantic": {
+            "target_exposure_support": 2,
+            "trigger_support": 1,
+            "transmission_support": 2,
+            "quantitative_support": 1,
+            "bank_specificity": 2,
+            "unsupported_exposures": [],
+            "unsupported_trigger_details": [
+              "sustained remote work trends",
+              "reduction in business travel"
+            ],
+            "unsupported_transmission_details": [],
+            "unsupported_quantitative_details": [
+              "20% decline in CRE loan values",
+              "CET1 decrease of 300 basis points",
+              "$10 billion asset sales"
+            ],
+            "mechanism_families": [
+              "cre_credit"
+            ],
+            "mechanism_summary": "A sharp decline in commercial real estate values leads to CRE loan defaults, eroding capital and forcing asset sales.",
+            "mechanism_coverage": {},
+            "grounding_rationale": "The scenario posits a trigger of declining CRE values due to remote work trends and reduced business travel. While the TARGET BANK PROFILE confirms Bank B's significant exposure to commercial real estate loans ($45.44B), the specific triggers are not explicitly supported by the provided evidence, although they are plausible given broader economic context. The transmission channel involving increased loan loss provisions and forced asset sales is supported by the CRE loan exposure. However, the quantitative details (20% decline, CET1 impact, asset sale amount) are assumed/calibrated rather than directly derived from the TARGET BANK PROFILE.",
+            "evidence_grounding_score": 1.667,
+            "parse_failed": false
+          }
+        },
+        {
+          "scenario_id": "S3",
+          "scenario_text": "**Scenario 3:  Cyberattack & Operational Disruption**\n*   **Trigger:** A sophisticated cyberattack that disrupts Bank B’s core operations, leading to reputational damage and regulatory fines.\n*   **Transmission Channel:** Loss of customer trust leads to deposit withdrawals (insured and uninsured), increased operational costs for remediation, and legal/regulatory penalties. Reduced lending activity further weakens revenue generation.\n*   **Supporting Evidence:** The increasing frequency and sophistication of cyberattacks targeting financial institutions. A significant portion of the bank’s business is conducted digitally.\n*   **Quantitative Magnitude:** A 10% deposit outflow combined with $5 billion in remediation costs would reduce CET1 by approximately 325 basis points, potentially forcing asset sales to maintain liquidity.",
+          "citation_audit": {
+            "cited_chunk_ids": [],
+            "valid_exact_chunk_ids": [],
+            "invalid_exact_chunk_ids": [],
+            "all_cited_chunk_ids_exist": true,
+            "strict_same_run_retrieval_check": "unavailable_for_legacy_txt"
+          },
+          "temporal_audit": {
+            "explicit_temporal_leakage": false,
+            "explicit_leakage_flags": [],
+            "hindsight_risk": false,
+            "hindsight_risk_flags": []
+          },
+          "semantic": {
+            "target_exposure_support": 2,
+            "trigger_support": 1,
+            "transmission_support": 2,
+            "quantitative_support": 1,
+            "bank_specificity": 1,
+            "unsupported_exposures": [],
+            "unsupported_trigger_details": [
+              "regulatory fines"
+            ],
+            "unsupported_transmission_details": [],
+            "unsupported_quantitative_details": [
+              "10% deposit outflow",
+              "$5 billion in remediation costs",
+              "reduce CET1 by approximately 325 basis points"
+            ],
+            "mechanism_families": [
+              "operational_cyber",
+              "deposit_liquidity_run"
+            ],
+            "mechanism_summary": "A cyberattack disrupts operations, leading to deposit withdrawals and remediation costs, impacting CET1.",
+            "mechanism_coverage": {},
+            "grounding_rationale": "The scenario posits a cyberattack as the trigger. While the TARGET BANK PROFILE does not explicitly mention cybersecurity incidents, it states 'A significant portion of the bank’s business is conducted digitally,' which supports the plausibility of a cyberattack impacting Bank B. The regulatory fines are unsupported; while regulatory intervention is possible, no specific evidence links the cyberattack to such fines.  The transmission channel – loss of customer trust leading to deposit withdrawals and operational costs – is supported by the presence of uninsured deposits in the TARGET BANK PROFILE. The quantitative details (10% outflow, $5 billion cost, 325 bps CET1 impact) are unsupported as they are not present in the provided evidence; they represent assumed magnitudes.",
+            "evidence_grounding_score": 1.667,
+            "parse_failed": false
+          }
+        }
+      ],
+      "aggregate": {
+        "num_scenarios": 3,
+        "avg_target_exposure_support": 2.0,
+        "avg_trigger_support": 0.667,
+        "avg_transmission_support": 1.667,
+        "avg_quantitative_support": 1.0,
+        "avg_bank_specificity": 1.667,
+        "avg_evidence_grounding_score": 1.445,
+        "fully_grounded_scenarios": 0,
+        "fully_grounded_rate": 0.0,
+        "mechanism_family_counts": {
+          "deposit_liquidity_run": 2,
+          "cre_credit": 2,
+          "operational_cyber": 1
+        },
+        "num_distinct_mechanism_families": 3,
+        "temporal_audit": {
+          "explicit_temporal_leakage": false,
+          "explicit_leakage_flags": [],
+          "hindsight_risk": false,
+          "hindsight_risk_flags": []
+        }
+      }
+    },
+    "strong": {
+      "num_scenarios": 2,
+      "abstained": false,
+      "scenarios": [
+        {
+          "scenario_id": "S1",
+          "scenario_text": "**Scenario 1: Rapid Deposit Flight due to Uninsured Deposit Concerns**\n\n*   **Trigger:** A credible but unfounded rumor spreads regarding Bank B’s financial health via social media.\n*   **Transmission Channel:**  Bank B has a significant proportion (45.4%) of uninsured deposits ([TARGET BANK PROFILE]). This makes it vulnerable to rapid deposit flight triggered by negative sentiment. FDIC guidance notes downside risks from inflation and rising rates ([fdic_qbp_2022_q4_overview_000]).  The combination of heightened market sensitivity (due to recent bank failures) and Bank B’s concentration in uninsured deposits could trigger a \"run\" on the bank, forcing it to sell securities.\n*   **Supporting Evidence:** FDIC data emphasizes liquidity constraints as an area of supervisory attention ([fdic_qbp_2022_q4_overview_000]). Regional banks like Huntington and Regions face similar risks related to uninsured deposits ([huntington_2022_10k_000], [regions_2022_10k_000]).\n*   **Quantitative Magnitude:** Requires quantitative calibration. The actual CET1 impact would depend on the velocity of deposit outflow and asset sales necessary to meet obligations.",
+          "citation_audit": {
+            "cited_chunk_ids": [
+              "fdic_qbp_2022_q4_overview_000",
+              "huntington_2022_10k_000",
+              "regions_2022_10k_000"
+            ],
+            "valid_exact_chunk_ids": [
+              "fdic_qbp_2022_q4_overview_000",
+              "huntington_2022_10k_000",
+              "regions_2022_10k_000"
+            ],
+            "invalid_exact_chunk_ids": [],
+            "all_cited_chunk_ids_exist": true,
+            "strict_same_run_retrieval_check": "unavailable_for_legacy_txt"
+          },
+          "temporal_audit": {
+            "explicit_temporal_leakage": false,
+            "explicit_leakage_flags": [],
+            "hindsight_risk": true,
+            "hindsight_risk_flags": [
+              "recent_bank_failures"
+            ]
+          },
+          "semantic": {
+            "target_exposure_support": 2,
+            "trigger_support": 1,
+            "transmission_support": 1,
+            "quantitative_support": 0,
+            "bank_specificity": 2,
+            "unsupported_exposures": [],
+            "unsupported_trigger_details": [
+              "social media rumor specifics (actor, timing, severity)"
+            ],
+            "unsupported_transmission_details": [],
+            "unsupported_quantitative_details": [
+              "CET1 impact",
+              "velocity of deposit outflow",
+              "asset sales magnitude"
+            ],
+            "mechanism_families": [
+              "deposit_liquidity_run"
+            ],
+            "mechanism_summary": "Rapid deposit flight triggered by a social media rumor, leading to asset sales.",
+            "mechanism_coverage": {},
+            "grounding_rationale": "The scenario asserts an exposure to uninsured deposits (supported by TARGET BANK PROFILE). The trigger is a rumor via social media; while the event type (rumor impacting bank perception) aligns with FDIC guidance ([fdic_qbp_2022_q4_overview_000]), the specifics of the rumor are unsupported.  The transmission channel, deposit flight and asset sales, is plausible given the exposure to uninsured deposits and FDIC concerns about liquidity constraints. However, quantitative details regarding CET1 impact, outflow velocity, and asset sale magnitude are not explicitly stated or calibrated.",
+            "evidence_grounding_score": 1.333,
+            "parse_failed": false
+          }
+        },
+        {
+          "scenario_id": "S2",
+          "scenario_text": "**Scenario 2: Realization of Unrealized Losses Due to Forcing Maturity Sales**\n\n*   **Trigger:** A significant downgrade by a rating agency, driven by concerns about Bank B’s exposure to commercial real estate loans and unrealized losses on securities.\n*   **Transmission Channel:**  Bank B holds substantial HTM and AFS securities with gross unrealized losses (HTM: $1.165 billion; AFS: $0.445 billion) ([TARGET BANK PROFILE]). A downgrade could trigger forced sales to meet regulatory capital requirements or liquidityneeds, realizing those losses and impacting CET1. FDIC data highlights elevated unrealized losses on securities as a risk ([fdic_qbp_2022_q4_securities_liquidity_000]) , and the Federal Reserve notes that changes in AFS market values alter regulatory capital ratios for some institutions [fed_fsr_2022_11_bank_capital_securities_000].\n*   **Supporting Evidence:** FDIC guidance highlights unrealized losses as a risk ([fdic_qbp_2022_q4_securities_liquidity_000]). BankB's exposure to longer-term assets creates this vulnerability.\n*   **Quantitative Magnitude:** Requires quantitative calibration. The CET1 impact would depend on the severity of the downgrade, theamount of securities sold, and their market values at time of sale.",
+          "citation_audit": {
+            "cited_chunk_ids": [
+              "fdic_qbp_2022_q4_securities_liquidity_000",
+              "fed_fsr_2022_11_bank_capital_securities_000"
+            ],
+            "valid_exact_chunk_ids": [
+              "fdic_qbp_2022_q4_securities_liquidity_000",
+              "fed_fsr_2022_11_bank_capital_securities_000"
+            ],
+            "invalid_exact_chunk_ids": [],
+            "all_cited_chunk_ids_exist": true,
+            "strict_same_run_retrieval_check": "unavailable_for_legacy_txt"
+          },
+          "temporal_audit": {
+            "explicit_temporal_leakage": false,
+            "explicit_leakage_flags": [],
+            "hindsight_risk": false,
+            "hindsight_risk_flags": []
+          },
+          "semantic": {
+            "target_exposure_support": 2,
+            "trigger_support": 1,
+            "transmission_support": 1,
+            "quantitative_support": 0,
+            "bank_specificity": 2,
+            "unsupported_exposures": [],
+            "unsupported_trigger_details": [
+              "rating agency",
+              "regulatory capital requirements"
+            ],
+            "unsupported_transmission_details": [
+              "forced sales to meet regulatory capital requirements or liquidity needs"
+            ],
+            "unsupported_quantitative_details": [],
+            "mechanism_families": [
+              "securities_interest_rate"
+            ],
+            "mechanism_summary": "The scenario posits a downgrade triggering forced sales of HTM and AFS securities, realizing unrealized losses and impacting CET1. While the existence of HTM/AFS holdings is supported, the trigger and transmission mechanism are partially unsupported.",
+            "mechanism_coverage": {},
+            "grounding_rationale": "Bank B's TARGET BANK PROFILE explicitly states its holdings of HTM and AFS securities with significant unrealized losses. The FDIC evidence highlights this as a potential risk in the banking industry, establishing the general possibility of forced sales due to liquidity needs or regulatory concerns. However, the scenario introduces an unsupported trigger (rating agency downgrade) and an unsupported transmission step (forced sales to meet regulatory capital requirements).  The quantitative impact is not specified and requires calibration.",
+            "evidence_grounding_score": 1.333,
+            "parse_failed": false
+          }
+        }
+      ],
+      "aggregate": {
+        "num_scenarios": 2,
+        "avg_target_exposure_support": 2.0,
+        "avg_trigger_support": 1.0,
+        "avg_transmission_support": 1.0,
+        "avg_quantitative_support": 0.0,
+        "avg_bank_specificity": 2.0,
+        "avg_evidence_grounding_score": 1.333,
+        "fully_grounded_scenarios": 0,
+        "fully_grounded_rate": 0.0,
+        "mechanism_family_counts": {
+          "deposit_liquidity_run": 1,
+          "securities_interest_rate": 1
+        },
+        "num_distinct_mechanism_families": 2,
+        "temporal_audit": {
+          "explicit_temporal_leakage": false,
+          "explicit_leakage_flags": [],
+          "hindsight_risk": true,
+          "hindsight_risk_flags": [
+            "recent_bank_failures"
+          ]
+        }
+      }
+    },
+    "lens": {
+      "num_scenarios": 2,
+      "abstained": false,
+      "scenarios": [
+        {
+          "scenario_id": "D1",
+          "scenario_text": "### Scenario D1: Regional Bank Contagion & Deposit Flight - Focus on Local Business Interdependence\n\n**Dominant Assumption Challenged:** The dominant assumption is that uninsured depositors behave rationally and independently, assessing risk based solely on the bank's overall financial health. This scenario challenges that by incorporating local business interdependence – businesses rely on each other for services, credit lines, payment flows, and trust. A failure of one triggers a chain reaction among related businesses that are also customers of Bank B.\n\n**Trigger:** A localized economic downturn significantly impacts several key industries served by Bank B (e.g., manufacturing, tourism). This could stem from a natural disaster or supply-chain disruption concentrated in the bank's footprint. The downturn leads to loan defaults within those sectors.\n\n**Transmission Channel:** Loan defaults trigger negative media coverage and erode local confidence in Bank B. Local businesses, reliant on each other, experience cascading payment delays and credit line contractions. This sparks an exodus of uninsured deposits as businesses prioritize survival over banking relationships.  The contagion spreads beyond directly affected businesses to others within the ecosystem who perceive increased risk.\n\n**Supporting Evidence:** [fdic_qbp_2022_q4_overview_000], [huntington_2022_10k_000], [regions_2022_10k_000] - These documents highlight the importance of community relationships for regional banks and the potential impact of adverse conditions on deposit stability.\n\n**Distinctiveness:** This scenario differs from prior analyses by emphasizing the network effect within a local economy, rather than solely focusing on broader market sentiment or macroeconomic triggers. It prioritizes systemic risk arising from complex interdependencies rather than from asset-value declines or interest rate risk alone. \n\n**Quantitative Magnitude:** Requires quantitative calibration.",
+          "citation_audit": {
+            "cited_chunk_ids": [
+              "fdic_qbp_2022_q4_overview_000",
+              "huntington_2022_10k_000",
+              "regions_2022_10k_000"
+            ],
+            "valid_exact_chunk_ids": [
+              "fdic_qbp_2022_q4_overview_000",
+              "huntington_2022_10k_000",
+              "regions_2022_10k_000"
+            ],
+            "invalid_exact_chunk_ids": [],
+            "all_cited_chunk_ids_exist": true,
+            "strict_same_run_retrieval_check": "unavailable_for_legacy_txt"
+          },
+          "temporal_audit": {
+            "explicit_temporal_leakage": false,
+            "explicit_leakage_flags": [],
+            "hindsight_risk": false,
+            "hindsight_risk_flags": []
+          },
+          "semantic": {
+            "target_exposure_support": 2,
+            "trigger_support": 1,
+            "transmission_support": 1,
+            "quantitative_support": 2,
+            "bank_specificity": 1,
+            "unsupported_exposures": [],
+            "unsupported_trigger_details": [
+              "specific natural disaster or supply-chain disruption"
+            ],
+            "unsupported_transmission_details": [
+              "cascading payment delays and credit line contractions",
+              "contagion spreads beyond directly affected businesses"
+            ],
+            "unsupported_quantitative_details": [],
+            "mechanism_families": [
+              "deposit_liquidity_run",
+              "sector_credit"
+            ],
+            "mechanism_summary": "A localized economic downturn triggers loan defaults, eroding confidence and leading to uninsured deposit flight due to interconnected business relationships.",
+            "mechanism_coverage": {},
+            "grounding_rationale": "The scenario asserts Bank B has commercial real estate loans (supported by TARGET BANK PROFILE), total loans, and uninsured deposits. The trigger is a localized economic downturn which is plausible given the FDIC evidence regarding downside risks but lacks specific support for a natural disaster or supply chain disruption. The transmission channel describes a causal pathway involving loan defaults leading to deposit flight; while plausible, the specifics of cascading payment delays and contagion are not explicitly supported by the provided evidence.  The quantitative magnitude requires calibration.",
+            "evidence_grounding_score": 1.333,
+            "parse_failed": false
+          }
+        },
+        {
+          "scenario_id": "D2",
+          "scenario_text": "### Scenario D2: Commercial Real Estate Valuation Shock & Debt Spiral - Focus on Leverage and Regulatory Response\n\n**Dominant Assumption Challenged:** The dominant assumption is that any CRE impairment will be gradual, allowing for managed adjustments to capital ratios. This scenario challenges this by incorporating a regulatory response designed to swiftly force recognition of losses. It posits that the regulator mandates immediate mark-to-market of some commercial real estate loans causing an abrupt and substantial decline in Bank B's equity.\n\n**Trigger:** A significant increase in remote work adoption, amplified by shifts in business preferences post pandemic, leads to a rapid decline in office property values concentrated in specific geographic areas where Bank B has significant exposure. Regulators issue guidance mandating banks immediately mark-to-market a portion of their CRE loans for risk assessment purposes.\n\n**Transmission Channel:** The regulatory mandate causes an immediate and substantial write-down on Bank B's commercial real estate loan portfolio, dramatically reducing equity capital. This triggers concerns about the bank’s solvency among investors and counterparties. While it does not cause direct defaults in other assets held by the bank, it provokes a market reassessment of CRE exposure across the sector—which may then trigger sales of securities and deposit withdrawals to meet margin calls elsewhere.\n\n**Supporting Evidence:** [fdic_qbp_2022_q4_securities_liquidity_000] -  Highlights risks associated with unrealized losses on investment securities and potential need for liquidity. The combination of elevated unrealized losses, longer-term asset maturities, and declining deposits creates a risk that unrealized losses could become realized if banks need to sell securities to meet liquidity needs.\n\n**Distinctiveness:** This scenario differs from prior analyses by introducing an element of regulatory action triggering immediate loss recognition, which is not explicitly included in previous scenarios. It shifts the focus away from purely market-driven declines and towards the role of regulatory intervention in amplifying losses and creating a rapid debt spiral.\n\n**Quantitative Magnitude:** Requires quantitative calibration.",
+          "citation_audit": {
+            "cited_chunk_ids": [
+              "fdic_qbp_2022_q4_securities_liquidity_000"
+            ],
+            "valid_exact_chunk_ids": [
+              "fdic_qbp_2022_q4_securities_liquidity_000"
+            ],
+            "invalid_exact_chunk_ids": [],
+            "all_cited_chunk_ids_exist": true,
+            "strict_same_run_retrieval_check": "unavailable_for_legacy_txt"
+          },
+          "temporal_audit": {
+            "explicit_temporal_leakage": false,
+            "explicit_leakage_flags": [],
+            "hindsight_risk": false,
+            "hindsight_risk_flags": []
+          },
+          "semantic": {
+            "target_exposure_support": 2,
+            "trigger_support": 1,
+            "transmission_support": 1,
+            "quantitative_support": 2,
+            "bank_specificity": 2,
+            "unsupported_exposures": [],
+            "unsupported_trigger_details": [
+              "geographic areas where Bank B has significant exposure"
+            ],
+            "unsupported_transmission_details": [
+              "sales of securities and deposit withdrawals to meet margin calls elsewhere"
+            ],
+            "unsupported_quantitative_details": [],
+            "mechanism_families": [
+              "cre_credit",
+              "regulatory_rating"
+            ],
+            "mechanism_summary": "A regulatory mandate forces Bank B to mark-to-market CRE loans, leading to a capital reduction and triggering investor concerns. This is linked to a decline in office property values due to increased remote work adoption.",
+            "mechanism_coverage": {},
+            "grounding_rationale": "The scenario asserts that Bank B has commercial real estate loans (supported by TARGET BANK PROFILE). The trigger, while plausible, lacks specific details about the geographic concentration of those CRE loans. The transmission channel describes a market reassessment and subsequent actions which are not explicitly supported but are consistent with banking industry behavior described in [fdic_qbp_2022_q4_securities_liquidity_000].",
+            "evidence_grounding_score": 1.333,
+            "parse_failed": false
+          }
+        }
+      ],
+      "aggregate": {
+        "num_scenarios": 2,
+        "avg_target_exposure_support": 2.0,
+        "avg_trigger_support": 1.0,
+        "avg_transmission_support": 1.0,
+        "avg_quantitative_support": 2.0,
+        "avg_bank_specificity": 1.5,
+        "avg_evidence_grounding_score": 1.333,
+        "fully_grounded_scenarios": 0,
+        "fully_grounded_rate": 0.0,
+        "mechanism_family_counts": {
+          "deposit_liquidity_run": 1,
+          "sector_credit": 1,
+          "cre_credit": 1,
+          "regulatory_rating": 1
+        },
+        "num_distinct_mechanism_families": 4,
+        "temporal_audit": {
+          "explicit_temporal_leakage": false,
+          "explicit_leakage_flags": [],
+          "hindsight_risk": false,
+          "hindsight_risk_flags": []
+        }
+      }
+    }
+  }
+}

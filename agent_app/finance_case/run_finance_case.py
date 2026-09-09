@@ -60,6 +60,133 @@ def parse_json_response(text):
         ) from e
 
 
+def validate_supported_directions(
+    supported_directions,
+    retrieved_chunks,
+    allowed_exposure_keys,
+):
+    """
+    Validate the structure and retrieved-evidence references of
+    homogeneity-agent supported directions.
+
+    This does NOT determine whether the reasoning is semantically correct.
+    It only prevents malformed entries or fabricated CHUNK_IDs from
+    being passed to the Lens Agent.
+    """
+
+    allowed_chunk_ids = {
+        chunk["chunk_id"]
+        for chunk in retrieved_chunks
+    }
+
+    validated = []
+
+    for item in supported_directions:
+        if not isinstance(item, dict): continue
+
+        direction = item.get("direction", "").strip()
+        exposure_key = item.get(
+            "required_exposure_keys",
+            ["unsupported"],
+        )
+        # if exposure_key not in allowed_exposure_keys:
+        #     print(
+        #         f"[FILTERED] unsupported target exposure "
+        #         f"'{exposure_key}': {direction}",
+        #         flush=True,
+        #     )
+        #     continue
+
+        invalid_exposure_keys = [
+            key for key in exposure_key if key not in allowed_exposure_keys]
+
+        if invalid_exposure_keys:
+            print(
+            f"[FILTERED] unsupported target exposure(s) "
+            f"{invalid_exposure_keys}: {direction}",
+            flush=True,
+            )
+            continue
+
+
+        # Keep your existing semantic flags
+        if item.get("exposure_explicitly_supported") is not True:
+            print(
+                f"[FILTERED] exposure not explicitly supported: "
+                f"{direction}",
+                flush=True,
+            )
+            continue
+
+        unsupported = item.get(
+            "unsupported_assumptions_required",
+            [],
+        )
+
+        if unsupported:
+            print(
+                f"[FILTERED] unsupported assumptions "
+                f"{unsupported}: {direction}",
+                flush=True,
+            )
+            continue
+
+        # -------------------------
+        # CHUNK_ID validation
+        # -------------------------
+        external_chunk_ids = item.get(
+            "external_chunk_ids",
+            [],
+        )
+
+        invalid_ids = [
+            cid
+            for cid in external_chunk_ids
+            if cid not in allowed_chunk_ids
+        ]
+
+        if invalid_ids:
+            print(
+                f"[FILTERED] invalid CHUNK_ID(s) "
+                f"{invalid_ids}: {direction}",
+                flush=True,
+            )
+            continue
+
+        validated.append(item)
+
+    print(
+        f"[SUPPORTED DIRECTIONS] "
+        f"{len(validated)}/{len(supported_directions)} "
+        f"passed validation",
+        flush=True,
+    )
+
+    return validated
+
+
+
+SUPPORTED_EXPOSURES_BY_BANK = {
+    "A": {
+        "total_loans",
+        "uninsured_deposits",
+        "afs_securities",
+        "htm_securities",
+        "securities_unrealized_losses",
+        "customer_concentration",
+    },
+
+    "B": {
+        "total_loans",
+        "cre_loans",
+        "uninsured_deposits",
+        "afs_securities",
+        "htm_securities",
+        "securities_unrealized_losses",
+    },
+}
+
+
 def run_finance_case(bank_id="A", run_id=1, top_k=5, backend="local_ollama", model=None):
     bank_label = f"Bank {bank_id}"
 
@@ -117,26 +244,63 @@ def run_finance_case(bank_id="A", run_id=1, top_k=5, backend="local_ollama", mod
         retrieved_context=evidence,
         baseline_response=baseline_output,
         strong_response=strong_output,
+        allowed_exposure_keys=SUPPORTED_EXPOSURES_BY_BANK[bank_id],
         backend=backend,
         model=model,
     )
     critique = parse_json_response(critique_raw)
-    supported_directions = critique.get("supported_directions", [])
-    supported_directions_text = json.dumps(supported_directions, indent=2)
+    validated_supported = validate_supported_directions(
+        critique.get("supported_directions", []), 
+        retrieved_chunks,
+        SUPPORTED_EXPOSURES_BY_BANK[bank_id]
+    )
+    print("VALIDATED: ", validated_supported, flush=True)
+    for i, item in enumerate(validated_supported, start=1): item["direction_id"] = f"D{i}"
+    lens_supported_directions = [{
+        "direction_id": item["direction_id"],
+        "direction": item["direction"],
+        "required_exposure_keys": item["required_exposure_keys"],
+        "target_bank_support": item["target_bank_support"],
+        "external_chunk_ids": item["external_chunk_ids"],
+    } for item in validated_supported]
+
+    for item in validated_supported:
+        exposure_supported = item.get("exposure_explicitly_supported", False)
+        unsupported = item.get("unsupported_assumptions_required", []) 
+        if unsupported: 
+            print( f"[FILTERED] unsupported assumptions " f"{unsupported}", flush=True, ) 
+            continue 
+
+
+    dominant_framing = critique.get("dominant_framing", [])
+    overlapping_mechanisms = critique.get("overlapping_mechanisms", [])
+    #supported_directions = critique.get("supported_directions", [])
+    #supported_directions_text = json.dumps(supported_directions, indent=2)
+    
+
     # -----------------------------
     # Arm C
     # -----------------------------
 
-    lens_output = finance_lens_agent(
-        bank_label=bank_label,
-        fixed_context=fixed_context,
-        retrieved_context=evidence,
-        baseline_response=baseline_output,
-        strong_response=strong_output,
-        supported_directions=supported_directions_text,
-        backend=backend,
-        model=model,
-    )
+    if not validated_supported: 
+        print("[ARM C ABSTAINED] No validated supported directions", flush=True)
+        lens_output = ("No evidence-supported alternative direction is available from the supplied context.")
+        lens_status = "not generated"
+
+    else:
+        lens_status = "generated"
+        lens_output = finance_lens_agent(
+            bank_label=bank_label,
+            fixed_context=fixed_context,
+            retrieved_context=evidence,
+            #baseline_response=baseline_output,
+            #strong_response=strong_output,
+            supported_directions=lens_supported_directions,
+            dominant_framing=dominant_framing,
+            overlapping_mechanisms=overlapping_mechanisms,
+            backend=backend,
+            model=model,
+        )
 
     return {
         "bank_id": bank_id,
@@ -152,10 +316,11 @@ def run_finance_case(bank_id="A", run_id=1, top_k=5, backend="local_ollama", mod
         "strong": strong_output,
         "critique": critique,
         "lens": lens_output,
+        "lens_status": lens_status
     }
 
 if __name__ == "__main__":
-    results = run_finance_case(bank_id="A", run_id=1, top_k=5)
+    results = run_finance_case(bank_id="B", run_id=5, top_k=5, model="gemma3:12b")
     print(
         "\n"
         "========================================\n"

@@ -1,0 +1,170 @@
+Arm A:
+## A. 2023 VS. 2015-2022 COMPARISON
+
+Here's a comparison of the 2023 severely adverse scenario versus the previous scenarios (2015-2022), highlighting shared assumptions and exceptions.  Due to limitations in the provided data, "NA" is used where specific additional context details are not available forearlier years.
+
+**1. Unemployment Peak:**
+
+*   **2023 Value/Pattern:** 10.0%
+*   **Shared Years:** All previous scenarios (2015-2022) also feature an unemployment peak of 10.0%, with the exception of 2021 whichis 10.8%.
+*   **Exceptions:** None significant.
+*   **Classification:** Strongly shared
+
+**2. Real GDP Trough:**
+
+*   **2023 Value/Pattern:** -8.75% relative to 2022-Q4 real GDP level.
+*   **Shared Years:** 2019 (-8.0%), and 2020 (-8.5%) have similarly large trough values compared to preceding reference points.
+*   **Exceptions:**  2015 (-4.5%) and 2016 (-6.25%) showed significantly less severe GDP contractions relative to their respective references, while scenario 2017 (-6.5%) has a moderately smaller trough contraction. Scenario 2021 (-4.0%) shows the smallest trough.
+*   **Classification:** Partially shared
+
+**3. Treasury 3-Month Rate:**
+
+*   **2023 Value/Pattern:** Starts at 1.7% and falls significantly to near zero by 2023-Q3, remaining there through the end of the scenario.
+*   **Shared Years:** 2016 (-0.5%), 2018 (remains near zero), 2019 (falls approximately 2.25 percentage points and remains close to zero), 2020 (immediately falls to near zero), 2021 (remains near zero), 2022 (remains near zero) all feature rates falling towards zero.
+*   **Exceptions:**  2015 started flat at 0.1% and remained there, and 2017 started at 0.1%, also remaining flat through the scenarioperiod.
+*   **Classification:** Partially shared
+
+**4. Treasury 10-Year Rate:**
+
+*   **2023 Value/Pattern:** Starts at 1.1% and falls sharply early in the scenario before gradually rising to approximately 1.5%.
+*   **Shared Years:** The general pattern of an initial decline followed by a gradual rise is seen in 2019, 2020, and 2022.
+*   **Exceptions:**  The 2015, 2016, 2017 and 2018 scenarios saw rates increase or remain flat. Scenario 2021 showed a fall to approximately 0.25 percent early in the scenario before gradually rising to approximately 1.5 percent by the end.
+*   **Classification:** Partially shared
+
+**5. Equity Drawdown:**
+
+*   **2023 Value/Pattern:** -45.0%
+*   **Shared Years:**  The 2018 (-65%), and 2021 (-55%) scenarios show similarly large equity drawdowns.
+*   **Exceptions:**  Other years have smaller drawdowns, generally in the range of -50% to -60%.
+*   **Classification:** Partially shared
+
+**6. House Price Drawdown:**
+
+*   **2023 Value/Pattern:** -38.0%
+*   **Shared Years:** 2018 (-30%), 2020 (-28%) and 2022 (-28.5%) show similarly significant house price drawdowns.
+*   **Exceptions:** Other scenarios have comparatively smaller drawdown percentages.
+*  **Classification:** Partially shared
+
+
+
+## B. ALTERNATIVE STRESS SCENARIOS
+
+Here are alternative stress scenarios that could deplete Bank A's CET1 ratio by at least 300 basis points or force asset sales to meet liquidity needs, targeting channels not adequately represented in the supervisory scenario:
+
+**Scenario 1: Rapid Uninsured Deposit Flight Due to Technology Sector Distress**
+
+*   **Trigger:**  A major cybersecurity breach impacting multiple technology companies concentrated within Bank A's customer base.
+*   **Transmission Channel:** Loss of confidence among technology sector depositors leads to a rapid and substantial withdrawal of uninsured deposits, driven by negative media coverage and social contagion. Given the high concentration (87.5% estimated uninsured), this withdrawal could be significantly larger than traditional "flight to safety" behavior, especially considering Bank A's significant exposure to private equity and venture capital customers reliant on technology funding rounds.
+*   **Supporting Evidence:**  Recent incidents highlight the vulnerability of tech companies to cyberattacks, and social media amplifies negative sentiment leading to rapid deposit outflows. The high percentage of uninsured deposits makes the bank particularly vulnerable.
+*   **Quantitative Magnitude:** A 30% outflow of uninsured deposits (approximately $45 billion) would require asset sales to maintainliquidity. This could deplete CET1 by approximately 350 bps given Bank A's total equity base.
+
+**Scenario 2: Commercial Real Estate Valuation Collapse Driven by Remote Work Permanence**
+
+*   **Trigger:**  A major, nationally recognized firm announces a permanent shift to fully remote operations, triggering broader reassessment of commercial real estate viability and leading to a sudden re-pricing of office properties.
+*   **Transmission Channel:** A significant decline in the value of Bank A's commercial real estate loan portfolio, particularly concentrated in urban areas. This impacts capital due to direct loan losses and reductions in collateral values.  The bank may be forced to sell securities to absorb these losses and meet minimum regulatory thresholds.
+*   **Supporting Evidence:** The 2023 scenario already incorporates CRE stress but does not fully account for a permanent shift to remote work. Existing conditions suggest vulnerability, especially given the narrative context surrounding commercial real estate in the2022 and 2023 scenarios.
+*   **Quantitative Magnitude:** A 15% decline in the value of Bank A's CRE loan portfolio (approximately $10.6 billion) could depleteCET1 by around 350 bps, forcing asset sales to cover losses and maintain capital adequacy ratios.
+
+**Scenario 3: Life Science & Healthcare Sector Funding Freeze**
+
+*   **Trigger:** Increased regulatory scrutiny or negative clinical trial results lead to a sharp contraction in venture capital funding for life science and healthcare companies within Bank A's customer base.
+*   **Transmission Channel:**  Reduced ability of these clients to service their loans, impacting loan performance and bank’s liquidity position as private equity customers require bridge financing or draw down existing credit lines.
+*   **Supporting Evidence:** The sensitive nature of the life science/healthcare sector means that public perception can rapidly impact funding availability. Bank A's concentration in this area amplifies this risk.
+*   **Quantitative Magnitude:**  A 20% decrease in loan repayments from affected customers (approximately $15 billion) could trigger asset sales to meet liquidity needs and deplete CET1 by approximately 300 bps.
+
+Arm B:
+**A. 2023 VS. 2015-2022 COMPARISON**
+
+Here's a comparison of the 2023 severely adverse scenario against the 2015-2022 scenarios, focusing on shared and differing assumptions:
+
+**1. Unemployment Peak:**
+
+*   **2023 Value/Pattern:** 10.0%
+*   **2015-2022 Similar Years:** 2015 (10.1%), 2016 (10.0%), 2017 (10.0%), 2018 (10.0%), 2019 (10.0%), 2020 (10.0%), 2021 (10.8%), 2022 (10.0%)
+*   **Exceptions:** None. The unemployment peak remains consistent across all scenarios.
+*   **Classification:** Strongly shared
+
+**2. Real GDP Trough:**
+
+*   **2023 Value/Pattern:** -8.75% relative to 2022-Q4 real GDP level.
+*   **2015-2022 Similar Years:** 2019 (-8.0%), 2020 (-8.5%) This is the most severe trough among those listed. All others are less negative than the 2023 scenario. The reference point for the GDP trough also differs – 2023 uses a more recent baseline, which results in a more significant relative decline.
+*   **Exceptions:** 2015 (-4.5%), 2016 (-6.25%) , 2017(-6.5%), 2018 (-7.5%), 2021 (-4.0%), and 2022 (-3.5%).
+*   **Classification:** Partially shared.  While a severe GDP contraction is common, the magnitude and reference point differ significantly in 2023.
+
+**3. Treasury 3-Month Rate:**
+
+*   **2023 Value/Pattern:** Starts at 1.7%, falls to approximately 0.1% by mid-scenario, and remains near zero.
+*   **2015-2022 Similar Years:** 2020 (starts at 0.1%, stays flat), 2021 (starts at 0.1%, stays flat). The behavior of falling to near zero is somewhat similar to the 2020 and 2021 scenarios.
+*   **Exceptions:** 2015 (0.1-0.1), 2016 (0.0, falls to -0.5), 2017 (0.1-0.1), 2018 (0.1-0.1), 2019 (0.3-0.1), 2022 (0.1-0.1)
+*   **Classification:** Partially shared. The short-term rate falling to near zero is a common response, but the initial rate and subsequent path are distinct in 2023.
+
+**4. Equity Drawdown:**
+
+*   **2023 Value/Pattern:** -45.0%
+*   **2015-2022 Similar Years:** 2018 (-65%), 2021 (-55%).  The magnitude is less severe than some previous scenarios but still significant.
+*   **Exceptions:** 2015 (-60%), 2016 (-50%), 2017 (-50%), 2019 (-50%), 2020 (-50%), 2022 (-55%).
+*   **Classification:** Partially shared. Equity market declines are a consistent feature, but the extent of the drawdown varies.
+
+**5. House Price Drawdown:**
+
+*   **2023 Value/Pattern:** -38.0%
+*   **2015-2022 Similar Years:** 2018 (-30%), 2020 (-28%) and 2022 (-28.5%). Magnitude is near the more extreme historical scenarios.
+*   **Exceptions:** 2015 (-25%), 2016 (-25%), 2017 (-25%), 2019 (-25%), 2021 (-23.5%).
+*   **Classification:** Partially Shared. House price declines are a consistent feature, but the magnitude varies.
+
+**B. ALTERNATIVE STRESS SCENARIOS**
+
+Given Bank A's profile (significant holdings of HTM securities, customer concentration in technology, life science & healthcare, and private equity & venture capital) and the provided context, here are alternative stress scenarios:
+
+**Scenario 1: Venture Capital-Driven Liquidity Crunch**
+
+*   **Trigger:** A significant downturn in the global venture capital market. Specifically, a widespread devaluation of portfolio companies held by Bank A’s private equity clients causes those clients to default on loans from the bank and/or draw down credit lines, requiring immediate repayment.
+*   **Transmission Channel:**  Bank A's exposure to the private equity sector leads to significant loan losses and margin calls on existing credit facilities. This necessitates a rapid sale of HTM securities to meet liquidity needs while maintaining solvency ratios. The customer concentration in this sector amplifies the impact.
+*   **Supporting Evidence:** Bank A’s customer concentration in technology, life science & healthcare, and private equity and venturecapital indicates significant exposure to these sectors [TARGET BANK PROFILE].  FDIC QBP data suggests increasing holding of longer-term assets that are susceptible to liquidity stress [fdic_qbp_2022_q4_securities_liquidity_000].
+*   **Quantitative Magnitude:** Requires quantitative calibration. The magnitude depends on the extent of loan losses and margin calls, which is tied to the severity of venture capital downturn.
+
+**Scenario 2:  HTM Securities Realization Due to Credit Downgrade**
+
+*   **Trigger:** A rapid succession of credit rating downgrades across several sectors heavily represented in Bank A's HTM portfolio due to unexpected economic headwinds and/or specific sector vulnerabilities (e.g., commercial real estate).
+*   **Transmission Channel:**  The market value of the HTM securities declines significantly because of the downgrades. To maintain capital ratios or meet regulatory requirements, Bank A is forced to realize losses by selling a portion of its HTM portfolio [fed_fsr_2022_11_bank_capital_securities_000].  This sale generates losses that deplete CET1 and impacts the bank’s earnings.
+*   **Supporting Evidence:** Bank A holds significant HTM securities with substantial unrealized losses [TARGET BANK PROFILE]. FDIC data highlights elevated unrealized losses on investment securities as interest rates increased [fdic_qbp_2022_q4_overview_000] and therisk that these could become realized.
+*   **Quantitative Magnitude:** Requires quantitative calibration.  The magnitude depends on the size of the HTM portfolio, the number and severity of downgrades, and market reaction.
+
+
+
+
+
+Critique:
+{'shared_assumptions': [{'assumption': 'Severely adverse scenarios will involve significant economic downturns.', 'assessment': 'Thisis a foundational assumption across all scenarios, evidenced by the consistent inclusion of negative GDP growth, high unemployment, and equity drawdowns.'}, {'assumption': 'Interest rate movements significantly impact bank balance sheets.', 'assessment': 'All scenarios feature changes in treasury rates impacting asset values and liquidity. This is reinforced by retrieved evidence regarding securities risk [fdic_qbp_2022_q4_securities_liquidity_000, fed_fsr_2022_11_bank_capital_securities_000].'}], 'factual_issues': [{'strategy': 'naive', 'issue': 'Inconsistent GDP trough reference points.', 'reason': "The naive strategy doesn't consistently clarify the reference point for real GDP trough, leading to potential misinterpretation of severity. Some scenarios use 'relative to 2014-Q3,' while others use 'relative to the pre-recession peak.'"}, {'strategy': 'strong', 'issue': 'Commercial Real Estate Drawdown values are not consistently reported.', 'reason': 'The table lacks commercial real estate drawdown percentages for several scenarios, making direct comparison difficult.'}], 'overlapping_mechanisms': ['Scenarios 1 and 3 (2023 and 2019) share a mechanism of falling short-term interest ratesleading to near-zero levels, impacting bank profitability and liquidity.', 'Several scenarios (2016, 2018, 2020, 2021, and 2022) involve unrealized losses on securities contributing to capital depletion.'], 'dominant_framing': ['The primary risk framing focuses on macroeconomic shocks (GDP contraction, unemployment spikes) impacting bank asset values and liquidity.', 'A secondary framing emphasizesthe interplay between interest rate movements and the valuation of fixed-income securities held by the bank.'], 'supported_directions': [{'direction': 'Venture Capital Funding Freeze Scenario', 'target_bank_support': "The TARGET BANK PROFILE explicitly states customer concentration in 'private equity and venture capital.'", 'required_target_bank_exposure': 'Exposure to private equity and venture capital customers.', 'required_exposure_keys': ['customer_concentration'], 'exposure_explicitly_supported': True, 'mechanism_support': "The scenario's trigger (funding freeze) and transmission channel (loan defaults/credit line drawdowns) are plausible given the customer concentration.  FDIC evidence highlights liquidity risks [fdic_qbp_2022_q4_securities_liquidity_000].", 'external_chunk_ids': ['fdic_qbp_2022_q4_securities_liquidity_000'], 'unsupported_assumptions_required': [], 'why_underexplored': 'The scenario addresses a specific, concentrated risk not fully captured by broader macroeconomic shocks.', 'direction_id': 'D1'}, {'direction': 'HTM Securities Realization Scenario', 'target_bank_support': "The TARGET BANK PROFILE explicitly states holdings of 'held-to-maturity' securities with substantial unrealized losses.", 'required_target_bank_exposure': 'Holdings of HTM securities and associated unrealized losses.', 'required_exposure_keys': ['htm_securities', 'securities_unrealized_losses'], 'exposure_explicitly_supported': True, 'mechanism_support': 'The trigger (credit downgrades) and transmission channel (forced sales to maintain capital ratios) are supported by the FDIC evidence onsecurities risk [fdic_qbp_2022_q4_securities_liquidity_000, fed_fsr_2022_11_bank_capital_securities_000].', 'external_chunk_ids': ['fdic_qbp_2022_q4_securities_liquidity_000', 'fed_fsr_2022_11_bank_capital_securities_000'], 'unsupported_assumptions_required': [], 'why_underexplored': 'This scenario directly addresses a key vulnerability highlighted by recent market conditions – unrealized losses onHTM securities.', 'direction_id': 'D2'}], 'unsupported_possibilities': [{'direction': 'Rapid Uninsured Deposit Flight Due to Technology Sector Distress', 'reason': "While the TARGET BANK PROFILE mentions customer concentration in technology, it doesn't explicitly state that these customers hold a significant portion of *uninsured* deposits.  The scenario requires a high degree of uninsured deposit concentration to generate the necessary liquidity outflow."}, {'direction': 'Commercial Real Estate Valuation Collapse Driven by Remote Work Permanence', 'reason': 'While the 2023 scenario mentions remote work impacting CRE, the severity required for a collapse triggering asset sales is not explicitly supported. The profile only states customer concentration and does not specify loan portfolio composition.'}]}
+
+Arm C:
+### Scenario D1: Venture Capital Funding Freeze & Liquidity Strain
+
+**Dominant assumption/mechanism challenged:** The scenarios primarily focus on broad macroeconomic shocks; this scenario emphasizes idiosyncratic risk concentrated within specific customer segments and its cascading effects on liquidity.
+
+**Trigger:** A sudden freeze in venture capital funding due to increased investor risk aversion following a broader market correction(not explicitly detailed here, but assumed as a catalyst).
+
+**Transmission channel:**  Bank A's customers heavily reliant on venture capital funding face difficulties servicing their loans/obligations. This leads to loan losses and reduced fee income for Bank A. As these defaults emerge, depositors (particularly uninsured deposits concentrated in the technology, life science, and private equity sectors) lose confidence prompting deposit outflows. The bank must then sell HTM securities to meet liquidity demands, realizing unrealized losses and impacting capital ratios.
+
+**Supporting evidence:** [fdic_qbp_2022_q4_securities_liquidity_000], [TARGET BANK PROFILE]
+
+**Why distinct:** This scenario is distinct from the prior analyses because it focuses on a concentrated customer segment risk (venture-backed companies) rather than broader macroeconomic factors. It highlights the potential for rapid liquidity stress stemming not just from asset values but also from deposit behavior linked to specific industry conditions.  It illustrates how idiosyncratic, client-specific shocks can trigger broader financial instability through contagion channels.
+
+**Quantitative magnitude:** Requires quantitative calibration.
+
+
+
+
+### Scenario D2: HTM Securities Realization Due to Deposit Flight
+
+**Dominant assumption/mechanism challenged:** The prevailing view is that unrealized losses on HTM securities remain contained withinthe balance sheet and do not immediately impact capital ratios. This scenario posits a realized loss event triggered by deposit flight.
+
+**Trigger:** A significant increase in interest rates combined with concerns about Bank A’s solvency (perhaps fueled by negative newsregarding its venture capital exposure - connecting to Scenario D1) leads to rapid uninsured deposit outflows.
+
+**Transmission channel:**  To meet unexpected deposit withdrawal demands, Bank A is forced to liquidate a portion of its HTM securities portfolio. This realization converts previously unrealized losses into actual losses, impacting the bank’s earnings and potentiallyeroding its CET1 capital ratio. The sale pressure on fixed income securities exacerbates market stress through broader liquidity.
+
+**Supporting evidence:** [TARGET BANK PROFILE], [fdic_qbp_2022_q4_securities_liquidity_000], [fed_fsr_2022_11_bank_capital_securities_000]
+
+**Why distinct:** It emphasizes the direct link between deposit behavior and HTM security realization, bypassing the typical assumption that these losses remain unrealized. The scenario highlights how even well-capitalized banks can be vulnerable to rapid liquidity stress if depositors lose confidence in their solvency.
+
+**Quantitative magnitude:** Requires quantitative calibration.

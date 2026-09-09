@@ -1,0 +1,478 @@
+{
+  "bank_id": "B",
+  "run_id": 1,
+  "source_file": "agent_app/finance_case/results/bank_b_run_01.txt",
+  "source_format": "legacy_txt",
+  "judge_backend": "local_ollama",
+  "judge_model": "gemma3:12b",
+  "strict_same_run_retrieval_provenance_available": false,
+  "direction_provenance_audit": {
+    "strict_same_run_retrieval_provenance_available": false,
+    "num_candidates": 3,
+    "num_admitted": 2,
+    "num_with_invalid_chunk_id": 1,
+    "directions": [
+      {
+        "candidate_index": 1,
+        "direction": "Scenario 1: Regional Deposit Flight Due to Reputation Risk",
+        "direction_id": "D1",
+        "required_exposure_keys": [
+          "uninsured_deposits"
+        ],
+        "exposure_explicitly_supported": true,
+        "external_chunk_ids": [
+          "fdic_qbp_2022_q4_securities_liquidity_000",
+          "fdic_qbp_2022_q4_overview_000",
+          "huntington_2022_10k_000",
+          "regions_2022_10k_000"
+        ],
+        "valid_exact_chunk_ids": [
+          "fdic_qbp_2022_q4_securities_liquidity_000",
+          "fdic_qbp_2022_q4_overview_000",
+          "huntington_2022_10k_000",
+          "regions_2022_10k_000"
+        ],
+        "invalid_exact_chunk_ids": [],
+        "unsupported_assumptions_required": [],
+        "admitted_to_lens": true,
+        "possible_provenance_rejection": false
+      },
+      {
+        "candidate_index": 2,
+        "direction": "Scenario 2: CRE Loan Defaults Driven By Remote Work Persistence",
+        "direction_id": null,
+        "required_exposure_keys": [
+          "cre_loans"
+        ],
+        "exposure_explicitly_supported": true,
+        "external_chunk_ids": [
+          "2023 severely adverse Scenario narrative"
+        ],
+        "valid_exact_chunk_ids": [],
+        "invalid_exact_chunk_ids": [
+          "2023 severely adverse Scenario narrative"
+        ],
+        "unsupported_assumptions_required": [],
+        "admitted_to_lens": false,
+        "possible_provenance_rejection": true
+      },
+      {
+        "candidate_index": 3,
+        "direction": "Scenario 3: HTM Securities Realization Due to Liquidity Crunch",
+        "direction_id": "D2",
+        "required_exposure_keys": [
+          "htm_securities"
+        ],
+        "exposure_explicitly_supported": true,
+        "external_chunk_ids": [
+          "fed_fsr_2022_11_bank_capital_securities_000",
+          "fdic_qbp_2022_q4_securities_liquidity_000"
+        ],
+        "valid_exact_chunk_ids": [
+          "fed_fsr_2022_11_bank_capital_securities_000",
+          "fdic_qbp_2022_q4_securities_liquidity_000"
+        ],
+        "invalid_exact_chunk_ids": [],
+        "unsupported_assumptions_required": [],
+        "admitted_to_lens": true,
+        "possible_provenance_rejection": false
+      }
+    ]
+  },
+  "arms": {
+    "baseline": {
+      "num_scenarios": 2,
+      "abstained": false,
+      "scenarios": [
+        {
+          "scenario_id": "S1",
+          "scenario_text": "**Scenario 1: Regional Bank Contagion & Deposit Flight**\n\n*   **Trigger:** A second-order regional bank failure stemming from unrealized losses on commercial mortgage-backed securities (CMBS)held by a peer of Bank B. This follows initial conditions of existing gross unreaalized losses in the securities portfolio.\n*   **Transmission Channel:** Fear and uncertainty trigger widespread uninsured deposit flight from Bank B, given its significant portion of uninsured deposits (45.4%).  The narrative also suggests exposure to Commercial Real Estate risk factors. Rapid deposit outflows force Bank B to sell available-for-sale and held-to-maturity securities to maintain liquidity.\n*   **Supporting Evidence:** The bank’s balance sheet shows substantial uninsured deposits, making it vulnerable to rapid withdrawals. A regional bank failure creates contagion fears.\n*   **Quantitative Magnitude:**  A 20% deposit outflow over a three-month period could force the sale of $40 billion in securities (20% of $200.73B total assets). This would reduce CET1 by an estimated 250 bps depending on realized losses versus book value, and requires immediate asset sales to meet liquidity needs.",
+          "citation_audit": {
+            "cited_chunk_ids": [],
+            "valid_exact_chunk_ids": [],
+            "invalid_exact_chunk_ids": [],
+            "all_cited_chunk_ids_exist": true,
+            "strict_same_run_retrieval_check": "unavailable_for_legacy_txt"
+          },
+          "temporal_audit": {
+            "explicit_temporal_leakage": false,
+            "explicit_leakage_flags": [],
+            "hindsight_risk": false,
+            "hindsight_risk_flags": []
+          },
+          "semantic": {
+            "target_exposure_support": 2,
+            "trigger_support": 1,
+            "transmission_support": 1,
+            "quantitative_support": 1,
+            "bank_specificity": 2,
+            "unsupported_exposures": [],
+            "unsupported_trigger_details": [
+              "peer of Bank B",
+              "CMBS held by a peer of Bank B"
+            ],
+            "unsupported_transmission_details": [
+              "rapid deposit outflows force Bank B to sell available-for-sale and held-to-maturity securities"
+            ],
+            "unsupported_quantitative_details": [
+              "20% deposit outflow",
+              "$40 billion in securities",
+              "reduce CET1 by an estimated 250 bps"
+            ],
+            "mechanism_families": [
+              "deposit_liquidity_run",
+              "securities_interest_rate"
+            ],
+            "mechanism_summary": "A regional bank failure triggers deposit flight from Bank B, forcing asset sales and impacting capital.",
+            "mechanism_coverage": {},
+            "grounding_rationale": "The scenario asserts that a second-order regional bank failure triggers events at Bank B. While the TARGET BANK PROFILE supports the existence of uninsured deposits (45.4%) and HTM securities, it does not specify the trigger event or its source. The transmission channel is partially supported by the presence of uninsured deposits but assumes an automatic sale of securities which isn't explicitly linked to liquidity needs in the profile. Quantitative details are unsupported as they are invented magnitudes.",
+            "evidence_grounding_score": 1.333,
+            "parse_failed": false
+          }
+        },
+        {
+          "scenario_id": "S2",
+          "scenario_text": "**Scenario 2: Commercial Real Estate Defaults & Loan Losses**\n\n*   **Trigger:** A sharp increase in defaults on Bank B’s commercial real estate loans (45.444 billion total) due to sustained remotework trends and reduced business travel, exacerbating existing unrealized losses on investment securities.\n*   **Transmission Channel:** Increased loan loss provisions significantly erode earnings.  The bank is compelled to reduce its CET1 ratio to absorb the losses. To shore up capital, Bank B would need to sell portions of its portfolio.\n*   **Supporting Evidence:** The supervisory scenario highlights commercial real estate vulnerability; Bank B holds significant CRE loans ($45.444 billion).  Reduced business travel and remote work trends are cited in the 2023 narrative as a stressor. Losses on investment-grade securities would also contribute to reduced equity, reinforcing capital needs.\n*   **Quantitative Magnitude:** A 15% default rate on CRE loans ($6.816 billion) would require ~$5 Billion in loan loss provisions (assuming conservative recovery rates), potentially depleting CET1 by approximately 200 bps and forcing $7-8B asset sales to meet capital requirements, depending on regulatory response and market conditions.",
+          "citation_audit": {
+            "cited_chunk_ids": [],
+            "valid_exact_chunk_ids": [],
+            "invalid_exact_chunk_ids": [],
+            "all_cited_chunk_ids_exist": true,
+            "strict_same_run_retrieval_check": "unavailable_for_legacy_txt"
+          },
+          "temporal_audit": {
+            "explicit_temporal_leakage": false,
+            "explicit_leakage_flags": [],
+            "hindsight_risk": false,
+            "hindsight_risk_flags": []
+          },
+          "semantic": {
+            "target_exposure_support": 2,
+            "trigger_support": 1,
+            "transmission_support": 1,
+            "quantitative_support": 1,
+            "bank_specificity": 2,
+            "unsupported_exposures": [],
+            "unsupported_trigger_details": [
+              "sustained remotework trends and reduced business travel",
+              "losses on investment-grade securities"
+            ],
+            "unsupported_transmission_details": [
+              "regulatory response"
+            ],
+            "unsupported_quantitative_details": [
+              "5 Billion in loan loss provisions",
+              "conservative recovery rates",
+              "200 bps CET1 depletion",
+              "$7-8B asset sales"
+            ],
+            "mechanism_families": [
+              "cre_credit"
+            ],
+            "mechanism_summary": "CRE credit stress leading to loan losses and capital erosion.",
+            "mechanism_coverage": {},
+            "grounding_rationale": "The scenario asserts Bank B has CRE loans (supported by TARGET BANK PROFILE). The trigger involves CRE defaults, which aligns with the 2023 supervisory scenario's emphasis on commercial real estate vulnerability. However, the specific drivers of those defaults ('sustained remotework trends and reduced business travel') are not explicitly stated in the provided evidence, nor is a direct link between CRE losses and investment security losses. The transmission channel is plausible but includes invented details like regulatory response. Quantitative magnitudes are assumed rather than derived from the TARGET BANK PROFILE.",
+            "evidence_grounding_score": 1.333,
+            "parse_failed": false
+          }
+        }
+      ],
+      "aggregate": {
+        "num_scenarios": 2,
+        "avg_target_exposure_support": 2.0,
+        "avg_trigger_support": 1.0,
+        "avg_transmission_support": 1.0,
+        "avg_quantitative_support": 1.0,
+        "avg_bank_specificity": 2.0,
+        "avg_evidence_grounding_score": 1.333,
+        "fully_grounded_scenarios": 0,
+        "fully_grounded_rate": 0.0,
+        "mechanism_family_counts": {
+          "deposit_liquidity_run": 1,
+          "securities_interest_rate": 1,
+          "cre_credit": 1
+        },
+        "num_distinct_mechanism_families": 3,
+        "temporal_audit": {
+          "explicit_temporal_leakage": false,
+          "explicit_leakage_flags": [],
+          "hindsight_risk": false,
+          "hindsight_risk_flags": []
+        }
+      }
+    },
+    "strong": {
+      "num_scenarios": 3,
+      "abstained": false,
+      "scenarios": [
+        {
+          "scenario_id": "S1",
+          "scenario_text": "**Scenario 1: Regional Deposit Flight Due to Reputation Risk**\n\n*   **Trigger:** A significant data breach involving sensitive customer information at a peer bank (Huntington or Regions) sparks widespread concern about cybersecurity practices within the regional banking sector [Retrieved Evidence 5, Retrieved Evidence 2].\n*   **Transmission Channel:**  A loss of confidence in Bank B leads to uninsured depositors withdrawing funds rapidly. The flight follows concerns regarding systemic risk and contagion from peers [Retrieved Evidence 1]. Given that estimated uninsured deposits comprise 45.4% of total deposits (TARGET BANK PROFILE), this withdrawal would significantly impact liquidity.\n*   **Supporting Evidence:**  FDIC QBP data highlights the risks associated with rising interest rates and deposits, which are exacerbated by concentration in uninsured depositors [Retrieved Evidence 1]. Bank B’s profile indicates a significant proportion of uninsured deposits making it vulnerable to deposit flight.\n*   **Quantitative Magnitude:** Requires quantitative calibration – The magnitude would depend on the severity of the peer bank's breach, media coverage, and overall market sentiment, but could reasonably deplete CET1 by at least 300 bps through loss of capital and forced asset sales for liquidity.",
+          "citation_audit": {
+            "cited_chunk_ids": [],
+            "valid_exact_chunk_ids": [],
+            "invalid_exact_chunk_ids": [],
+            "all_cited_chunk_ids_exist": true,
+            "strict_same_run_retrieval_check": "unavailable_for_legacy_txt"
+          },
+          "temporal_audit": {
+            "explicit_temporal_leakage": false,
+            "explicit_leakage_flags": [],
+            "hindsight_risk": false,
+            "hindsight_risk_flags": []
+          },
+          "semantic": {
+            "target_exposure_support": 2,
+            "trigger_support": 1,
+            "transmission_support": 2,
+            "quantitative_support": 0,
+            "bank_specificity": 1,
+            "unsupported_exposures": [],
+            "unsupported_trigger_details": [
+              "peer bank (Huntington or Regions)"
+            ],
+            "unsupported_transmission_details": [],
+            "unsupported_quantitative_details": [
+              "300 bps CET1 depletion",
+              "forced asset sales for liquidity"
+            ],
+            "mechanism_families": [
+              "deposit_liquidity_run"
+            ],
+            "mechanism_summary": "Deposit run triggered by reputation risk.",
+            "mechanism_coverage": {},
+            "grounding_rationale": "The scenario posits a deposit flight due to concerns about cybersecurity practices following a data breach at a peer bank. The TARGET BANK PROFILE explicitly states Bank B has 45.4% uninsured deposits, making it vulnerable to such an event. While the trigger mentions specific peer banks (Huntington or Regions), this detail is not supported by the provided evidence and represents an unsupported addition.  The scenario correctly identifies deposit liquidity run as a plausible mechanism given the exposure. The quantitative details regarding CET1 depletion and forced asset sales are unsupported, as no specific magnitudes are provided in the TARGET BANK PROFILE or FIXED FED SUPERVISORY CONTEXT.",
+            "evidence_grounding_score": 1.667,
+            "parse_failed": false
+          }
+        },
+        {
+          "scenario_id": "S2",
+          "scenario_text": "**Scenario 2:  CRE Loan Defaults Driven By Remote Work Persistence**\n\n*   **Trigger:**  A sustained shift towards remote work leads to significantly lower occupancy rates in office buildings across Bank B's lending footprint, triggering widespread defaults on commercial real estate loans [2023 severely adverse Scenario narrative].\n*   **Transmission Channel:** Increased CRE loan losses erode capital. The bank must recognize these losses and reduce its CET1 ratio; furthermore, the need to fund those write-downs leads to asset sales (held-to-maturity securities). Given that commercial real estate loans comprise 45.4% of total loans (TARGET BANK PROFILE), this impact would be substantial.\n*   **Supporting Evidence:**  The 2023 severely adverse scenario explicitly highlights the prolonged remote work as a driver of CRE price declines [2023 severely_adverse Scenario narrative].\n*   **Quantitative Magnitude:** Requires quantitative calibration – The magnitude of losses would depend on occupancy rates, lease terms, and recovery values. However, given Bank B’s exposure to CRE loans (45.4% of total loans) , a severe downturn could easily deplete CET1 by 300+ basis points.",
+          "citation_audit": {
+            "cited_chunk_ids": [],
+            "valid_exact_chunk_ids": [],
+            "invalid_exact_chunk_ids": [],
+            "all_cited_chunk_ids_exist": true,
+            "strict_same_run_retrieval_check": "unavailable_for_legacy_txt"
+          },
+          "temporal_audit": {
+            "explicit_temporal_leakage": false,
+            "explicit_leakage_flags": [],
+            "hindsight_risk": false,
+            "hindsight_risk_flags": []
+          },
+          "semantic": {
+            "target_exposure_support": 2,
+            "trigger_support": 2,
+            "transmission_support": 2,
+            "quantitative_support": 0,
+            "bank_specificity": 2,
+            "unsupported_exposures": [],
+            "unsupported_trigger_details": [],
+            "unsupported_transmission_details": [],
+            "unsupported_quantitative_details": [
+              "300+ basis points CET1 depletion"
+            ],
+            "mechanism_families": [
+              "cre_credit"
+            ],
+            "mechanism_summary": "CRE loan defaults driven by persistent remote work lead to capital erosion and asset sales.",
+            "mechanism_coverage": {},
+            "grounding_rationale": "The scenario explicitly states a trigger of sustained remote work leading to CRE loan defaults, supported by the 2023 severely adverse scenario narrative. The transmission channel is clearly articulated: CRE losses erode capital, necessitating asset sales. While the quantitative detail (CET1 depletion) is unsupported, the core exposures and causal pathway are well-grounded in the provided evidence.",
+            "evidence_grounding_score": 2.0,
+            "parse_failed": false
+          }
+        },
+        {
+          "scenario_id": "S3",
+          "scenario_text": "**Scenario 3: HTM Securities Realization Due to Liquidity Crunch**\n\n*   **Trigger:**  A sudden increase in short-term funding costs, coupled with the continued rise in market interest rates (reflectingexpectations of further rate hikes), creates a liquidity crunch for Bank B.\n*   **Transmission Channel:** Bank B is forced to sell some of its held-to-maturity securities portfolio to meet ongoing liquidity needs [Retrieved Evidence 1].  These include unrealized losses that would be realized upon sale, severely impacting capital ratios. BankB holds $13.53 billion in HTM securities (TARGET BANK PROFILE).\n*   **Supporting Evidence:** FDIC data highlights risks from elevated unrealized losses on held-to-maturity and available-for-sale securities [Retrieved Evidence 1]. The combination of rising rates, deposit outflows, and potential liquidity constraints could force Bank B to liquidate HTM holdings.\n*   **Quantitative Magnitude:** Requires quantitative calibration – the magnitude depends on the funding costs and how much of the $13.53 billion in HTM securities would need to be sold.",
+          "citation_audit": {
+            "cited_chunk_ids": [],
+            "valid_exact_chunk_ids": [],
+            "invalid_exact_chunk_ids": [],
+            "all_cited_chunk_ids_exist": true,
+            "strict_same_run_retrieval_check": "unavailable_for_legacy_txt"
+          },
+          "temporal_audit": {
+            "explicit_temporal_leakage": false,
+            "explicit_leakage_flags": [],
+            "hindsight_risk": false,
+            "hindsight_risk_flags": []
+          },
+          "semantic": {
+            "target_exposure_support": 2,
+            "trigger_support": 1,
+            "transmission_support": 1,
+            "quantitative_support": 0,
+            "bank_specificity": 2,
+            "unsupported_exposures": [],
+            "unsupported_trigger_details": [
+              "sudden increase in short-term funding costs",
+              "continued rise in market interest rates (reflecting expectations of further rate hikes)"
+            ],
+            "unsupported_transmission_details": [
+              "deposit outflows"
+            ],
+            "unsupported_quantitative_details": [
+              "magnitude depends on the funding costs and how much of the $13.53 billion in HTM securities would need to be sold"
+            ],
+            "mechanism_families": [
+              "securities_interest_rate",
+              "deposit_liquidity_run"
+            ],
+            "mechanism_summary": "The scenario posits a liquidity crunch driven by rising funding costs and market interest rates, forcing the sale of HTM securities to meet ongoing needs. This results in realized losses impacting capital ratios.",
+            "mechanism_coverage": {},
+            "grounding_rationale": "The scenario correctly identifies Bank B's $13.53 billion in HTM holdings as a supported exposure (TARGET BANK PROFILE). The trigger, while plausible, lacks explicit support within the provided evidence; it asserts an increase in funding costs and interest rates without direct correlation to the 2023 scenario.  The transmission channel is partially supported by the general concept of needing liquidity and selling securities, but the inclusion of 'deposit outflows' isn't directly linked to the provided evidence. The quantitative aspect is unsupported as it requires calibration not present in the profile or fixed supervisory context.",
+            "evidence_grounding_score": 1.333,
+            "parse_failed": false
+          }
+        }
+      ],
+      "aggregate": {
+        "num_scenarios": 3,
+        "avg_target_exposure_support": 2.0,
+        "avg_trigger_support": 1.333,
+        "avg_transmission_support": 1.667,
+        "avg_quantitative_support": 0.0,
+        "avg_bank_specificity": 1.667,
+        "avg_evidence_grounding_score": 1.667,
+        "fully_grounded_scenarios": 1,
+        "fully_grounded_rate": 0.333,
+        "mechanism_family_counts": {
+          "deposit_liquidity_run": 2,
+          "cre_credit": 1,
+          "securities_interest_rate": 1
+        },
+        "num_distinct_mechanism_families": 3,
+        "temporal_audit": {
+          "explicit_temporal_leakage": false,
+          "explicit_leakage_flags": [],
+          "hindsight_risk": false,
+          "hindsight_risk_flags": []
+        }
+      }
+    },
+    "lens": {
+      "num_scenarios": 2,
+      "abstained": false,
+      "scenarios": [
+        {
+          "scenario_id": "D1",
+          "scenario_text": "**D1: Scenario 1: Regional Deposit Flight Due to Reputation Risk**\n\n*   **Dominant assumption or mechanism challenged:** Assumes deposit flight is solely driven by macroeconomic factors. This scenario isolates the role of local reputational shocks as a driver of uninsured deposit outflows, particularly when combined with broader economic stress.\n*   **Trigger:** A major, highly publicized enforcement action against Bank B stemming from localized operational deficiencies (e.g.,data security breach impacting customer account information), triggering immediate loss of confidence among uninsured depositors. This is distinct from global or national-level shocks.\n*   **Transmission channel:** The reputational shock immediately prompts a significant portion of the 45.4% ($74.2 billion) of uninsured deposits to flee, potentially accelerating losses on HTM securities if liquid assets need to be sold to meet withdrawals (consistent with direction D2).  Further loss of confidence precipitates market concerns about Bank B’s solvency, leading to increased scrutinyand potential regulatory intervention.\n*   **Supporting evidence:** FDIC QBP data highlights the risks associated with substantial uninsured deposits ([fdic_qbp_2022_q4_securities_liquidity_000], [fdic_qbp_2022_q4_overview_000]). Regional banks such as Huntington and Regions demonstrate risk management practices related to deposit stability.\n*   **Why distinct:** Prior scenarios focus on macroeconomic shocks. This scenario highlights idiosyncratic reputational risks often underestimated in system-wide stress tests, especially for regional institutions with less diversified funding sources.\n*   **Quantitative magnitude:** Requires quantitative calibration.",
+          "citation_audit": {
+            "cited_chunk_ids": [
+              "fdic_qbp_2022_q4_securities_liquidity_000",
+              "fdic_qbp_2022_q4_overview_000"
+            ],
+            "valid_exact_chunk_ids": [
+              "fdic_qbp_2022_q4_securities_liquidity_000",
+              "fdic_qbp_2022_q4_overview_000"
+            ],
+            "invalid_exact_chunk_ids": [],
+            "all_cited_chunk_ids_exist": true,
+            "strict_same_run_retrieval_check": "unavailable_for_legacy_txt"
+          },
+          "temporal_audit": {
+            "explicit_temporal_leakage": false,
+            "explicit_leakage_flags": [],
+            "hindsight_risk": false,
+            "hindsight_risk_flags": []
+          },
+          "semantic": {
+            "target_exposure_support": 2,
+            "trigger_support": 1,
+            "transmission_support": 1,
+            "quantitative_support": 2,
+            "bank_specificity": 2,
+            "unsupported_exposures": [],
+            "unsupported_trigger_details": [
+              "specific operational deficiencies (e.g., data security breach impacting customer account information)"
+            ],
+            "unsupported_transmission_details": [
+              "accelerating losses on HTM securities if liquid assets need to be sold to meet withdrawals"
+            ],
+            "unsupported_quantitative_details": [],
+            "mechanism_families": [
+              "deposit_liquidity_run",
+              "operational_cyber"
+            ],
+            "mechanism_summary": "A localized reputational shock triggers a deposit run, potentially forcing sales of HTM securities.",
+            "mechanism_coverage": {},
+            "grounding_rationale": "The scenario posits an enforcement action as the trigger. While FDIC data highlights risks associated with uninsured deposits and potential liquidity constraints ([fdic_qbp_2022_q4_securities_liquidity_000], [fdic_qbp_2022_q4_overview_000]), it does not specify the nature of the enforcement action. The scenario also assumes a direct link between deposit flight and HTM sales, which requires calibration.",
+            "evidence_grounding_score": 1.333,
+            "parse_failed": false
+          }
+        },
+        {
+          "scenario_id": "D2",
+          "scenario_text": "**D2: Scenario 3: HTM Securities Realization Due to Liquidity Crunch**\n\n*   **Dominant assumption or mechanism challenged:** Assumes unrealized losses on securities remain confined to AFS portfolios.  Thisscenario explores a pathway where liquidity stress forces the realization of losses from held-to-maturity (HTM) securities, significantly impacting capital ratios and potentially triggering broader financial instability.\n*   **Trigger:** A sharp and unexpected increase in loan drawdowns combined with an acceleration in deposit outflows puts significantpressure on Bank B’s liquidity position. These are triggered by a combination of macroeconomic factors and local commercial real estate distress.\n*   **Transmission channel:**  To meet liquidity demand, Bank B is forced to sell portions of its $13.53 billion HTM portfolio, resulting in the realization of the $1.165 billion gross unrealized loss. The realized losses deplete available capital, potentially triggering regulatory action and further eroding market confidence.\n*   **Supporting evidence:** FED Financial System Risk Reports emphasize that while changes in HTM securities do not immediately impact capital ratios, forced sales can trigger larger negative outcomes ([fed_fsr_2022_11_bank_capital_securities_000]). FDIC data show industry holdings of longer-term assets and the risks they create ([fdic_qbp_2022_q4_securities_liquidity_000]).\n*   **Why distinct:**  Prior scenarios typically focus on AFS losses. This scenario stresses the liquidity risk embedded in HTM portfolios, a less frequently analyzed vulnerability.\n*   **Quantitative magnitude:** Requires quantitative calibration.",
+          "citation_audit": {
+            "cited_chunk_ids": [
+              "fed_fsr_2022_11_bank_capital_securities_000",
+              "fdic_qbp_2022_q4_securities_liquidity_000"
+            ],
+            "valid_exact_chunk_ids": [
+              "fed_fsr_2022_11_bank_capital_securities_000",
+              "fdic_qbp_2022_q4_securities_liquidity_000"
+            ],
+            "invalid_exact_chunk_ids": [],
+            "all_cited_chunk_ids_exist": true,
+            "strict_same_run_retrieval_check": "unavailable_for_legacy_txt"
+          },
+          "temporal_audit": {
+            "explicit_temporal_leakage": false,
+            "explicit_leakage_flags": [],
+            "hindsight_risk": false,
+            "hindsight_risk_flags": []
+          },
+          "semantic": {
+            "target_exposure_support": 2,
+            "trigger_support": 1,
+            "transmission_support": 1,
+            "quantitative_support": 2,
+            "bank_specificity": 2,
+            "unsupported_exposures": [],
+            "unsupported_trigger_details": [
+              "local commercial real estate distress"
+            ],
+            "unsupported_transmission_details": [],
+            "unsupported_quantitative_details": [],
+            "mechanism_families": [
+              "securities_interest_rate",
+              "deposit_liquidity_run"
+            ],
+            "mechanism_summary": "The scenario posits a liquidity crunch forcing the realization of HTM losses, impacting capital and potentially triggering broader instability. This combines deposit outflows with securities interest rate risk.",
+            "mechanism_coverage": {},
+            "grounding_rationale": "Target exposure support is high because the TARGET BANK PROFILE explicitly states Bank B's HTM portfolio size ($13.53 billion) and unrealized losses ($1.165 billion). The trigger, while plausible given industry trends (FDIC data), lacks specific details linking it to Bank B. Transmission is partially supported by the general concept of forced sales impacting capital ratios (FED report), but the specifics are assumed. Quantitative support is low because the scenario asserts values from the TARGET BANK PROFILE without calibration.",
+            "evidence_grounding_score": 1.333,
+            "parse_failed": false
+          }
+        }
+      ],
+      "aggregate": {
+        "num_scenarios": 2,
+        "avg_target_exposure_support": 2.0,
+        "avg_trigger_support": 1.0,
+        "avg_transmission_support": 1.0,
+        "avg_quantitative_support": 2.0,
+        "avg_bank_specificity": 2.0,
+        "avg_evidence_grounding_score": 1.333,
+        "fully_grounded_scenarios": 0,
+        "fully_grounded_rate": 0.0,
+        "mechanism_family_counts": {
+          "deposit_liquidity_run": 2,
+          "operational_cyber": 1,
+          "securities_interest_rate": 1
+        },
+        "num_distinct_mechanism_families": 3,
+        "temporal_audit": {
+          "explicit_temporal_leakage": false,
+          "explicit_leakage_flags": [],
+          "hindsight_risk": false,
+          "hindsight_risk_flags": []
+        }
+      }
+    }
+  }
+}

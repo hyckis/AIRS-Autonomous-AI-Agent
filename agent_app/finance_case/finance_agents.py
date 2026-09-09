@@ -66,6 +66,7 @@ def finance_detect_homogeneity(
     retrieved_context,
     baseline_response,
     strong_response,
+    allowed_exposure_keys,
     backend="local_ollama",
     model=None,
 ):
@@ -75,6 +76,7 @@ def finance_detect_homogeneity(
         retrieved_context=retrieved_context,
         baseline_response=baseline_response,
         strong_response=strong_response,
+        allowed_exposure_keys=allowed_exposure_keys,
     )
 
     return call_llm(
@@ -93,9 +95,9 @@ def finance_lens_agent(
     bank_label,
     fixed_context,
     retrieved_context,
-    baseline_response,
-    strong_response,
     supported_directions,
+    dominant_framing,
+    overlapping_mechanisms,
     backend="local_ollama",
     model=None,
 ):
@@ -103,9 +105,9 @@ def finance_lens_agent(
         bank_label=bank_label,
         fixed_context=fixed_context,
         retrieved_context=retrieved_context,
-        baseline_response=baseline_response,
-        strong_response=strong_response,
         supported_directions=supported_directions,
+        dominant_framing=dominant_framing,
+        overlapping_mechanisms=overlapping_mechanisms
     )
 
     return call_llm(

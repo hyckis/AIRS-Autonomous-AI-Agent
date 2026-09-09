@@ -1,147 +1,167 @@
-SHARED_TASK = """
+# ------------------------------------------------------------
+# 1. BASE TASK
+#    Shared by Arm A and Arm B.
+#    Keep this focused on the actual experimental task.
+# ------------------------------------------------------------
+
+BASE_TASK = """
 You are advising the risk function of {bank_name}.
 
 The bank currently uses the Federal Reserve supervisory severely adverse
 scenario as its primary internal stress scenario.
 
-Using ONLY the information provided in the context:
+Using only the supplied context, complete BOTH parts below.
 
-(a) Compare the 2023 severely adverse scenario specifically against
-the 2015-2022 scenarios.
+A. 2023 VS. 2015-2022 COMPARISON
+
+Compare the 2023 severely adverse scenario specifically against
+the 2015-2022 severely adverse scenarios.
 
 For each candidate shared assumption:
 
-1. State the 2023 value or pattern first.
-2. List which 2015-2022 years show the same pattern.
-3. List important exceptions.
-4. Conclude whether the assumption is:
-   - strongly shared,
-   - partially shared,
-   - or not shared.
+1. State the 2023 value or pattern.
+2. Identify which 2015-2022 years show the same or similar pattern.
+3. Identify important exceptions.
+4. Classify the assumption as:
+   - Strongly shared
+   - Partially shared
+   - Not shared
 
 Do not summarize the historical scenarios year-by-year without
-explicitly comparing them to 2023.
+explicitly comparing them with 2023.
 
 
-(b) Generate alternative stress scenarios that could either:
+B. ALTERNATIVE STRESS SCENARIOS
+
+Generate alternative stress scenarios that could either:
 
 1. deplete the bank's CET1 ratio by at least 300 basis points, or
-2. force the bank to sell securities or other assets to meet liquidity needs,
+2. force the bank to sell securities or other assets to meet
+   liquidity needs,
 
-through channels that are not adequately covered by the supervisory scenario.
+through channels not adequately represented in the supervisory scenario.
 
-For each proposed scenario, provide:
+For each scenario provide:
 
 - Trigger
 - Transmission channel
-- Key quantitative magnitudes, if supported
-- Supporting evidence from the provided context
-
-SCENARIO ADMISSION RULE
------------------------
-Before outputting a scenario, verify that it has sufficient grounding.
-
-If your reasoning would require phrases such as:
-- "the context does not specify..."
-- "it is reasonable to assume..."
-- "such exposures are plausible..."
-- "Bank A may have..."
-- "potentially..."
-to establish a required Bank A exposure, DISCARD the scenario.
-Do not output it.
-A diversity lens does not override the evidence requirement.
-
-QUANTITATIVE DISCIPLINE
------------------------
-Do not invent CET1 impacts, loss amounts, deposit outflows, asset-sale
-amounts, or other quantitative magnitudes.
-
-Only provide a quantitative estimate when it can be reasonably derived
-from the supplied data.
-
-If the supplied information is insufficient to calculate whether the
-300-basis-point CET1 threshold would be reached, state:
-
-"Requires quantitative calibration."
-
-If you state "Requires quantitative calibration", DO NOT provide
-an unsupported numerical range afterward.
-
-Either:
-A. provide a number derived from supplied data and explain the derivation,
-or
-B. state "Requires quantitative calibration" with no invented estimate.
-
-A scenario may still satisfy the task if it provides a plausible
-liquidity mechanism that could force asset sales.
+- Supporting evidence
+- Quantitative magnitude, if supported
+"""
 
 
-EVIDENCE DISCIPLINE
--------------------
-Do not use information that is not contained in the supplied context.
+# ------------------------------------------------------------
+# 2. COMMON INTEGRITY RULES
+#    Minimal rules used across A/B/C.
+#    These are experimental hygiene, not a "strong prompt treatment".
+# ------------------------------------------------------------
 
-Do not use information or events occurring after March 7, 2023.
+COMMON_INTEGRITY_RULES = """
+GENERAL RULES
+-------------
+- Use only information supplied in the prompt.
+- Do not use or refer to events occurring after March 7, 2023.
+- Do not infer the real-world identity of the anonymized bank.
 
-Do not infer the identity of the anonymized bank.
+OUTPUT STYLE
+------------
+- Begin directly with the requested output.
+- Do not include introductory filler, acknowledgments, meta-commentary,
+  disclaimers, concluding summaries, closing remarks, or offers for
+  further help.
+- Output only the requested sections and fields.
+"""
 
-Regional-bank 10-K evidence in the retrieved corpus is comparative
-industry evidence only. Do not attribute another bank's balance-sheet
-figures or exposures to {bank_name}.
 
-For numerical cross-year comparisons, treat the
-STRUCTURED CROSS-YEAR VARIABLE TABLE as authoritative.
-Do not reconstruct or regroup numerical values from memory.
+# ------------------------------------------------------------
+# 3. STRONG GROUNDING RULES
+#    Used by Arm B and Arm C, NOT Arm A.
+# ------------------------------------------------------------
 
-EVIDENCE PROVENANCE RULES
--------------------------
-TARGET BANK PROFILE:
-May be used to establish Bank A's actual exposures and characteristics.
+GROUNDING_RULES = """
+EVIDENCE AND GROUNDING RULES
+----------------------------
 
-MACRO_CONTEXT:
-May support macroeconomic triggers or mechanisms.
-It does not establish a Bank A-specific exposure.
+A scenario may be output only when the target-bank exposures required
+by its transmission mechanism are supported by the supplied context.
 
-INDUSTRY_CONTEXT:
-May support general banking-sector mechanisms or conditions.
-Industry aggregates must NOT be treated as Bank A figures.
+TARGET-BANK EXPOSURE
+- Customer concentration identifies who the bank serves.
+  It does not establish the composition of the bank's loans,
+  securities, CRE exposure, derivatives, or fee income.
+- Total loans must not be treated as CRE loans or as loans to a
+  particular customer sector unless explicitly stated.
+- AFS or HTM securities must not be assigned a particular asset
+  composition unless explicitly stated.
+- If a required target-bank exposure is not supplied, do not assume it.
 
-COMPARATOR_BANK:
-May support analogies or demonstrate that a mechanism exists at another bank.
-It must NEVER be used to claim that Bank A has the same exposure,
-portfolio composition, funding structure, or customer concentration.
-
+EVIDENCE PROVENANCE
+- TARGET BANK PROFILE may establish actual target-bank characteristics.
+- MACRO_CONTEXT may support macroeconomic triggers or mechanisms,
+  but not target-bank-specific exposures.
+- INDUSTRY_CONTEXT may support banking-sector mechanisms or conditions,
+  but industry aggregates are not target-bank figures.
+- COMPARATOR_BANK evidence may demonstrate that a mechanism exists
+  elsewhere, but must not be used to claim that the target bank has
+  the same exposure, portfolio composition, funding structure,
+  or customer concentration.
 
 ASSET-CLASS DISCIPLINE
-----------------------
-Do not infer the composition of a bank asset category unless it is
-explicitly stated in the supplied bank profile.
+- Do not apply an equity-market drawdown directly as a loss rate to
+  a debt-securities portfolio.
+- Unrealized HTM losses do not automatically reduce CET1.
+  A realization or sale mechanism must be established.
 
-In particular:
+QUANTITATIVE DISCIPLINE
+- Use a numerical magnitude only when it can be derived from supplied data.
+- Otherwise write exactly:
+  "Requires quantitative calibration."
+- Do not provide a speculative numerical value after that statement.
 
-- total loans must not be treated as CRE loans;
-- AFS or HTM securities must not be assumed to be equities,
-  corporate bonds, technology securities, or CRE-linked securities
-  unless the context explicitly states this;
-- an equity-market drawdown must not be directly applied as a loss
-  rate to a debt-securities portfolio;
-- unrealized HTM losses do not automatically reduce CET1 unless a
-  relevant realization, sale, or accounting/regulatory transmission
-  mechanism is specified.
+EXTERNAL TRIGGERS
+- Do not invent regulatory actions, rating-agency actions, policy changes,
+  institutional interventions, or other external events unless supported
+  by the supplied evidence.
 
+CITATION DISCIPLINE
+- When retrieved evidence is used, cite only exact supplied CHUNK_IDs.
+- Never invent a CHUNK_ID.
+
+For numerical comparison across Federal Reserve scenarios, treat the
+STRUCTURED CROSS-YEAR VARIABLE TABLE as authoritative.
 """
+
+
+# ------------------------------------------------------------
+# 4. ARM A — NAIVE
+#    Fixed context only.
+#    Important: do NOT add the strong grounding treatment here.
+# ------------------------------------------------------------
 
 def prompt_arm_a(bank_label, fixed_context):
     return f"""
-{SHARED_TASK.format(bank_name=bank_label)}
+{BASE_TASK.format(bank_name=bank_label)}
+
+{COMMON_INTEGRITY_RULES}
 
 FIXED CONTEXT
 -------------
 {fixed_context}
 """
 
+
+# ------------------------------------------------------------
+# 5. ARM B — STRONG PROMPT
+#    Fixed context + retrieval + systematic grounding.
+# ------------------------------------------------------------
+
 def prompt_arm_b(bank_label, fixed_context, retrieved_context):
     return f"""
-{SHARED_TASK.format(bank_name=bank_label)}
+{BASE_TASK.format(bank_name=bank_label)}
+
+{COMMON_INTEGRITY_RULES}
+
+{GROUNDING_RULES}
 
 FIXED CONTEXT
 -------------
@@ -151,21 +171,16 @@ RETRIEVED EVIDENCE
 ------------------
 {retrieved_context}
 
-Approach the task systematically.
+STRONG-PROMPT INSTRUCTIONS
+--------------------------
+Analyze systematically:
 
-Compare the historical supervisory scenarios before proposing alternatives.
-Identify recurring assumptions, examine the bank's balance-sheet exposures,
-and use the retrieved evidence to develop plausible and well-supported
-alternative scenarios.
-
-Avoid merely rephrasing the Federal Reserve scenarios. Consider multiple
-possible transmission mechanisms and ensure that each proposed scenario is
-grounded in the supplied evidence.
-
-Do not combine values from different years.
-Before citing a numerical value, verify that the value belongs to
-the scenario year being discussed.
-
+1. Identify recurring assumptions in the supervisory scenarios.
+2. Identify target-bank vulnerabilities explicitly supported by evidence.
+3. Use retrieved evidence to identify underrepresented stress-transmission
+   mechanisms.
+4. Generate alternative scenarios that are meaningfully distinct from
+   the supervisory scenario rather than merely rephrasing it.
 """
 
 DIVERSITY_LENSES = """
@@ -179,9 +194,21 @@ DIVERSITY_LENSES = """
 8. Long-term systemic risk
 """
 
-def prompt_arm_c(bank_label, fixed_context, retrieved_context, baseline_response, strong_response, supported_directions):
+def prompt_arm_c(
+  bank_label, 
+  fixed_context, 
+  retrieved_context, 
+  supported_directions,
+  dominant_framing,
+  overlapping_mechanisms
+  ):
     return f"""
-{SHARED_TASK.format(bank_name=bank_label)}
+You are generating evidence-grounded alternative stress scenarios
+for {bank_label}.
+
+{COMMON_INTEGRITY_RULES}
+
+{GROUNDING_RULES}
 
 FIXED CONTEXT
 -------------
@@ -191,17 +218,17 @@ RETRIEVED EVIDENCE
 -------------
 {retrieved_context}
 
-ARM A OUTPUT
--------------
-{baseline_response}
-
-ARM B OUTPUT
--------------
-{strong_response}
-
-SUPPORTED DIRECTIONS
+VALIDATED SUPPORTED DIRECTIONS
 -------------
 {supported_directions}
+
+DOMINANT FRAMING
+-------------
+{dominant_framing}
+
+OVERLAPPING MECHANISMS
+-------------
+{overlapping_mechanisms}
 
 DIVERSITY LENSES
 -------------
@@ -209,62 +236,55 @@ DIVERSITY LENSES
 
 TASK
 -------------
-Generate alternative stress scenarios that deliberately expand beyond
-the dominant assumptions identified in Arm A and Arm B.
+Generate alternative stress scenarios that expand beyond the dominant
+framing and overlapping mechanisms above.
 
-The diversity lenses are  SEARCH HEURISTICS, not evidence.
+Use the diversity lenses as SEARCH HEURISTICS, not as evidence.
 
-A lens may suggest where to look, but a scenario must still be supported
-by the supplied fixed context or retrieved evidence.
+Develop scenarios only from the VALIDATED SUPPORTED DIRECTIONS.
+A diversity lens does not permit unsupported exposures, triggers,
+or transmission mechanisms.
 
-For each scenario:
-1. State which dominant assumption or mechanism it challenges.
-2. Give a clear trigger.
-3. Give a causal transmission channel.
-4. Cite supporting retrieved evidence using the exact CHUNK_ID.
-5. Explain why the scenario is distinct from Arm A and Arm B.
-6. Give quantitative magnitudes only when supported by supplied data.
-7. Otherwise state "Requires quantitative calibration."
+For each scenario provide:
+
+- Dominant assumption or mechanism challenged
+- Trigger
+- Transmission channel
+- Supporting evidence using exact CHUNK_ID(s)
+- Why the scenario is distinct from the prior analyses
+- Quantitative magnitude, or exactly:
+  "Requires quantitative calibration."
+
 
 GROUNDING RULES
 -------------
-Do not invent:
-- counterparties
-- hedge-fund exposures
-- derivative exposures
-- depositor types
-- securities holdings
-- credit concentrations
-- operational dependencies
-- regulatory actions
-- market events
-unless they are supported by the supplied context.
+Do not introduce any target-bank exposure, dependency, actor,
+or external event that is not supported by the supplied context.
 
-Do not use a diversity lens merely to create a novel story.
-
-If a potentially diversi direction is not supported by the supplied evidence, do not generate it as a scenario.
-
-Regional-bank 10-K evidence is comparative evidence only.
-Do not attribute Regions or Huntington characteristics directly to {bank_label},
+A diversity lens is a search heuristic, not evidence.
+Unsupported directions must be discarded.
 
 Do not use post-March-7-2023 information.
+
 Do not infer the bank's real-world identity.
+
+Every scenario MUST be derived from exactly one VALIDATED SUPPORTED DIRECTION.
+Do not create a scenario that cannot be traced to a validated direction.
+
+A diversity lens may change the framing or emphasis of a validated direction, but may not introduce a new unsupported trigger, exposure, actor, or institutional action.
 """
 
 def prompt_homogeneity(
     bank_label,
-        fixed_context,
-        retrieved_context,
-        baseline_response,
-        strong_response,
+    fixed_context,
+    retrieved_context,
+    baseline_response,
+    strong_response,
+    allowed_exposure_keys,
 ):
     return f"""
-You are evaluating conceptual convergence between two bank
-stress-testing analyses.
-
-BANK
-----
-{bank_label}
+You are evaluating conceptual convergence between two stress-testing
+analyses of the SAME target bank: {bank_label}.
 
 FIXED CONTEXT
 -------------
@@ -274,77 +294,87 @@ RETRIEVED EVIDENCE
 ------------------
 {retrieved_context}
 
-ARM A — NAIVE ANALYSIS
-----------------------
+NAIVE STRATEGY OUTPUT
+---------------------
 {baseline_response}
 
-ARM B — STRONG-PROMPT ANALYSIS
-------------------------------
+STRONG-PROMPT STRATEGY OUTPUT
+-----------------------------
 {strong_response}
 
 TASK
 ----
-Analyze Arm A and Arm B for conceptual homogeneity.
-
 Identify:
 
-1. SHARED ASSUMPTIONS
-   - Which assumptions recur across both outputs?
-   - Check those assumptions against the supplied context.
-   - Flag assumptions that appear inconsistent with the context.
+1. Shared assumptions
+   - recurring assumptions across both outputs
+   - factual inconsistencies with supplied context
 
-2. OVERLAPPING MECHANISMS
-   - Which apparently different scenarios rely on essentially
-     the same causal pathway?
+2. Overlapping mechanisms
+   - scenarios that use different wording but essentially the same
+     causal pathway
 
-3. DOMINANT FRAMING
-   - Which risk perspectives dominate both analyses?
+3. Dominant framing
+   - risk perspectives that dominate both outputs
 
-4. EVIDENCE-SUPPORTED UNDEREXPLORED CHANNELS
-   - Identify risk channels that receive little attention but
-     have support in the supplied fixed context or retrieved evidence.
-   - Cite the relevant CHUNK_ID whenever the support comes from
-     retrieved evidence.
+4. Supported directions
+   - underexplored directions that are supported by supplied evidence
 
-5. UNSUPPORTED POSSIBILITIES
-   - Separately identify potentially interesting directions that
-     are NOT supported by the supplied evidence.
-   - These must NOT be recommended to the diversity-expansion agent.
+5. Unsupported possibilities
+   - potentially interesting directions that lack sufficient evidence
 
-6. CONCEPTUAL REDUNDANCIES
-   - Identify surface-level variations of the same underlying idea.
+6. Factual issues
+   - identify factual, numerical, provenance, or logical problems in either strategy.
 
-7. DIVERSITY GAPS
-   - Recommend only evidence-supported directions that a subsequent
-     diversity-expansion agent could explore.
 
-IMPORTANT
----------
-Both outputs analyze the SAME target bank: {bank_label}.
+GROUNDING RULE FOR SUPPORTED DIRECTIONS
+---------------------------------------
+A direction is supported only if:
 
-"Naive Strategy" and "Strong-Prompt Strategy" are generation
-strategies. They do NOT refer to different banks.
+1. every target-bank exposure required by the direction is explicitly
+   supported by the TARGET BANK PROFILE; and
 
-Do not generate final alternative stress scenarios.
+2. its proposed trigger or transmission mechanism is supported by the
+   supplied fixed or retrieved evidence.
 
-Do not use post-March-7-2023 knowledge.
+Comparator-bank evidence may support a mechanism but cannot establish
+a target-bank exposure.
 
-Do not infer the identity of the anonymized bank.
+General discussion of a risk does not establish that the target bank
+has that exposure.
 
-Do not treat different wording as conceptual diversity.
+Evidence supporting one component of a scenario does not automatically
+support an invented trigger or transmission mechanism.
 
-Do not convert unsupported possibilities into recommended directions.
+If either condition fails, place the direction under
+"unsupported_possibilities" instead of "supported_directions".
 
-Before recommending any underexplored channel, perform a grounding check:
-GROUNDING CHECK
-- Is this exposure explicitly present in the target bank profile?
-- Is this mechanism explicitly supported by retrieved evidence?
-- If the evidence describes Huntington or Regions, do not treat that
-  exposure as belonging to the target bank.
-- General discussion of a risk does not establish that Bank A has
-  that exposure.
-If no explicit support exists, place the idea under
-UNSUPPORTED POSSIBILITIES and do NOT recommend it to the Lens Agent.
+CHUNK-ID RULE
+-------------
+"external_chunk_ids" may contain ONLY exact CHUNK_IDs appearing in
+RETRIEVED EVIDENCE.
+
+Do NOT put:
+- "TARGET BANK PROFILE"
+- "FIXED CONTEXT"
+- section labels
+- source names
+
+inside "external_chunk_ids".
+
+Describe target-bank-profile support only in "target_bank_support".
+
+If a supported direction does not require retrieved evidence, use:
+"external_chunk_ids": []
+
+
+ADDITIONAL RULES
+----------------
+- Do not generate final alternative stress scenarios.
+- Do not use information or events after March 7, 2023.
+- Do not infer the anonymized bank's identity.
+- Do not treat different wording as conceptual diversity.
+- When citing retrieved evidence, use exact supplied CHUNK_IDs only.
 
 
 OUTPUT FORMAT
@@ -377,7 +407,16 @@ OUTPUT FORMAT
     {{
       "direction": "...",
       "target_bank_support": "...",
+      "required_target_bank_exposure": "...",
+      "required_exposure_keys": [
+        "customer_concentration",
+        "uninsured_deposits",
+        "htm_securities"
+      ]
+      "exposure_explicitly_supported": true,
+      "mechanism_support": "...",
       "external_chunk_ids": ["..."],
+      "unsupported_assumptions_required": [],
       "why_underexplored": "..."
     }}
   ],
@@ -389,15 +428,92 @@ OUTPUT FORMAT
     }}
   ]
 }}
+
+REQUIRED EXPOSURE KEYS
+----------------------
+List EVERY target-bank exposure required for the direction's
+trigger and transmission mechanism.
+
+Do not select only one representative exposure.
+
+Every required target-bank exposure must be mapped to an allowed key.
+
+If ANY required exposure cannot be represented by an allowed key,
+include:
+"unsupported"
+
+Allowed keys for this target bank:
+{allowed_exposure_keys}
+
+Example:
+A scenario requiring technology-sector loan defaults and HTM sales
+requires BOTH the sector-specific loan exposure and HTM exposure.
+
+If technology-sector loans are not explicitly supported, return:
+"required_exposure_keys": ["unsupported", "htm_securities"]
+
+exposure_keys = item.get(
+    "required_exposure_keys",
+    ["unsupported"],
+)
+
+
+
+SUPPORTED-DIRECTION ADMISSION TEST
+----------------------------------
+Before placing a direction in supported_directions:
+
+1. State the exact target-bank exposure required.
+2. Determine whether that exposure is explicitly present in
+   the TARGET BANK PROFILE.
+3. Identify the evidence supporting the transmission mechanism.
+4. List every additional assumption required by the direction.
+
+A direction may be placed in supported_directions ONLY when:
+
+- exposure_explicitly_supported = true
+- unsupported_assumptions_required = []
+
+Customer concentration alone does NOT support sector-specific loans,
+CRE exposure, securities exposure, geographic exposure, derivatives,
+credit lines, or fee-income exposure.
+
+If the direction requires any such unsupported inference, place it in
+unsupported_possibilities instead.
+
+IMPORTANT:
+"exposure_explicitly_supported" refers to the REQUIRED exposure,
+not merely to a related fact.
+
+Example:
+If the required exposure is "technology-sector loan exposure",
+a statement that technology is a customer concentration does NOT
+make exposure_explicitly_supported true.
+
+The exact asset/funding exposure required by the causal mechanism
+must itself be explicitly stated.
+
 """
 
+# ------------------------------------------------------------
+# 9. RETRIEVAL QUERY
+# ------------------------------------------------------------
 
 def build_retrieval(bank_profile):
     return f"""
-Identify pre-March-7-2023 evidence relevant to stress transmission
-mechanisms, interest-rate risk, liquidity risk, funding risk,
-securities valuation risk, and credit risk for a bank with the
-following balance-sheet characteristics:
+Retrieve pre-March-7-2023 evidence relevant to stress-transmission
+mechanisms for a bank with the following profile.
 
+Focus on:
+- interest-rate risk
+- liquidity and funding risk
+- securities valuation risk
+- credit conditions
+- mechanisms through which losses or liquidity pressure could
+  lead to asset sales or capital erosion
+
+BANK PROFILE
+------------
 {bank_profile}
 """
+

@@ -1,0 +1,4 @@
+bank_id,run_id,arm,num_scenarios,abstained,avg_target_exposure_support,avg_trigger_support,avg_transmission_support,avg_quantitative_support,avg_bank_specificity,avg_evidence_grounding_score,fully_grounded_scenarios,fully_grounded_rate,num_distinct_mechanism_families,mechanism_family_counts,explicit_temporal_leakage,hindsight_risk
+B,3,baseline,3,False,2.0,0.667,1.667,1.0,1.667,1.445,0,0.0,3,"{""deposit_liquidity_run"": 2, ""cre_credit"": 2, ""operational_cyber"": 1}",False,False
+B,3,strong,2,False,2.0,1.0,1.0,0.0,2.0,1.333,0,0.0,2,"{""deposit_liquidity_run"": 1, ""securities_interest_rate"": 1}",False,True
+B,3,lens,2,False,2.0,1.0,1.0,2.0,1.5,1.333,0,0.0,4,"{""deposit_liquidity_run"": 1, ""sector_credit"": 1, ""cre_credit"": 1, ""regulatory_rating"": 1}",False,False

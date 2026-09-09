@@ -1,0 +1,138 @@
+Arm A:
+**A. 2023 VS. 2015-2022 COMPARISON**
+
+Here's a comparison of the 2023 severely adverse scenario against the 2015-2022 scenarios, identifying shared and divergent assumptions.  "NA" in the table indicates data was not provided.
+
+*   **Unemployment Peak:**
+    *   **2023 Value/Pattern:** 10.0%
+    *   **Similar Years:** All prior years (2015-2022) also have an unemployment peak of 10.0%, with the exception of 2021 (10.8%).
+    *   **Exceptions:**  The 2021 scenario exhibited a slightly higher peak.
+    *   **Classification:** Strongly Shared
+
+*   **Real GDP Trough:**
+    *   **2023 Value/Pattern:** -8.75%, relative to the 2022-Q4 real GDP level.
+    *   **Similar Years:** The 2019 (-8.0%), 2020 (-8.5%) scenarios also show a trough significantly below pre-recession peaks, though reference points differ.
+    *   **Exceptions:**  The 2015 (-4.5%), 2016 (-6.25%), 2017 (-6.5%), 2018 (-7.5%) and 2021(-4.0%) scenarios show a less severe trough relative to their respective reference levels (pre-recession peak vs. 2022-Q4).
+    *   **Classification:** Partially Shared
+
+*   **3-Month Treasury Rate:**
+    *   **2023 Value/Pattern:** Starts at 1.7%, falls significantly, ending near zero.
+    *   **Similar Years:** The 2016 (-0.5), 2017, 2018, 2019, and 2020 scenarios all experience rate declines to or near zero during the scenario period.
+    *   **Exceptions:** The 2015 scenario maintains a constant rate of 0.1%. The 2022 starts at 0.1% and remains there.
+    *   **Classification:** Partially Shared
+
+*   **10-Year Treasury Rate:**
+    *   **2023 Value/Pattern:** Starts at 1.1%, falls, and then gradually rises to end near 1.5%.
+    *   **Similar Years:** The 2016, 2017, 2020, and 2021 scenarios depict similar patterns of initial declines followed by gradual increases.
+    *   **Exceptions:**  The 2015 scenario shows a significant rise in the 10-year Treasury rate. The 2018 scenario holds it constant. The 2019 scenario has an initial fall with subsequent gradual increase. The 2022 scenario rises gradually.
+    *   **Classification:** Partially Shared
+
+*   **Equity Drawdown:**
+    *   **2023 Value/Pattern:** -45.0%
+    *   **Similar Years:**  The 2019 (-50%), 2020 (-50%), and 2021 (-55%) scenarios exhibit substantial equity declines in line with 2023.
+    *   **Exceptions:** The 2015 (-60%), 2016 (-50%), 2017 (-50%), 2018 (-65%) and 2022 (-55%) scenarios depict greater drawdowns.
+    *   **Classification:** Partially Shared
+
+*   **House Price Drawdown:**
+    *   **2023 Value/Pattern:** -38.0%
+    *   **Similar Years:** The 2018 and 2022 also show substantial declines (-30%, -28.5%)
+    *   **Exceptions:** All other prior scenarios have a smaller drawdown, or less severe downward pressure on housing prices.
+    *   **Classification:** Partially Shared
+
+
+
+**B. ALTERNATIVE STRESS SCENARIOS**
+
+Here are alternative stress scenarios that could impact Bank B’s CET1 ratio by at least 300 basis points or force asset sales to meetliquidity needs, outside of the scope of the supervisory scenario:
+
+1.  **Scenario:** Rapid Commercial Real Estate (CRE) Vacancy Spike
+    *   **Trigger:** A sudden shift in remote work policies across major industries leads to a rapid increase in CRE vacancy rates, particularly in office spaces within Bank B’s geographic footprint.
+    *   **Transmission Channel:** Increased CRE vacancies result in lower rents and property values.  Bank B's commercial real estateloan portfolio experiences significant defaults and accelerated loan losses. This erodes capital and stresses liquidity as borrowers default on debt obligations and require forbearance. The bank may also be compelled to sell discounted assets to manage the impact, particularly if required by regulators.
+    *   **Supporting Evidence:** Increased remote work adoption trends across key industries (e.g., technology, finance) coupled withthe already strained commercial real estate market. Available data on vacancy rates in major metropolitan areas could provide early warning signs.
+    *   **Quantitative Magnitude:** A 15% increase in CRE vacancy rates within Bank B's footprint could lead to a 200-300 basis pointCET1 ratio reduction and necessitate asset sales to maintain liquidity.
+
+2.  **Scenario: Sudden Uninsured Deposit Flight Driven by Social Media Panic**
+    *   **Trigger:** A widely disseminated, unsubstantiated rumor on social media about Bank B's financial health sparks a sudden flight of uninsured deposits and increased scrutiny from peer institutions.
+    *   **Transmission Channel:** The bank’s total deposit base is 73% uninsured. Rapid withdrawals of uninsured deposits trigger liquidity shortages and necessitate asset sales to meet withdrawal demands.  Loss of confidence spreads, leading to additional deposit outflows. This rapidly erodes capital as assets are sold at fire-sale prices.
+    *   **Supporting Evidence:** Monitoring social media for mentions of the bank and sentiment analysis can provide early warning signs. Peer institutions' scrutiny of Bank B’s financial health can also trigger similar events.
+    *   **Quantitative Magnitude:** A 20% outflow of uninsured deposits (approximately $14.6 billion) could lead to a 300+ basis point CET1 ratio reduction and force significant asset sales to cover liquidity needs, given the bank's existing deposit base.
+
+
+
+Arm B:
+## A. 2023 VS. 2015-2022 COMPARISON
+
+Here's a comparison of the 2023 severely adverse scenario against the 2015-2022 scenarios, identifying shared and divergent assumptions based on the provided `STRUCTURED CROSS-YEAR VARIABLE TABLE`.
+
+**1. Unemployment Peak:**
+
+*   **2023 Value/Pattern:** 10.0%
+*   **Similar Years:** 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022 all share the same `unemployment_peak_pct` of 10.0%.
+*   **Exceptions:** None.
+*   **Classification:** Strongly Shared
+
+**2. Real GDP Trough:**
+
+*   **2023 Value/Pattern:** -8.75%, referenced to 2022-Q4 real GDP level.
+*   **Similar Years:**  2019 (-8.0%), 2020 (-8.5%) show similarly large negative troghs relative to a recent reference point.
+*   **Exceptions:** 2015 (-4.5%), 2016 (-6.25%), 2017 (-6.5%), 2018 (-7.5%), 2021 (-4.0%), and 2022 (-3.5%) show smaller negative real GDP troughs relative to their reference points.
+*   **Classification:** Partially Shared - The magnitude of the trough is notably higher in 2023 than most prior scenarios, while sharing a similar characterization as a significant economic contraction.
+
+**3. Treasury 3-Month Rate:**
+
+*   **2023 Value/Pattern:** Starts at 1.7%, falls to near zero by 2023-Q3, and remains near zero.
+*   **Similar Years:** 2016 (-0.5), 2017 (remains near zero in later periods of the scenario), 2020 (immediately falls near zero).
+*   **Exceptions:** 2015 (0.1), 2018 (0.1), 2019 (0.3) start at a higher rate and have different trajectories.
+*   **Classification:** Partially Shared - The dramatic fall to near-zero is a shared feature, but the starting point differs significantly.
+
+**4. Treasury 10-Year Rate:**
+
+*   **2023 Value/Pattern:** Starts at 1.1%, gradually rises to 1.5% by end of scenario.
+*   **Similar Years:**  2017 (ends at 1.8%), and 2021 (ends at 1.5%) show a similar gradual increase.
+*   **Exceptions:** 2015 (Starts at 0.9, ends at 2.3), 2016 (Starts at 0.2 and ends at 1.7), 2018 (remains unchanged at 2.4), 2019 (starts at 0.8, ends at 1.8), 2020 (begins at 0.7, rises to 2.2), and 2022(starts at 0.7 ends at 1.5).
+*   **Classification:** Partially Shared - The general trend of an upward movement shares similarity but the start and ending points vary considerably.
+
+**5. Equity Drawdown:**
+
+*   **2023 Value/Pattern:** -45.0%
+*   **Similar Years:** 2019 (-50%), 2020 (-50%).
+*   **Exceptions:**  2015 (-60%), 2016 (-50%), 2017(-50%), 2018 (-65%), and 2021 (-55%), and 2022 (-55%) show different drawdown magnitudes.
+*   **Classification:** Partially Shared - While the level of equity drawdown is smaller than in some scenarios, the general characteristic of a significant market decline remains consistent.
+
+**6. House Price Drawdown:**
+
+*   **2023 Value/Pattern:** -38.0%
+*   **Similar Years:** 2018 (-30%), 2020 (-28%) are also very large drawdowns, reflective of the housing market's vulnerability in these scenarios.
+*   **Exceptions:**  2015 (-25%), 2016 (-25%), 2017 (-25%), 2019 (-25%), 2021 (-23.5%) show smaller drawdowns.
+*   **Classification:** Partially Shared - The magnitude of housing price declines is significant in all scenarios, but the level hasvaried across years.
+
+## B. ALTERNATIVE STRESS SCENARIOS
+
+Here are alternative stress scenarios that could deplete Bank B's CET1 ratio by at least 300 basis points or force asset sales to meet liquidity needs, targeting channels not fully represented within the supervisory scenario, using only supplied context. Each scenario includes a trigger, transmission channel, supporting evidence, and quantitative magnitude (if possible).
+
+**Scenario 1: Regional Deposit Flight Due to Confidence Crisis**
+
+*   **Trigger:** A series of negative news reports highlighting deficiencies in Bank B’s risk management practices or asset quality, specifically concerning its exposure to commercial real estate.  These are triggered by deteriorating conditions identified within the2023 scenario narrative (commercial real estate price declines).
+*   **Transmission Channel:** Depositors, particularly uninsured depositors, move funds to larger, perceived-safer institutions [FDIC_QBP_2022_Q4_overview_000] or money market funds. Bank B's deposit profile shows approximately 45.4% are uninsured [TARGET BANK PROFILE].
+*   **Supporting Evidence:**  [FDIC_QBP_2022_Q4_securities_liquidity_000] indicates elevated unrealized losses on securities increaseliquidity pressures, potentially triggering a confidence crisis. Bank B has significant holdings of held-to-maturity and available for sale securities [TARGET BANK PROFILE].
+*   **Quantitative Magnitude:** Requires quantitative calibration. A 25% flight of uninsured deposits would reduce equity by approximately $6.35 billion (74.2 billion * 0.25), which could significantly impact the CET1 ratio, depending on other factors.  Further liquidity needs would necessitate sales of HTM securities at a loss.
+
+**Scenario 2: Forced Sale of Commercial Real Estate Securities to Meet Liquidity Needs**
+
+*   **Trigger:** A sudden and significant decline in Bank B's CRE loan portfolio performance due to sustained remote work impacting office properties, coupled with rising interest rates [2023 severely_adverse Scenario Narrative].
+*   **Transmission Channel:**  Increased credit losses on the CRE portfolio force Bank B to sell HTM securities to cover losses or meet regulatory capital requirements. [TARGET BANK PROFILE] Commercial real estate loans comprise a significant portion of Bank B’s loanbook (45.444/132.074).
+*   **Supporting Evidence:** The 2023 scenario explicitly mentions the impact of remote work on commercial real estate, and emphasizes concentration in office buildings. [2023 severely_adverse Scenario Narrative]  [FDIC_QBP_2022_Q4_securities_liquidity_000] shows howunrealized losses might become realized due to liquidity needs.
+*   **Quantitative Magnitude:** Requires quantitative calibration. Given Bank B's significant CRE exposure, a 15% loss on the CRE portfolio would result in approximately $6.8 billion in losses (45.444 * .15).  Selling HTM securities to cover this could trigger further losses.
+
+**Scenario 3: Mark-to-Market of Securities Due to Ratings Downgrade**
+
+*   **Trigger:** A material deterioration in the perceived creditworthiness of Bank B, triggered by one or more of the events described above (deposit flight, CRE losses), leading to a ratings downgrade.
+*   **Transmission Channel:** The rating downgrade triggers regulatory pressure and/or contractual obligations that require Bank B tomark its securities portfolio to market, recognizing further unrealized losses which negatively impact capital ratios.
+*   **Supporting Evidence:** [Fed_fsr_2022_11_bank_capital_securities_000] states some large banks are required to reflect changes inAFS market values in regulatory capital, implying that the rating agency has an influence on this assessment.  [TARGET BANK PROFILE] shows Bank B has significant holdings of HTM and AFS securities.
+*   **Quantitative Magnitude:** Requires quantitative calibration. The existing unrealized losses on HTM securities are $1.165 billion; a downgrade leading to further mark-to-market could easily exceed this, significantly impacting CET1.
+
+Critique:
+{'shared_assumptions': [{'assumption': 'Severely adverse scenarios will involve economic contraction and market declines.', 'assessment': "This is a foundational assumption inherent in defining 'severely adverse' conditions across all scenarios. All scenarios featurenegative GDP growth, equity drawdowns, and interest rate movements consistent with a recessionary environment."}, {'assumption': 'Commercial real estate will be negatively impacted.', 'assessment': "All scenarios explicitly mention significant commercial real estate drawdowns, suggesting this sector is consistently identified as a vulnerability within the bank's portfolio."}, {'assumption': 'Unrealized losses on securities are a risk factor.', 'assessment': 'This assumption is repeatedly highlighted across all scenarios and reinforced by retrieved evidence [FDIC_QBP_2022_Q4_securities_liquidity_000, Fed_fsr_2022_11_bank_capital_securities_000], demonstrating a systemic concern about the potential for these losses to materialize.'}], 'factual_issues': [{'strategy': 'naive', 'issue': 'Inconsistent reference frames for GDP trough.', 'reason': "The naive strategy fails to clearly articulate that different scenarios use different reference points for measuring the 'trough' in real GDP (relative to 2014-Q3, pre-recession peak). This makes direct comparisons of magnitude misleading."}, {'strategy': 'strong', 'issue': 'Incomplete reporting of scenario variables.', 'reason': "The provided table does not include all numerical values for every scenario. For example, 'commercial_real_estate_drawdown_pct' is NA for many scenarios."}], 'overlapping_mechanisms': ['Both outputs identify a potential liquidity crisis stemming from deposit outflows and the need to sell securities to cover those withdrawals.', 'Both outputs highlight the risk of unrealized losses on securities becoming realized due to market conditions or regulatory pressure.', "Both outputs recognize the vulnerability of commercial real estate and its impact on Bank B's financial health."], 'dominant_framing': ['Macroeconomic shocks as primary drivers of bank stress: Both analyses emphasize external factors (recessions, interest rate changes) as the initial triggers for adverse outcomes.', "Focus on capital adequacy and liquidity risk: The scenarios consistently assess the impact on Bank B's CET1 ratio and its ability to meet liquidity needs."], 'supported_directions': [{'direction': 'A scenario where a ratings downgrade forces mark-to-market of securities, impacting capital ratios.', 'target_bank_support': 'The TARGET BANK PROFILE indicates Bank B holds significant amounts of available for sale and held-to-maturity securities. The narrative mentions unrealized losses on these holdings.', 'required_target_bank_exposure': 'AFS and HTM Securities', 'required_exposure_keys': ['afs_securities', 'htm_securities'], 'exposure_explicitly_supported': True, 'mechanism_support': 'Fed_fsr_2022_11_bank_capital_securities_000 indicates that rating agencies can influence the treatment of securities in regulatory capital.', 'external_chunk_ids': ['Fed_fsr_2022_11_bank_capital_securities_000'], 'unsupported_assumptions_required': [], 'why_underexplored': 'This scenario focuses on a regulatory response rather than direct market forces, offering a different stress pathway.'}, {'direction': 'A scenario involving rapid deposit outflows triggered by social media panic.', 'target_bank_support': 'The TARGET BANK PROFILE reveals that45.4% of Bank B’s deposits are uninsured, making it vulnerable to sudden withdrawals.', 'required_target_bank_exposure': 'Uninsured Deposits', 'required_exposure_keys': ['uninsured_deposits'], 'exposure_explicitly_supported': True, 'mechanism_support': 'FDIC_QBP_2022_Q4_overview_000 highlights the risk of liquidity constraints in the banking industry.', 'external_chunk_ids': ['FDIC_QBP_2022_Q4_overview_000'], 'unsupported_assumptions_required': [], 'why_underexplored': 'This scenario highlights the role of reputational risk and social media in triggering a liquidity crisis, which is often overlooked in traditional stress tests.'}], 'unsupported_possibilities': [{'direction': 'A scenario where a sudden increase in loan demand strains Bank B’s liquidity.', 'reason': "There's no evidence within the provided context to suggest that Bank B is experiencing or anticipates significant increases in loan demand. The narrative focuseson asset declines and deposit outflows, not increased lending activity."}, {'direction': 'A scenario where a competitor aggressively poaches Bank B’s customers.', 'reason': "While competitive pressure exists, there's no specific information about a targeted poaching strategy or the scale of potential customer losses. This would require assumptions beyond the provided context."}]}
+
+Arm C:
+No evidence-supported alternative direction is available from the supplied context.
